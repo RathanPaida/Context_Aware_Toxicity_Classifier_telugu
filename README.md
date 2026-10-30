@@ -111,20 +111,42 @@ cd Context_Aware_Toxicity_Classifier_telugu
 pip install -r requirements.txt
 ```
 
-### 2. Launch the Web Interface
+### 2. Launch the Application
 
-Start the local FastAPI moderation server:
-
+#### Option A: Next.js Frontend + FastAPI Backend (Recommended)
+1. Start the FastAPI backend server:
 ```bash
 python app/server.py
 ```
-
+2. Start the modern Next.js frontend (in a separate terminal):
+```bash
+cd frontend
+npm install
+npm run dev
+```
 Open your browser and navigate to:
+```
+http://localhost:3000/
+```
+
+#### Option B: Standalone FastAPI Glassmorphic Web App
+```bash
+python app/server.py
+```
+Navigate to:
 ```
 http://localhost:7860/
 ```
 
-### 3. Features in the Web App
+### 3. Run in Jupyter Notebook / Google Colab
+Open [`Indic_Shield_AI_Complete_Pipeline.ipynb`](Indic_Shield_AI_Complete_Pipeline.ipynb) directly in Jupyter, VS Code, or Google Colab:
+- Fully self-contained pipeline execution (data loading, preprocessing, 8-head attention model, training, and evaluation).
+- Interactive Matplotlib/Seaborn token saliency attention heatmaps.
+```bash
+jupyter notebook Indic_Shield_AI_Complete_Pipeline.ipynb
+```
+
+### 4. Features in the Web App
 - **Interactive Multi-Turn Thread Simulator:** Test live conversational chat streams with dynamic real-time moderation verdicts.
 - **Multi-Head Attention Token Heatmap:** Visualizes token-level attention saliency weights with color intensity (cyan for target, purple for context).
 - **Context Influence Metric:** Real-time telemetry reporting the exact percentage influence of preceding conversational history.

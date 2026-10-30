@@ -61,3 +61,10 @@ scratch/
 *.swo
 .DS_Store
 Thumbs.db
+.ipynb_checkpoints/
+
+# Node / Next.js
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
