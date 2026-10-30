@@ -151,6 +151,13 @@ function resetDiagnosticView() {
   document.getElementById("seq-target").textContent = "(Awaiting text)";
   document.getElementById("prep-raw").textContent = "--";
   document.getElementById("prep-clean").textContent = "--";
+
+  const ctxPctEl = document.getElementById("attn-ctx-pct");
+  if (ctxPctEl) ctxPctEl.textContent = "0.0%";
+  const topWordsEl = document.getElementById("attn-top-words");
+  if (topWordsEl) topWordsEl.textContent = "--";
+  const heatmapContainer = document.getElementById("token-heatmap-container");
+  if (heatmapContainer) heatmapContainer.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">(Multi-Head Attention token weights will display here after evaluation)</span>';
 }
 
 async function sendComment() {
@@ -262,7 +269,7 @@ function updateDiagnosticInspector(data) {
   // Telemetry
   document.getElementById("telemetry-route").textContent = data.stage_routed;
   document.getElementById("telemetry-latency").textContent = `${data.latency_ms} ms`;
-  document.getElementById("telemetry-pooling").textContent = "CLS ⊕ TargetMean";
+  document.getElementById("telemetry-pooling").textContent = "MHA 8-Head Fusion";
 
   // Category Risk Bars
   const cats = data.categories || {};
@@ -281,6 +288,18 @@ function updateDiagnosticInspector(data) {
     }
   }
 
+  // Multi-Head Attention Heatmap & Analysis
+  const attn = data.attention_analysis;
+  if (attn) {
+    const ctxPctEl = document.getElementById("attn-ctx-pct");
+    if (ctxPctEl) ctxPctEl.textContent = `${attn.context_influence_pct || 0}%`;
+    
+    const topWordsEl = document.getElementById("attn-top-words");
+    if (topWordsEl) topWordsEl.textContent = (attn.top_attended_words && attn.top_attended_words.length > 0) ? attn.top_attended_words.join(", ") : "--";
+
+    renderTokenHeatmap("token-heatmap-container", attn.tokens);
+  }
+
   // Context Sequence Breakdown
   const parentEl = document.getElementById("seq-parent");
   if (parentEl) parentEl.textContent = data.context_used || "(No preceding history)";
@@ -290,6 +309,33 @@ function updateDiagnosticInspector(data) {
   // Preprocessor State
   document.getElementById("prep-raw").textContent = data.raw_text || "--";
   document.getElementById("prep-clean").textContent = data.cleaned_text || "--";
+}
+
+function renderTokenHeatmap(containerId, tokens) {
+  const heatmapContainer = document.getElementById(containerId);
+  if (!heatmapContainer) return;
+  if (!tokens || tokens.length === 0) {
+    heatmapContainer.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">(No tokens found)</span>';
+    return;
+  }
+  heatmapContainer.innerHTML = "";
+  const maxAttn = Math.max(...tokens.map((t) => t.attention), 0.0001);
+
+  tokens.forEach((tok) => {
+    const span = document.createElement("span");
+    const isTarget = tok.is_target;
+    span.className = `attn-token ${isTarget ? "target-tok" : "context-tok"}`;
+
+    const intensity = Math.min(0.85, 0.15 + (tok.attention / maxAttn) * 0.7);
+    const bgRgba = isTarget
+      ? `rgba(56, 189, 248, ${intensity})`
+      : `rgba(192, 132, 252, ${intensity})`;
+    span.style.background = bgRgba;
+
+    span.title = `${isTarget ? "Target Utterance" : "Parent Context"} Token: "${tok.token}" (Attention: ${(tok.attention * 100).toFixed(2)}%)`;
+    span.innerHTML = `<span>${escapeHtml(tok.token)}</span><span class="attn-val">${(tok.attention * 100).toFixed(1)}%</span>`;
+    heatmapContainer.appendChild(span);
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -339,6 +385,16 @@ async function runDeepDive() {
     const pct = Math.round(data.toxicity_score * 100);
     document.getElementById("deepdive-score-val").textContent = `${pct}%`;
     document.getElementById("deepdive-latency-val").textContent = `${data.latency_ms} ms (${data.stage_routed})`;
+
+    // Multi-Head Attention Heatmap for Deep Dive
+    if (data.attention_analysis) {
+      const attn = data.attention_analysis;
+      const ddCtxPct = document.getElementById("deepdive-attn-ctx-pct");
+      if (ddCtxPct) ddCtxPct.textContent = `${attn.context_influence_pct || 0}%`;
+      const ddTopWords = document.getElementById("deepdive-attn-top-words");
+      if (ddTopWords) ddTopWords.textContent = (attn.top_attended_words && attn.top_attended_words.length > 0) ? attn.top_attended_words.join(", ") : "--";
+      renderTokenHeatmap("deepdive-token-heatmap-container", attn.tokens);
+    }
   } catch (err) {
     console.error("Deep dive failed:", err);
     alert("Deep dive request failed: " + err.message);

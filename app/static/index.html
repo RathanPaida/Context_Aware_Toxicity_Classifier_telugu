@@ -31,7 +31,7 @@
           <span id="system-status-text">IndicBERT-v3 (CUDA Online)</span>
         </div>
         <div class="pill" id="pipeline-arch-pill">
-          <span>Target-Span Pooling + Focal Loss</span>
+          <span>8-Head Transformer Attention + Attentive Pooling</span>
         </div>
         <button class="nav-btn" id="btn-open-arch-modal" onclick="openArchModal()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -225,6 +225,21 @@
           </div>
         </div>
 
+        <!-- Multi-Head Attention Token Heatmap & Saliency -->
+        <div class="pipeline-breakdown">
+          <div class="card-subtitle">
+            <span>Multi-Head Attention Token Heatmap</span>
+            <span style="font-size: 11px; color: var(--cyan);" id="attn-heads-badge">8 Heads Active</span>
+          </div>
+          <div class="attention-meta-bar" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; color: var(--text-dim);">
+            <span>Context Influence: <strong id="attn-ctx-pct" style="color: #38bdf8;">0.0%</strong></span>
+            <span>Key Attended Tokens: <strong id="attn-top-words" style="color: #f472b6;">--</strong></span>
+          </div>
+          <div class="token-heatmap-container" id="token-heatmap-container">
+            <span style="font-size: 12px; color: var(--text-muted);">(Multi-Head Attention token weights will display here after evaluation)</span>
+          </div>
+        </div>
+
         <!-- Preprocessing Breakdown -->
         <div class="pipeline-breakdown">
           <div class="card-subtitle">
@@ -288,6 +303,21 @@
               <span class="token-tag">[CLS]</span> Parent: <span class="context-txt" id="dd-parent-txt">(None - Standalone)</span>
               <span class="token-tag">[SEP]</span> Target: <span class="target-txt" id="dd-target-txt">Champesav po!</span>
               <span class="token-tag">[SEP]</span>
+            </div>
+          </div>
+
+          <!-- Multi-Head Attention Token Heatmap for Deep-Dive -->
+          <div class="pipeline-breakdown">
+            <div class="card-subtitle">
+              <span>Multi-Head Attention Token Heatmap</span>
+              <span style="font-size: 11px; color: var(--cyan);" id="deepdive-attn-heads-badge">8 Heads Active</span>
+            </div>
+            <div class="attention-meta-bar" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; color: var(--text-dim);">
+              <span>Context Influence: <strong id="deepdive-attn-ctx-pct" style="color: #38bdf8;">--</strong></span>
+              <span>Key Attended Tokens: <strong id="deepdive-attn-top-words" style="color: #f472b6;">--</strong></span>
+            </div>
+            <div class="token-heatmap-container" id="deepdive-token-heatmap-container">
+              <span style="font-size: 12px; color: var(--text-muted);">(Multi-Head Attention token weights will display here after evaluation)</span>
             </div>
           </div>
         </div>

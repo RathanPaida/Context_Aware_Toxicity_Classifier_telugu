@@ -22,6 +22,13 @@ from typing import Dict, List, Optional, Tuple, Any
 import torch
 import numpy as np
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -313,42 +320,18 @@ class TwoStageModerationPipeline:
         # Step 1: Preprocessing & De-obfuscation
         cleaned_text = self.preprocessor.clean_text(text)
         
-        # Step 2: Stage 1 Fast Filter (<3ms)
-        fast_prob, decision = self.fast_filter.predict_fast(cleaned_text)
+        # Step 2: Contextual Analysis & Sequence Assembly
+        # Fast filter provides lexical cues for explainability without hard short-circuiting
+        fast_prob, fast_decision = self.fast_filter.predict_fast(cleaned_text)
+        has_slur_lexicon = (fast_decision == "SLUR_FAST_EXIT")
+        has_safe_token = (fast_decision == "SAFE_FAST_EXIT")
         
-        if decision == "SAFE_FAST_EXIT":
-            # Record in thread history and exit
-            self.cache.push_message(thread_id, cleaned_text)
-            latency_ms = (time.time() - t0) * 1000
-            return {
-                "action": "ALLOW",
-                "toxicity_score": fast_prob,
-                "is_toxic": False,
-                "stage_routed": "Stage 1 Fast Filter",
-                "latency_ms": round(latency_ms, 2),
-                "categories": {lbl: 0.0 for lbl in TOXICITY_LABELS},
-                "explanation": "High confidence safe conversational marker; fast-path exit (<1ms).",
-            }
-        
-        if decision == "SLUR_FAST_EXIT":
-            self.cache.push_message(thread_id, cleaned_text)
-            latency_ms = (time.time() - t0) * 1000
-            return {
-                "action": "FLAG",
-                "toxicity_score": fast_prob,
-                "is_toxic": True,
-                "stage_routed": "Stage 1 Fast Filter",
-                "latency_ms": round(latency_ms, 2),
-                "categories": {"toxic": fast_prob, "insult": 0.94, "severe_toxic": 0.70, "identity_attack": 0.10, "threat": 0.15},
-                "explanation": "Explicit profanity, slur, or abusive phrase detected; fast-path exit (<1ms).",
-            }
-        
-        # Step 3: Stage 2 Context-Aware Cross-Encoder (~18-25ms)
-        # Fetch preceding conversation turns from thread cache
+        # Step 3: Fetch conversational history from thread cache
         history = self.cache.get_history(thread_id, limit=3)
         parent_context = " [SEP] ".join(history) if history else ""
         
-        # Assemble context window
+        # Assemble canonical context window:
+        # [CLS] Topic: {topic} [SEP] Parent: {context} [SEP] Target: {target} [SEP]
         has_custom_topic = bool(topic and topic.strip() and topic.strip().lower() not in ["general", "none", "default"])
         
         if parent_context:
@@ -362,31 +345,98 @@ class TwoStageModerationPipeline:
             else:
                 assembled = f"{TARGET_PREFIX} {cleaned_text}"
         
+        # Step 4: Multi-Head Attention Transformer Forward Pass
         encoding = tokenize_with_target_mask(assembled, self.tokenizer, max_length=MAX_SEQ_LENGTH)
         inputs = {k: v.unsqueeze(0).to(self.device) for k, v in encoding.items()}
         
         with torch.no_grad():
-            outputs = self.model(**inputs)
+            outputs = self.model(**inputs, return_attention=True)
             probs = outputs["probs"][0].cpu().numpy()
         
         # Multi-label category scores
         category_scores = {lbl: round(float(probs[i]), 4) for i, lbl in enumerate(TOXICITY_LABELS)}
         primary_score = float(probs[0])
-        is_toxic = primary_score >= 0.50
+        
+        # Whole-sequence multi-label risk evaluation:
+        # Flag if general toxicity >= 0.50 OR any specialized risk category (severe_toxic, identity_attack, threat, insult) >= 0.50
+        max_risk = max(float(probs[i]) for i in range(len(TOXICITY_LABELS)))
+        effective_score = max(primary_score, max_risk)
+        is_toxic = effective_score >= 0.50
+        
+        # Step 5: Extract Token-Level Attention Weights and Explanations
+        token_attn_raw = outputs.get("token_attention")
+        tokens_with_attn = []
+        top_attended_words = []
+        context_influence_pct = 0.0
+        
+        if token_attn_raw is not None:
+            token_weights = token_attn_raw[0].cpu().numpy()
+            input_ids_list = encoding["input_ids"].tolist()
+            token_strings = self.tokenizer.convert_ids_to_tokens(input_ids_list)
+            attn_mask_list = encoding["attention_mask"].tolist()
+            target_mask_list = encoding["target_mask"].tolist()
+            
+            # Filter non-padding tokens
+            valid_tokens = []
+            context_attn_sum = 0.0
+            target_attn_sum = 0.0
+            
+            for i, (tok, w, m, t_m) in enumerate(zip(token_strings, token_weights, attn_mask_list, target_mask_list)):
+                if m == 1:
+                    clean_tok = tok.replace(" ", "").replace("##", "")
+                    if clean_tok and clean_tok not in ["[PAD]", "[CLS]", "[SEP]"]:
+                        weight_val = round(float(w), 4)
+                        is_target = bool(t_m == 1)
+                        valid_tokens.append({
+                            "token": clean_tok,
+                            "attention": weight_val,
+                            "is_target": is_target,
+                        })
+                        if is_target:
+                            target_attn_sum += weight_val
+                        else:
+                            context_attn_sum += weight_val
+            
+            total_valid_attn = context_attn_sum + target_attn_sum
+            if total_valid_attn > 0:
+                context_influence_pct = round((context_attn_sum / total_valid_attn) * 100, 1)
+            
+            tokens_with_attn = valid_tokens
+            sorted_tokens = sorted(valid_tokens, key=lambda x: x["attention"], reverse=True)
+            top_attended_words = [t["token"] for t in sorted_tokens[:5]]
+        
+        # Contextual Overrides & Intent Diagnostics
+        is_cuss_word_overridden = False
+        if has_slur_lexicon and not is_toxic:
+            is_cuss_word_overridden = True
+            explanation = "Colloquial slang/cuss word detected, but Multi-Head Attention captured benign praise/banter across the whole text."
+        elif not has_slur_lexicon and is_toxic:
+            explanation = "No explicit cuss words detected; Multi-Head Attention captured toxicity from whole-text context and sentence semantics."
+        elif is_toxic:
+            explanation = f"Evaluated with Multi-Head Attention (8 Heads); toxic intent confirmed across whole context."
+        else:
+            explanation = f"Evaluated with Multi-Head Attention (8 Heads); safe context confirmed across whole text."
         
         # Update thread cache
         self.cache.push_message(thread_id, cleaned_text)
-        
         latency_ms = (time.time() - t0) * 1000
+        
         return {
             "action": "FLAG" if is_toxic else "ALLOW",
-            "toxicity_score": round(primary_score, 4),
+            "toxicity_score": round(effective_score, 4),
             "is_toxic": is_toxic,
-            "stage_routed": "Stage 2 IndicBERT Cross-Encoder",
+            "stage_routed": "Multi-Head Attention Transformer (8 Heads)",
             "latency_ms": round(latency_ms, 2),
             "categories": category_scores,
             "context_used": parent_context if parent_context else "(None - First Turn)",
-            "explanation": f"Evaluated with {len(history)} parent message(s) using Target-Span cross-attention.",
+            "explanation": explanation,
+            "attention_analysis": {
+                "num_heads": 8,
+                "context_influence_pct": context_influence_pct,
+                "top_attended_words": top_attended_words,
+                "is_cuss_word_overridden": is_cuss_word_overridden,
+                "tokens": tokens_with_attn,
+            },
         }
     
     def clear_thread(self, thread_id: str):
@@ -427,17 +477,25 @@ def run_inference_demo():
                 "Champesav po!",  # Target comment: Encouraging violence in political context
             ]
         },
-        # Conversation 3: De-obfuscation + Fast Exit Slur
+        # Conversation 3: Slang / Expletive in Praise (Overridden by MHA Context)
         {
-            "thread_id": "thread_abuse_303",
-            "topic": "Random",
+            "thread_id": "thread_praise_303",
+            "topic": "Gaming",
             "turns": [
-                "m@drch0d nuvvu chala worst ra",  # Leetspeak slur
+                "Bro that was fucking insane clutch! You are god tier!",
             ]
         },
-        # Conversation 4: Parent Bleed Robustness
+        # Conversation 4: Zero-Cuss Violent Threat (Captured by Whole-Text MHA)
         {
-            "thread_id": "thread_bleed_404",
+            "thread_id": "thread_threat_404",
+            "topic": "Threat",
+            "turns": [
+                "Mee illu thagaletti mee bathuku nasanam cheyandi",
+            ]
+        },
+        # Conversation 5: Parent Bleed Robustness
+        {
+            "thread_id": "thread_bleed_505",
             "topic": "Flame War",
             "turns": [
                 "Chetha na kodaka, ninnu champi street lo padestha!",
@@ -455,8 +513,12 @@ def run_inference_demo():
             flag_str = "[FLAGGED]" if res["is_toxic"] else "[ALLOWED]"
             print(f"  Turn {i+1}: \"{turn}\"")
             print(f"    -> {flag_str} | Score: {res['toxicity_score']} | Stage: {res['stage_routed']} | Latency: {res['latency_ms']}ms")
+            print(f"      Explanation: {res['explanation']}")
+            attn = res.get("attention_analysis", {})
+            if attn.get("top_attended_words"):
+                print(f"      MHA (8 Heads): Context Influence={attn.get('context_influence_pct', 0)}% | Top Attended Tokens: {attn.get('top_attended_words')}")
             if res.get("context_used") and res["context_used"] != "(None - First Turn)":
-                print(f"      Context: \"{res['context_used']}\"")
+                print(f"      Preceding Context: \"{res['context_used']}\"")
     
     print("\n" + "=" * 75)
     print("DEMO COMPLETE")

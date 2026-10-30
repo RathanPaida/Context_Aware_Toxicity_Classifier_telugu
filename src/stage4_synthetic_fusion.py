@@ -127,6 +127,66 @@ def generate_synthetic_contrastive_dataset(output_path: Path, n_pairs: int = 150
             "safe": {"topic": "క్రికెట్ మ్యాచ్", "parent": "చివరి బంతికి ఫోర్ కొట్టాలి, బౌండరీ లైన్ దగ్గర ఫీల్డర్ లేడు", "label": [0, 0, 0, 0, 0]},
             "toxic": {"topic": "రాజకీయ ఘర్షణ", "parent": "మన పార్టీ బ్యానర్ చింపిన వాళ్ళు అక్కడే నిలబడ్డారు", "label": [1, 1, 0, 0, 1]},
         },
+        # 11. Cuss Word in Gaming Praise vs Toxic Abuse (Fucking insane clutch)
+        {
+            "target": "Bro that was fucking insane clutch!",
+            "safe": {"topic": "BGMI Esports", "parent": "1v4 solo squad situation lo zone lo nunchi kotti gelipinchav!", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "Online Abuse", "parent": "You ruined our match on purpose, get lost", "label": [1, 1, 0, 1, 0]},
+        },
+        # 12. Telugu Slang in Praise vs Abuse (Crazy acting ra vedhava)
+        {
+            "target": "Crazy acting ra vedhava, goosebumps!",
+            "safe": {"topic": "Tollywood Fans", "parent": "Climax scene lo hero dialogue delivery chusava?", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "Personal Insult", "parent": "Nee valla office project spoil aindi, siggu undali", "label": [1, 0, 0, 1, 0]},
+        },
+        # 13. Telugu Cinema Slang vs Misogynistic Harassment (Lanja level step)
+        {
+            "target": "Lanja level lo step vesadu dance lo bro!",
+            "safe": {"topic": "Cinema Dance Choreography", "parent": "New dance video release aindi, hook step keka anthe!", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "Character Defamation", "parent": "Aaa ammayi gurinchi social media lo post cheyandi", "label": [1, 1, 1, 1, 0]},
+        },
+        # 14. Severe Toxic Threat with ZERO cuss words (Arson / Destruction)
+        {
+            "target": "Mee illu thagaletti mee bathuku nasanam cheyandi",
+            "safe": {"topic": "Construction & Cleaning", "parent": "Kotha building lo unna chetha antha tholaginchali", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "Violent Arson Incitement", "parent": "Maa colony lo unna opposing party vallani em cheddam?", "label": [1, 1, 0, 0, 1]},
+        },
+        # 15. Severe Regional / Identity Hate Speech with ZERO cuss words
+        {
+            "target": "You do not belong in our state, pack your bags and leave or face consequences",
+            "safe": {"topic": "Vacation Planning", "parent": "Tour aipoindi, packing chesukoni hotel room checkout cheyandi", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "Xenophobic Hate Speech", "parent": "Other state workers are settling in our city", "label": [1, 0, 1, 1, 1]},
+        },
+        # 16. Serious Bodily Harm Threat with ZERO cuss words
+        {
+            "target": "Repu mee batch lo okkadu kooda hospital lekunda undadu, chusukondi",
+            "safe": {"topic": "Medical Checkup", "parent": "Company annual health insurance checkup evaru register chesaru?", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "Gang Threat", "parent": "Maa meedha complaint chesina gang repu ground loki vasthundhi", "label": [1, 1, 0, 0, 1]},
+        },
+        # 17. Native Script Contrastive Pair: నువ్వు చాలా వరస్ట్ గా మాట్లాడుతున్నావ్
+        {
+            "target": "నువ్వు చాలా వరస్ట్ గా మాట్లాడుతున్నావ్",
+            "safe": {"topic": "తెలుగు నాటకం", "parent": "నాటకంలో విలన్ పాత్ర గురించి నీ అభిప్రాయం ఏమిటి?", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "వ్యక్తిగత దూషణ", "parent": "మర్యాద లేకుండా అందరి ముందు గొడవ పడ్డావు", "label": [1, 0, 0, 1, 0]},
+        },
+        # 18. Native Script Contrastive Pair: వీడి కథ తేల్చాల్సిందే రేపు
+        {
+            "target": "వీడి కథ తేల్చాల్సిందే రేపు",
+            "safe": {"topic": "తెలుగు సినిమా కథ", "parent": "మనం రాస్తున్న సినిమాలో క్లైమాక్స్ సీన్ ఎలా ముగించాలి?", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "రౌడీయిజం వివాదం", "parent": "వాడు మనల్ని బహిరంగంగా బెదిరిస్తున్నాడు, ఊరుకోవద్దు", "label": [1, 1, 0, 0, 1]},
+        },
+        # 19. Native Script Contrastive Pair: మీ లాంటి వాళ్ళకి బుద్ధి రాదు రా
+        {
+            "target": "మీ లాంటి వాళ్ళకి బుద్ధి రాదు రా",
+            "safe": {"topic": "హాస్య సంభాషణ", "parent": "పరీక్షల ముందు రోజు కూడా సరదాగా సినిమాకి వెళ్ళిన మిత్రులు", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "సామాజిక దూషణ", "parent": "నియమాలను ఉల్లంఘించి రోడ్డుపై న్యూసెన్స్ చేసిన ఆకతాయిలు", "label": [1, 0, 0, 1, 0]},
+        },
+        # 20. Native Script Safe Praise: చాలా బాగా పెర్ఫార్మ్ చేశారు అందరూ
+        {
+            "target": "చాలా బాగా పెర్ఫార్మ్ చేశారు అందరూ",
+            "safe": {"topic": "సాంస్కృతిక ఉత్సవాలు", "parent": "పాఠశాల వార్షికోత్సవ నృత్య ప్రదర్శనలు ముగిశాయి", "label": [0, 0, 0, 0, 0]},
+            "toxic": {"topic": "నాటక ప్రదర్శన", "parent": "అందరూ పాత్రలకు న్యాయం చేసి అద్భుతంగా నటించారు", "label": [0, 0, 0, 0, 0]},
+        },
     ]
     
     rows = []
@@ -301,14 +361,24 @@ def train_stage4(
         focal_alpha=config.focal_alpha,
         focal_gamma=config.focal_gamma,
         use_target_span_pooling=True,
+        use_multihead_attention=True,
     )
     
-    # Load Stage 3 weights
+    # Auto-detect base checkpoint if not explicitly provided
+    if stage3_checkpoint is None:
+        for candidate in ["stage3_best", "stage1_best"]:
+            cand_path = CHECKPOINT_DIR / candidate
+            if (cand_path / "model.pt").exists():
+                stage3_checkpoint = str(cand_path)
+                logger.info(f"Auto-detected base checkpoint: {stage3_checkpoint}")
+                break
+    
+    # Load base weights
     if stage3_checkpoint and (Path(stage3_checkpoint) / "model.pt").exists():
-        logger.info(f"Loading Stage 3 weights from {stage3_checkpoint}")
+        logger.info(f"Loading base weights from {stage3_checkpoint}")
         state = torch.load(Path(stage3_checkpoint) / "model.pt", map_location="cpu")
         model.load_state_dict(state, strict=False)
-        logger.info("  ✓ Loaded Stage 3 weights")
+        logger.info("  ✓ Loaded base weights into Multi-Head Attention model")
     
     # Freeze bottom 75% of layers + embeddings (preserving prior representations)
     model.freeze_layers(freeze_ratio=config.freeze_ratio)
@@ -428,5 +498,5 @@ if __name__ == "__main__":
     parser.add_argument("--stage3-checkpoint", type=str, default=None)
     args = parser.parse_args()
     
-    cfg = Stage4Config(learning_rate=args.lr, num_epochs=args.epochs, batch_size=args.batch_size)
+    cfg = Stage4Config(learning_rate=args.lr, num_epochs=args.epochs, batch_size=args.batch_size, fp16=False)
     train_stage4(config=cfg, stage3_checkpoint=args.stage3_checkpoint)

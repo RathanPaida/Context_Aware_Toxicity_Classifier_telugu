@@ -974,3 +974,54 @@ body {
   color: var(--cyan);
   margin-bottom: 4px;
 }
+
+/* Multi-Head Attention Token Heatmap Styles */
+.token-heatmap-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 48px;
+  align-items: center;
+}
+
+.attn-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.3;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.attn-token.target-tok {
+  color: #e0f2fe;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.attn-token.context-tok {
+  color: #f3e8ff;
+  border: 1px dashed rgba(192, 132, 252, 0.35);
+}
+
+.attn-token:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.attn-token .attn-val {
+  font-size: 9px;
+  opacity: 0.85;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+}
+

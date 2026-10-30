@@ -189,6 +189,30 @@ def get_preset_scenarios():
     """Return pre-built demo scenarios for one-click testing in the UI."""
     return [
         {
+            "id": "scenario_gaming_slang_praise",
+            "title": "🔥 Slang & Expletive in Praise (Safe)",
+            "topic": "BGMI Esports",
+            "thread_id": "demo_slang_praise",
+            "turns": [
+                {"speaker": "Gamer 1", "text": "1v4 solo squad situation lo zone lo nunchi kotti gelipinchav!"},
+                {"speaker": "Gamer 2", "text": "Bro that was fucking insane clutch! Champesav po!"},
+            ],
+            "expected": "ALLOWED (Safe Whole-Text Context)",
+            "explanation": "Even though expletive 'fucking' and slang 'champesav' are present, Multi-Head Attention captures whole-text conversational context as high-energy praise.",
+        },
+        {
+            "id": "scenario_zero_cuss_threat",
+            "title": "⚠️ Violent Threat (Zero Cuss Words)",
+            "topic": "Gang Threat",
+            "thread_id": "demo_zero_cuss",
+            "turns": [
+                {"speaker": "Target", "text": "Maa meedha complaint chesina gang repu ground loki vasthundhi"},
+                {"speaker": "Aggressor", "text": "Repu mee batch lo okkadu kooda hospital lekunda undadu, chusukondi"},
+            ],
+            "expected": "FLAGGED (Contextual Threat)",
+            "explanation": "Contains zero explicit cuss words or profanity, yet Multi-Head Attention identifies serious threat of bodily harm from sentence semantics.",
+        },
+        {
             "id": "scenario_gaming_safe",
             "title": "🎮 Gaming Banter (Twin A - Safe)",
             "topic": "Gaming & Esports",
@@ -198,8 +222,8 @@ def get_preset_scenarios():
                 {"speaker": "Player 2", "text": "Boss level clear chesa! Solo squad clutch!"},
                 {"speaker": "Player 1", "text": "Champesav po!"},
             ],
-            "expected": "ALLOWED (0.11)",
-            "explanation": "'Champesav po!' in gaming context means 'You killed it / amazing job!'. Target-Span pooling recognizes benign banter.",
+            "expected": "ALLOWED",
+            "explanation": "'Champesav po!' in gaming context means 'You killed it / amazing job!'. Multi-Head Attention cross-attention recognizes benign banter.",
         },
         {
             "id": "scenario_politics_toxic",
@@ -211,8 +235,8 @@ def get_preset_scenarios():
                 {"speaker": "User B", "text": "Vaadini thagalettali repu"},
                 {"speaker": "User C", "text": "Champesav po!"},
             ],
-            "expected": "FLAGGED (0.83)",
-            "explanation": "Identical target text 'Champesav po!' under violent incitement context means 'Kill them off!'. Correctly flipped to FLAGGED.",
+            "expected": "FLAGGED",
+            "explanation": "Identical target text 'Champesav po!' under violent incitement context means 'Kill them off!'. Multi-Head Attention captures malicious polarity flip.",
         },
         {
             "id": "scenario_parent_bleed",
@@ -223,19 +247,8 @@ def get_preset_scenarios():
                 {"speaker": "Troll", "text": "Chetha na kodaka, ninnu champi street lo padestha!"},
                 {"speaker": "Peacekeeper", "text": "Shantinchandi bro, vadileyandi andi."},
             ],
-            "expected": "ALLOWED (0.33)",
-            "explanation": "Even though parent comment is an explicit death threat, the polite reply is protected from parent toxicity bleed.",
-        },
-        {
-            "id": "scenario_fast_filter",
-            "title": "⚡ Leetspeak Slur Fast Path (<1ms)",
-            "topic": "General Discussion",
-            "thread_id": "demo_fast",
-            "turns": [
-                {"speaker": "Spammer", "text": "m@drch0d nuvvu chala worst ra"},
-            ],
-            "expected": "FLAGGED (Fast Exit 0.96)",
-            "explanation": "Regex de-obfuscation maps 'm@drch0d' to 'madarchod', triggering Stage 1 Fast Filter exit in <1ms without GPU overhead.",
+            "expected": "ALLOWED",
+            "explanation": "Even though parent comment is an explicit death threat, the polite reply is protected from parent toxicity bleed via target-span cross-attention.",
         },
         {
             "id": "scenario_telugu_native",
@@ -246,8 +259,8 @@ def get_preset_scenarios():
                 {"speaker": "సినిమా లవర్", "text": "ఆ పాటలో డ్యాన్స్ మరియు యాక్టింగ్ అద్భుతంగా ఉన్నాయి!"},
                 {"speaker": "ఫ్యాన్", "text": "చంపేసావ్ పో!"},
             ],
-            "expected": "ALLOWED (0.19)",
-            "explanation": "Evaluated in native Telugu script Unicode with IndicNLP normalization.",
+            "expected": "ALLOWED",
+            "explanation": "Evaluated in native Telugu script Unicode with Multi-Head Attention IndicNLP normalization.",
         },
     ]
 
