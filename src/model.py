@@ -245,14 +245,15 @@ class MultiHeadContextCrossAttention(nn.Module):
         """
         # Context tokens: valid tokens that are NOT part of target
         context_mask = (attention_mask == 1) & (target_mask == 0)
-        has_context = (context_mask.sum(dim=-1) > 0)
+        has_context = (context_mask.sum(dim=-1) > 0)  # (batch,)
         
         if not has_context.any():
-            # No parent context (first turn) -> pass through self-attended states
+            # No parent context anywhere in batch -> pass through self-attended states
             return hidden_states, None
         
-        # Mask out anything that is NOT parent context
-        context_key_padding = (context_mask == 0)
+        # For rows without context in this batch, use attention_mask to prevent all-True key_padding_mask (which causes NaN)
+        safe_context_mask = torch.where(has_context.unsqueeze(-1), context_mask, attention_mask)
+        context_key_padding = (safe_context_mask == 0)
         
         attn_out, cross_weights = self.mha(
             query=hidden_states,
@@ -262,6 +263,13 @@ class MultiHeadContextCrossAttention(nn.Module):
             need_weights=True,
             average_attn_weights=True,
         )
+        
+        # For rows that genuinely have no context, zero out the cross attention delta
+        if not has_context.all():
+            attn_out = torch.where(has_context.unsqueeze(-1).unsqueeze(-1), attn_out, torch.zeros_like(attn_out))
+            if cross_weights is not None:
+                cross_weights = torch.where(has_context.unsqueeze(-1).unsqueeze(-1), cross_weights, torch.zeros_like(cross_weights))
+        
         out = self.norm(hidden_states + self.dropout(attn_out))
         return out, cross_weights
 
