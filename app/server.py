@@ -66,6 +66,7 @@ class ModerateRequest(BaseModel):
     thread_id: str = "default_thread"
     topic: Optional[str] = None
     parent_context: Optional[str] = None  # Optional manual parent override (for single deep-dive)
+    update_history: bool = False
 
 
 class ClearThreadRequest(BaseModel):
@@ -94,27 +95,35 @@ def moderate_comment(req: ModerateRequest):
     if not req.text or not req.text.strip():
         raise HTTPException(status_code=400, detail="Empty comment text")
 
+    tid = req.thread_id
+    update_hist = req.update_history
+    
     # If manual parent override is provided (e.g. from single deep-dive mode),
-    # push it to cache first so the cross-encoder picks it up
+    # push it to cache and do not contaminate context with the target utterance
     if req.parent_context and req.parent_context.strip():
-        pipeline.clear_thread(req.thread_id)
-        pipeline.cache.push_message(req.thread_id, req.parent_context.strip())
+        pipeline.clear_thread(tid)
+        pipeline.cache.push_message(tid, req.parent_context.strip())
+        update_hist = False
+    elif tid == "default_thread":
+        # Default thread is treated as standalone to ensure deterministic repeated runs
+        update_hist = False
 
     result = pipeline.moderate(
         text=req.text.strip(),
-        thread_id=req.thread_id,
+        thread_id=tid,
         topic=req.topic,
+        update_history=update_hist,
     )
     
     # Enrich with preprocessing info for visual inspectability
     cleaned = pipeline.preprocessor.clean_text(req.text.strip())
-    history = pipeline.cache.get_history(req.thread_id, limit=3)
+    history = pipeline.cache.get_history(tid, limit=3)
     
     response = {
         **result,
         "raw_text": req.text.strip(),
         "cleaned_text": cleaned,
-        "thread_id": req.thread_id,
+        "thread_id": tid,
         "topic": req.topic,
         "history": history,
     }

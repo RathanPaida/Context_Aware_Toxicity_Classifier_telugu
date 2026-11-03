@@ -190,6 +190,7 @@ async function processMessage(text, author = "User", isLast = true) {
       body: JSON.stringify({
         text: text,
         thread_id: currentThreadId,
+        update_history: true,
       }),
     });
 

@@ -127,13 +127,14 @@ export default function IndicShieldApp() {
   }, []);
 
   // API Call function with resilient fallback
-  async function callModerationAPI(text, parentContext = '', topic = '') {
+  async function callModerationAPI(text, parentContext = '', topic = '', updateHistory = true, customThreadId = null) {
     try {
       const payload = {
         text: text,
-        thread_id: threadId,
+        thread_id: customThreadId || threadId,
         topic: topic || undefined,
         parent_context: parentContext || undefined,
+        update_history: updateHistory,
       };
       const res = await fetch('/api/moderate', {
         method: 'POST',
@@ -273,8 +274,8 @@ export default function IndicShieldApp() {
     setDeepDiveLoading(true);
 
     const [withCtx, withoutCtx] = await Promise.all([
-      callModerationAPI(deepDiveTarget, deepDiveParent, deepDiveTopic),
-      callModerationAPI(deepDiveTarget, '', deepDiveTopic),
+      callModerationAPI(deepDiveTarget, deepDiveParent, deepDiveTopic, false, 'deepdive_with_ctx'),
+      callModerationAPI(deepDiveTarget, '', deepDiveTopic, false, 'deepdive_without_ctx'),
     ]);
 
     setDeepDiveResult({ withCtx, withoutCtx });

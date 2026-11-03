@@ -248,8 +248,8 @@ class MultiHeadContextCrossAttention(nn.Module):
         has_context = (context_mask.sum(dim=-1) > 0)  # (batch,)
         
         if not has_context.any():
-            # No parent context anywhere in batch -> pass through self-attended states
-            return hidden_states, None
+            # No parent context anywhere in batch -> pass through self-attended states with LayerNorm
+            return self.norm(hidden_states), None
         
         # For rows without context in this batch, use attention_mask to prevent all-True key_padding_mask (which causes NaN)
         safe_context_mask = torch.where(has_context.unsqueeze(-1), context_mask, attention_mask)

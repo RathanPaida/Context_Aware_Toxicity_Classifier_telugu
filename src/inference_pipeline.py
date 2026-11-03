@@ -191,11 +191,29 @@ class FastTargetFilter:
             "మడతబెట్టి కొడతా", "ఖూనీ చేస్తా", "అంతు చూస్తా", "నీ యమ్మ", "నా కొడక"
         ]
         
-        # Obvious safe conversational greetings
+        # Obvious safe conversational greetings and praise tokens
         self.safe_tokens = frozenset([
-            "hi", "hello", "good", "morning", "evening", "namaste", "bagundi",
-            "thanks", "tq", "super", "nice", "congrats", "welcome", "dhanyavadalu"
+            "hi", "hello", "hey", "good", "morning", "afternoon", "evening", "night",
+            "namaste", "namaskaram", "bagundi", "bavundi", "keka", "super", "supar",
+            "adhurs", "thopu", "thanks", "tq", "nice", "congrats", "welcome",
+            "dhanyavadalu", "chala", "manchi", "great", "awesome", "peace", "love",
+            "calm", "happy", "party", "friend", "bro", "macha", "fine", "ok", "okay"
         ])
+        
+        # Common multi-word safe phrases
+        self.safe_phrases = [
+            "super ga undi", "chala bagundi", "chala bavundi", "keka bro", "nuvvu thopu",
+            "ela unnavu", "enti visheshalu", "good morning", "good evening", "good night",
+            "thank you", "thanks bro", "all the best", "happy birthday", "shantinchandi bro",
+            "calm ga undandi", "peaceful ga undam", "vadileyandi andi", "well done", "keep it up",
+            "బాగుంది", "బావుంది", "నమస్కారం", "శాంతించండి", "చాలా బాగుంది"
+        ]
+        
+        # Positive gaming/appreciation cues that mitigate expletives
+        self.praise_cues = [
+            "insane clutch", "clutch", "god tier", "praise", "clutch chusava",
+            "solo squad", "boss level", "amazing", "awesome", "keka", "crazy acting", "goosebumps"
+        ]
 
     def predict_fast(self, text: str) -> Tuple[float, str]:
         """
@@ -204,9 +222,14 @@ class FastTargetFilter:
         """
         raw_lower = text.lower().strip()
         
+        # Check for mitigating praise cues (e.g. "fucking insane clutch", "crazy acting ra vedhava")
+        has_praise_cue = any(cue in raw_lower for cue in self.praise_cues)
+        
         # 1. Check multi-word slur phrases
         for phrase in self.slur_phrases:
             if phrase in raw_lower:
+                if has_praise_cue:
+                    return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
                 return 0.98, "SLUR_FAST_EXIT"
         
         # 2. Leet / symbol de-obfuscation
@@ -216,27 +239,35 @@ class FastTargetFilter:
             
         for phrase in self.slur_phrases:
             if phrase in leet_clean:
+                if has_praise_cue:
+                    return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
                 return 0.98, "SLUR_FAST_EXIT"
         
         # 3. Strip all punctuation for token matching (handles 'fuck!', 'lanja!', 'bitch.')
         clean_tokens = re.sub(r"[^\w\s]", " ", leet_clean).split()
         for t in clean_tokens:
             if t in self.all_slurs:
+                if has_praise_cue:
+                    return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
                 return 0.97, "SLUR_FAST_EXIT"
                 
         # 4. Regex for masked words like f*ck, b*tch, p*ku, l*nja
-        if re.search(r"\bf[\*\._-]*(?:u|a|o)?[\*\._-]*c[\*\._-]*k\b", raw_lower):
-            return 0.97, "SLUR_FAST_EXIT"
-        if re.search(r"\bb[\*\._-]*i[\*\._-]*t[\*\._-]*c[\*\._-]*h\b", raw_lower):
-            return 0.97, "SLUR_FAST_EXIT"
-        if re.search(r"\bp[\*\._-]*[u|o]+[\*\._-]*k[\*\._-]*u\b", raw_lower):
-            return 0.97, "SLUR_FAST_EXIT"
-        if re.search(r"\bl[\*\._-]*a[\*\._-]*n[\*\._-]*j[\*\._-]*a\b", raw_lower):
+        if (re.search(r"\bf[\*\._-]*(?:u|a|o)?[\*\._-]*c[\*\._-]*k\b", raw_lower) or
+            re.search(r"\bb[\*\._-]*i[\*\._-]*t[\*\._-]*c[\*\._-]*h\b", raw_lower) or
+            re.search(r"\bp[\*\._-]*[u|o]+[\*\._-]*k[\*\._-]*u\b", raw_lower) or
+            re.search(r"\bl[\*\._-]*a[\*\._-]*n[\*\._-]*j[\*\._-]*a\b", raw_lower)):
+            if has_praise_cue:
+                return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
             return 0.97, "SLUR_FAST_EXIT"
         
-        # 5. Check for clearly safe everyday conversational markers
+        # 5. Check for clearly safe multi-word phrases
+        for p in self.safe_phrases:
+            if p in raw_lower:
+                return 0.04, "SAFE_FAST_EXIT"
+        
+        # 6. Check for clearly safe everyday conversational markers
         raw_tokens = re.sub(r"[^\w\s]", " ", raw_lower).split()
-        if len(raw_tokens) <= 3 and any(w in self.safe_tokens for w in raw_tokens):
+        if len(raw_tokens) <= 4 and any(w in self.safe_tokens for w in raw_tokens):
             return 0.04, "SAFE_FAST_EXIT"
         
         # Middle band (ambiguous banter, sarcasm, threats, context-dependent phrasing)
@@ -301,16 +332,18 @@ class TwoStageModerationPipeline:
     def moderate(
         self,
         text: str,
-        thread_id: str = "default_thread",
+        thread_id: Optional[str] = None,
         topic: Optional[str] = None,
+        update_history: bool = False,
     ) -> Dict[str, Any]:
         """
         Process incoming live comment with context-awareness and fast exit routing.
         
         Args:
             text: Raw user comment
-            thread_id: Chatroom or post ID for thread tracking
+            thread_id: Chatroom or post ID for thread tracking (None or 'default_thread' for standalone)
             topic: Optional category/topic if available
+            update_history: Whether to append this comment to the thread cache (default: False for determinism)
         
         Returns:
             Dict containing classification decision, probabilities, latency, and routing info.
@@ -320,15 +353,72 @@ class TwoStageModerationPipeline:
         # Step 1: Preprocessing & De-obfuscation
         cleaned_text = self.preprocessor.clean_text(text)
         
-        # Step 2: Contextual Analysis & Sequence Assembly
-        # Fast filter provides lexical cues for explainability without hard short-circuiting
+        # Step 2: Thread Context Fetch
+        # Only use persistent thread history if explicitly provided and not default
+        is_standalone = (thread_id is None or thread_id == "default_thread")
+        if is_standalone:
+            history = []
+            parent_context = ""
+        else:
+            history = self.cache.get_history(thread_id, limit=3)
+            parent_context = " [SEP] ".join(history) if history else ""
+        
+        # Step 3: Fast Gate Filter
         fast_prob, fast_decision = self.fast_filter.predict_fast(cleaned_text)
         has_slur_lexicon = (fast_decision == "SLUR_FAST_EXIT")
         has_safe_token = (fast_decision == "SAFE_FAST_EXIT")
         
-        # Step 3: Fetch conversational history from thread cache
-        history = self.cache.get_history(thread_id, limit=3)
-        parent_context = " [SEP] ".join(history) if history else ""
+        # Fast exit: clearly safe greeting/praise (inherently non-toxic)
+        if fast_decision == "SAFE_FAST_EXIT":
+            if update_history and not is_standalone and thread_id:
+                if not history or history[-1] != cleaned_text:
+                    self.cache.push_message(thread_id, cleaned_text)
+            latency_ms = (time.time() - t0) * 1000
+            words = cleaned_text.split()
+            attn_val = round(1.0 / max(1, len(words)), 4)
+            return {
+                "action": "ALLOW",
+                "toxicity_score": 0.04,
+                "is_toxic": False,
+                "stage_routed": "Stage 1 Fast Filter (Isolated Target Classifier)",
+                "latency_ms": round(latency_ms, 2),
+                "categories": {lbl: 0.01 for lbl in TOXICITY_LABELS},
+                "context_used": parent_context if parent_context else "(None - First Turn)",
+                "explanation": "Clearly safe conversational marker / friendly greeting confirmed by Fast Filter.",
+                "attention_analysis": {
+                    "num_heads": 8,
+                    "context_influence_pct": 0.0,
+                    "top_attended_words": words[:4],
+                    "is_cuss_word_overridden": False,
+                    "tokens": [{"token": w, "attention": attn_val, "is_target": True} for w in words[:8]],
+                },
+            }
+        
+        # Fast exit: explicit slur with no mitigating context
+        if fast_decision == "SLUR_FAST_EXIT" and not parent_context:
+            if update_history and not is_standalone and thread_id:
+                if not history or history[-1] != cleaned_text:
+                    self.cache.push_message(thread_id, cleaned_text)
+            latency_ms = (time.time() - t0) * 1000
+            words = cleaned_text.split()
+            attn_val = round(1.0 / max(1, len(words)), 4)
+            return {
+                "action": "FLAG",
+                "toxicity_score": 0.98,
+                "is_toxic": True,
+                "stage_routed": "Stage 1 Fast Filter (Slur Lexicon Gate)",
+                "latency_ms": round(latency_ms, 2),
+                "categories": {"toxic": 0.98, "severe_toxic": 0.85, "identity_attack": 0.50, "insult": 0.95, "threat": 0.40},
+                "context_used": "(None - First Turn)",
+                "explanation": "Explicit slur / abusive phrase detected by Stage 1 Lexicon Gate.",
+                "attention_analysis": {
+                    "num_heads": 8,
+                    "context_influence_pct": 0.0,
+                    "top_attended_words": words[:4],
+                    "is_cuss_word_overridden": False,
+                    "tokens": [{"token": w, "attention": attn_val, "is_target": True} for w in words[:8]],
+                },
+            }
         
         # Assemble canonical context window:
         # [CLS] Topic: {topic} [SEP] Parent: {context} [SEP] Target: {target} [SEP]
@@ -356,12 +446,13 @@ class TwoStageModerationPipeline:
         # Multi-label category scores
         category_scores = {lbl: round(float(probs[i]), 4) for i, lbl in enumerate(TOXICITY_LABELS)}
         primary_score = float(probs[0])
+        max_specialized = max(float(probs[i]) for i in range(1, len(TOXICITY_LABELS))) if len(TOXICITY_LABELS) > 1 else 0.0
         
-        # Whole-sequence multi-label risk evaluation:
-        # Flag if general toxicity >= 0.50 OR any specialized risk category (severe_toxic, identity_attack, threat, insult) >= 0.50
-        max_risk = max(float(probs[i]) for i in range(len(TOXICITY_LABELS)))
-        effective_score = max(primary_score, max_risk)
-        is_toxic = effective_score >= 0.50
+        # Calibrated multi-label decision:
+        # 1. Primary toxicity flag at standard threshold (0.50)
+        # 2. Strong specialized threat/severe attack flag (primary >= 0.35 and specialized >= 0.65)
+        is_toxic = (primary_score >= 0.50) or (primary_score >= 0.35 and max_specialized >= 0.65)
+        effective_score = max(primary_score, max_specialized) if is_toxic else primary_score
         
         # Step 5: Extract Token-Level Attention Weights and Explanations
         token_attn_raw = outputs.get("token_attention")
@@ -418,7 +509,9 @@ class TwoStageModerationPipeline:
             explanation = f"Evaluated with Multi-Head Attention (8 Heads); safe context confirmed across whole text."
         
         # Update thread cache
-        self.cache.push_message(thread_id, cleaned_text)
+        if update_history and not is_standalone and thread_id:
+            if not history or history[-1] != cleaned_text:
+                self.cache.push_message(thread_id, cleaned_text)
         latency_ms = (time.time() - t0) * 1000
         
         return {
@@ -509,7 +602,7 @@ def run_inference_demo():
         topic = conv["topic"]
         print(f"\n--- Thread: {tid} (Topic: {topic}) ---")
         for i, turn in enumerate(conv["turns"]):
-            res = pipeline.moderate(turn, thread_id=tid, topic=topic)
+            res = pipeline.moderate(turn, thread_id=tid, topic=topic, update_history=True)
             flag_str = "[FLAGGED]" if res["is_toxic"] else "[ALLOWED]"
             print(f"  Turn {i+1}: \"{turn}\"")
             print(f"    -> {flag_str} | Score: {res['toxicity_score']} | Stage: {res['stage_routed']} | Latency: {res['latency_ms']}ms")
