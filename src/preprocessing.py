@@ -5,28 +5,14 @@ Implements the deterministic 4-stage preprocessing pipeline:
   1. De-Obfuscation (Regex L33t normalization, URL/handle stripping)
   2. Transliteration (ai4bharat/indic-xlit: Romanized Telugu → Native Script)
   3. Script Normalization (indic-nlp-library: Unicode canonicalization)
-  4. Context Window Assembly (Head-truncation, [CLS] Topic [SEP] Parent [SEP] Target [SEP])
+  (Context window assembly is done on token ids in src/model.py:encode_example)
 """
 
 import re
 import unicodedata
-from typing import List, Optional, Tuple, Dict
-from dataclasses import dataclass
+from typing import List
 
-from src.config import (
-    LEET_MAP,
-    MAX_CHAR_REPEAT,
-    MAX_SEQ_LENGTH,
-    TARGET_MIN_TOKENS,
-    PARENT_MIN_TOKENS,
-    CLS_TOKEN,
-    SEP_TOKEN,
-    TOPIC_PREFIX,
-    CONTEXT_PREFIX,
-    PARENT_PREFIX,
-    TARGET_PREFIX,
-    get_logger,
-)
+from src.config import LEET_MAP, get_logger
 
 logger = get_logger("preprocessing")
 
@@ -69,7 +55,7 @@ def deobfuscate(text: str) -> str:
       - Strip URLs and @handles
       - Clean hashtags (keep word)
       - Replace embedded leetspeak digits/symbols with letters
-      - Collapse >2 repeating characters to single character
+      - Collapse >2 repeating characters to 2
       - Normalize whitespace
       - Normalize Unicode to NFC form
     
@@ -101,8 +87,9 @@ def deobfuscate(text: str) -> str:
         prev = text
         text = _LEET_EMBEDDED_PATTERN.sub(_leet_replace, text)
     
-    # Collapse repeated characters: "chalaaaaa" → "chala" (>2 → 1)
-    text = _CHAR_REPEAT_PATTERN.sub(r"\1", text)
+    # Collapse runs of >2 identical chars to 2 ("chalaaaaa" → "chalaa", "gooood" → "good").
+    # Collapsing to 1 corrupts real words ("gooood" → "god").
+    text = _CHAR_REPEAT_PATTERN.sub(r"\1\1", text)
     
     # Unicode NFC normalization
     text = unicodedata.normalize("NFC", text)
@@ -361,131 +348,6 @@ class IndicNormalizer:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Stage 4: Context Window Assembly (Head-Truncation)
-# ═══════════════════════════════════════════════════════════════════════
-
-@dataclass
-class ThreadMessage:
-    """Represents a single message in a conversational thread."""
-    text: str
-    role: str = "user"  # "user", "assistant", "system"
-    timestamp: Optional[str] = None
-
-
-@dataclass
-class ConversationThread:
-    """Represents a full conversational thread for context-aware classification."""
-    topic: str = ""
-    context_messages: List[ThreadMessage] = None  # Older messages (Context_1, Context_2, ...)
-    parent_message: Optional[ThreadMessage] = None  # Immediate parent
-    target_message: Optional[ThreadMessage] = None  # Message to classify
-    
-    def __post_init__(self):
-        if self.context_messages is None:
-            self.context_messages = []
-
-
-def assemble_context_window(
-    thread: ConversationThread,
-    tokenizer,
-    max_length: int = MAX_SEQ_LENGTH,
-    target_min_tokens: int = TARGET_MIN_TOKENS,
-    parent_min_tokens: int = PARENT_MIN_TOKENS,
-) -> str:
-    """
-    Stage 4: Assemble conversational thread into a single structured sequence
-    with left-truncation on context only.
-    
-    Format:
-        [CLS] Topic: {topic} [SEP] Context_1: {msg_t-n} [SEP] ... 
-        [SEP] Parent: {msg_t-1} [SEP] Target: {msg_t} [SEP]
-    
-    Truncation Strategy:
-        - Target text is NEVER truncated (up to target_min_tokens)
-        - Parent text is NEVER truncated (up to parent_min_tokens)
-        - Oldest context messages are discarded first (left-truncation)
-        - Within a context message, text is truncated from the left
-    
-    Args:
-        thread: ConversationThread with topic, contexts, parent, and target
-        tokenizer: HuggingFace tokenizer (for token counting)
-        max_length: Maximum total tokens (default: 512)
-        target_min_tokens: Minimum tokens reserved for target
-        parent_min_tokens: Minimum tokens reserved for parent
-    
-    Returns:
-        Formatted string ready for tokenization
-    """
-    # Build the target segment (never truncated)
-    target_text = thread.target_message.text if thread.target_message else ""
-    target_segment = f"{TARGET_PREFIX} {target_text}"
-    
-    # Build the parent segment (never truncated)
-    parent_text = thread.parent_message.text if thread.parent_message else ""
-    parent_segment = f"{PARENT_PREFIX} {parent_text}" if parent_text else ""
-    
-    # Build the topic segment
-    topic_segment = f"{TOPIC_PREFIX} {thread.topic}" if thread.topic else ""
-    
-    # Count tokens for fixed segments
-    fixed_parts = []
-    if topic_segment:
-        fixed_parts.append(topic_segment)
-    if parent_segment:
-        fixed_parts.append(parent_segment)
-    fixed_parts.append(target_segment)
-    
-    # Estimate tokens for fixed segments + separators
-    fixed_text = f" {SEP_TOKEN} ".join(fixed_parts)
-    fixed_tokens = len(tokenizer.encode(fixed_text, add_special_tokens=True))
-    
-    # Calculate remaining budget for context messages
-    context_budget = max_length - fixed_tokens - 2  # -2 for safety margin
-    
-    if context_budget <= 0 or not thread.context_messages:
-        # No room for context → return just topic + parent + target
-        parts = []
-        if topic_segment:
-            parts.append(topic_segment)
-        if parent_segment:
-            parts.append(parent_segment)
-        parts.append(target_segment)
-        return f" {SEP_TOKEN} ".join(parts)
-    
-    # Add context messages from newest to oldest (right-to-left priority)
-    context_segments = []
-    remaining_budget = context_budget
-    
-    for i, msg in enumerate(reversed(thread.context_messages)):
-        ctx_text = f"{CONTEXT_PREFIX}{len(thread.context_messages) - i}: {msg.text}"
-        ctx_tokens = len(tokenizer.encode(ctx_text, add_special_tokens=False))
-        
-        if ctx_tokens <= remaining_budget:
-            context_segments.insert(0, ctx_text)
-            remaining_budget -= ctx_tokens
-        else:
-            # Partial fit: truncate this message's text from the left
-            if remaining_budget > 10:  # Only if meaningful space remains
-                tokens = tokenizer.encode(msg.text, add_special_tokens=False)
-                truncated_tokens = tokens[-(remaining_budget - 5):]  # -5 for prefix
-                truncated_text = tokenizer.decode(truncated_tokens, skip_special_tokens=True)
-                ctx_text = f"{CONTEXT_PREFIX}{len(thread.context_messages) - i}: ...{truncated_text}"
-                context_segments.insert(0, ctx_text)
-            break  # No room for older messages
-    
-    # Assemble final sequence
-    all_parts = []
-    if topic_segment:
-        all_parts.append(topic_segment)
-    all_parts.extend(context_segments)
-    if parent_segment:
-        all_parts.append(parent_segment)
-    all_parts.append(target_segment)
-    
-    return f" {SEP_TOKEN} ".join(all_parts)
-
-
-# ═══════════════════════════════════════════════════════════════════════
 # Full Pipeline Orchestrator
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -493,20 +355,18 @@ class IndicPreprocessor:
     """
     End-to-end preprocessing pipeline for Indic & Telugu text.
     
-    Chains all 4 stages:
+    Chains the text-level stages:
       1. De-obfuscation
       2. Selective transliteration (Roman Telugu → Native Telugu)
       3. Unicode normalization (indic-nlp-library)
-      4. Context window assembly (thread → model input)
+
+    Context-window assembly (topic / history / target) lives in
+    src/model.py:encode_example, which works at the token-id level.
     
     Usage:
         preprocessor = IndicPreprocessor()
         
-        # Single text processing (stages 1-3)
         clean = preprocessor.clean_text("m@drch0d nuvvu chalaaaaa")
-        
-        # Full thread processing (all 4 stages)
-        model_input = preprocessor.process_thread(thread, tokenizer)
     """
     
     def __init__(
@@ -546,41 +406,6 @@ class IndicPreprocessor:
             text = self.normalizer.normalize(text)
         
         return text.strip()
-    
-    def process_thread(
-        self,
-        thread: ConversationThread,
-        tokenizer,
-        max_length: int = MAX_SEQ_LENGTH,
-    ) -> str:
-        """
-        Apply all 4 stages to a full conversational thread.
-        
-        1. Clean each message (stages 1-3)
-        2. Assemble context window (stage 4)
-        
-        Returns:
-            Formatted string ready for model tokenization
-        """
-        # Clean all messages
-        cleaned_thread = ConversationThread(
-            topic=thread.topic,
-            context_messages=[
-                ThreadMessage(text=self.clean_text(msg.text), role=msg.role)
-                for msg in (thread.context_messages or [])
-            ],
-            parent_message=ThreadMessage(
-                text=self.clean_text(thread.parent_message.text),
-                role=thread.parent_message.role,
-            ) if thread.parent_message else None,
-            target_message=ThreadMessage(
-                text=self.clean_text(thread.target_message.text),
-                role=thread.target_message.role,
-            ) if thread.target_message else None,
-        )
-        
-        # Stage 4: Context window assembly
-        return assemble_context_window(cleaned_thread, tokenizer, max_length)
     
     def process_single(self, text: str) -> str:
         """

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Indic Shield AI | Context-Aware Toxicity Classifier for Indian & Telugu Code-Mixed Data</title>
-  <meta name="description" content="Stateful Two-Stage Moderation Cascade combining Fast Target Filtering (<3ms) with IndicBERT-v3 Target-Span Pooling Cross-Encoder (~17ms) for Telugu and Indian Code-Mixed text.">
+  <meta name="description" content="Two-stage moderation cascade: lexicon gate plus context-aware IndicBERT cross-encoder for Telugu and Indian code-mixed text.">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
 </head>
@@ -28,7 +28,7 @@
       <div class="system-pills">
         <div class="pill live-status" id="system-status-pill">
           <span class="pulse-dot"></span>
-          <span id="system-status-text">IndicBERT-v3 (CUDA Online)</span>
+          <span id="system-status-text">Connecting…</span>
         </div>
         <div class="pill" id="pipeline-arch-pill">
           <span>8-Head Transformer Attention + Attentive Pooling</span>
@@ -366,8 +366,8 @@
         <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px; line-height: 1.6; color: #cbd5e1;">
           <div class="arch-stage-card">
             <h4>1. Two-Stage Production Inference Cascade</h4>
-            <p><strong>Stage 1 Fast Filter (&le; 3ms):</strong> Isolated comment evaluated via high-confidence lexical regex + slur canonicalizer. Explicit slurs (&gt;0.90) and obvious benign greetings (&lt;0.15) exit immediately, bypassing GPU overhead for ~75% of traffic.</p>
-            <p><strong>Stage 2 IndicBERT Cross-Encoder (~17ms):</strong> Ambiguous traffic (0.15 to 0.90) is routed to IndicBERT-v3, incorporating preceding parent turns from thread cache via Target-Span Pooling.</p>
+            <p><strong>Stage 1 Lexicon Gate (&lt;1ms):</strong> Severe slurs in a message with no thread context and no praise cue are flagged immediately. Mild or ambiguous terms are only reported; the model decides.</p>
+            <p><strong>Stage 2 IndicBERT Cross-Encoder:</strong> Everything else is scored by the trained model with the preceding thread turns as context. Thresholds are tuned on validation data; latency is measured by the evaluation suite.</p>
           </div>
 
           <div class="arch-stage-card">

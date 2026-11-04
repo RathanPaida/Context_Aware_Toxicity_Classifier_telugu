@@ -2,81 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-// Preset scenarios for 1-click demonstration
-const PRESET_SCENARIOS = [
-  {
-    id: 'gaming_safe',
-    title: '🎮 Gaming Banter (Twin A - Safe)',
-    topic: 'Gaming',
-    turns: [
-      { speaker: 'Player 1', text: 'Ninna match lo 1v4 clutch chusava bro?' },
-      { speaker: 'Player 2', text: 'Boss level clear chesa! Solo squad clutch!' },
-      { speaker: 'Player 1', text: 'Champesav po!' },
-    ],
-    expected: 'ALLOWED',
-    desc: "'Champesav po!' in gaming context means 'You killed it / amazing!'. MHA captures benign praise.",
-  },
-  {
-    id: 'politics_toxic',
-    title: '⚠️ Riot Incitement (Twin B - Toxic)',
-    topic: 'Politics',
-    turns: [
-      { speaker: 'User A', text: 'Aaa journalist bayataki vasthe kottali andaru' },
-      { speaker: 'User B', text: 'Vaadini thagalettali repu' },
-      { speaker: 'User C', text: 'Champesav po!' },
-    ],
-    expected: 'FLAGGED',
-    desc: "Identical target 'Champesav po!' under violent incitement context flips to 'Kill them off!'.",
-  },
-  {
-    id: 'cuss_in_praise',
-    title: '🔥 Slang & Cuss in Praise (Safe)',
-    topic: 'BGMI Esports',
-    turns: [
-      { speaker: 'Gamer 1', text: '1v4 solo squad situation lo zone lo nunchi kotti gelipinchav!' },
-      { speaker: 'Gamer 2', text: 'Bro that was fucking insane clutch! You are god tier!' },
-    ],
-    expected: 'ALLOWED',
-    desc: "Expletive 'fucking' detected, but 8-head attention recognizes high-energy gaming appreciation.",
-  },
-  {
-    id: 'zero_cuss_threat',
-    title: '🚨 Violent Threat (Zero Cuss Words)',
-    topic: 'Gang Threat',
-    turns: [
-      { speaker: 'Target', text: 'Maa meedha complaint chesina gang repu ground loki vasthundhi' },
-      { speaker: 'Aggressor', text: 'Repu mee batch lo okkadu kooda hospital lekunda undadu, chusukondi' },
-    ],
-    expected: 'FLAGGED',
-    desc: "Contains zero explicit curse words, yet identified as severe threat of bodily harm from semantics.",
-  },
-  {
-    id: 'parent_bleed',
-    title: '🕊️ Parent-Bleed De-escalation',
-    topic: 'Flame War',
-    turns: [
-      { speaker: 'Troll', text: 'Chetha na kodaka, ninnu champi street lo padestha!' },
-      { speaker: 'Peacekeeper', text: 'Shantinchandi bro, vadileyandi andi.' },
-    ],
-    expected: 'ALLOWED',
-    desc: "Polite de-escalation reply is protected against parent toxicity bleed.",
-  },
-  {
-    id: 'telugu_native',
-    title: 'తెలుగు Native Telugu Script Praise',
-    topic: 'తెలుగు సినిమా',
-    turns: [
-      { speaker: 'సినిమా లవర్', text: 'ఈ పాటలో డ్యాన్స్ మరియు యాక్టింగ్ అద్భుతంగా ఉన్నాయి!' },
-      { speaker: 'ఫ్యాన్', text: 'చంపేసావ్ పో!' },
-    ],
-    expected: 'ALLOWED',
-    desc: "Evaluated in native Telugu script Unicode with IndicNLP normalization.",
-  },
-];
-
 export default function IndicShieldApp() {
   const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'deepdive' | 'benchmarks'
-  const [backendStatus, setBackendStatus] = useState({ online: false, mode: 'Connecting...' });
+  const [backendStatus, setBackendStatus] = useState({ online: false, mode: 'Connecting...', heads: null });
+  const [presets, setPresets] = useState([]);
+  const [benchmarks, setBenchmarks] = useState(null);
 
   // Chat simulator state
   const [threadId] = useState('live_session_thread');
@@ -101,12 +31,17 @@ export default function IndicShieldApp() {
         const res = await fetch('/api/health');
         if (res.ok) {
           const data = await res.json();
-          setBackendStatus({ online: true, mode: `IndicBERT-v3 (${data.device?.toUpperCase() || 'ONLINE'})` });
+          if (data.ready) {
+            const name = (data.model_name || 'model').split('/').pop();
+            setBackendStatus({ online: true, mode: `${name} · ${data.stage || 'checkpoint'} (${(data.device || '').toUpperCase()})`, heads: data.num_heads });
+          } else {
+            setBackendStatus({ online: false, mode: 'Backend up — model not trained', heads: null });
+          }
         } else {
-          setBackendStatus({ online: false, mode: 'Standby / Local Engine' });
+          setBackendStatus({ online: false, mode: 'Backend offline', heads: null });
         }
       } catch {
-        setBackendStatus({ online: false, mode: 'Standby / Local Engine' });
+        setBackendStatus({ online: false, mode: 'Backend offline', heads: null });
       }
     }
     checkHealth();
@@ -121,97 +56,51 @@ export default function IndicShieldApp() {
     }
   }, [messages]);
 
-  // Load first scenario initially
+  // Load scenarios + measured benchmarks from the backend
   useEffect(() => {
-    loadPreset(PRESET_SCENARIOS[0]);
+    fetch('/api/scenarios')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => setPresets(list.map((sc) => ({ ...sc, desc: sc.explanation }))))
+      .catch(() => setPresets([]));
+    fetch('/api/benchmarks')
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setBenchmarks)
+      .catch(() => setBenchmarks(null));
   }, []);
 
-  // API Call function with resilient fallback
-  async function callModerationAPI(text, parentContext = '', topic = '', updateHistory = true, customThreadId = null) {
+  // API call. On failure an explicit ERROR result is returned — the old version
+  // fabricated verdicts with keyword rules and displayed them as model output.
+  async function callModerationAPI(text, history = [], topic = '', customThreadId = null) {
     try {
-      const payload = {
-        text: text,
-        thread_id: customThreadId || threadId,
-        topic: topic || undefined,
-        parent_context: parentContext || undefined,
-        update_history: updateHistory,
-      };
       const res = await fetch('/api/moderate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          text,
+          thread_id: customThreadId || threadId,
+          topic: topic || undefined,
+          history,
+          update_history: false,
+        }),
       });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {
-      // Fallback local response simulation if FastAPI server is temporarily offline
+      if (res.ok) return await res.json();
+      const body = await res.json().catch(() => ({}));
+      return errorResult(body.detail || `HTTP ${res.status}`);
+    } catch (err) {
+      return errorResult(`Backend unreachable (${err.message}). Start it with: python app/server.py`);
     }
+  }
 
-    // Dynamic heuristic simulation fallback for instant responsive testing
-    const lowered = text.toLowerCase();
-    const parentLower = (parentContext || '').toLowerCase();
-    let isToxic = false;
-    let score = 0.12;
-    let explanation = 'Evaluated with 8-Head Multi-Head Attention.';
-    let ctxPct = 45.0;
-
-    if (lowered.includes('champesav')) {
-      if (parentLower.includes('kottali') || parentLower.includes('thagalettali') || parentLower.includes('journalist')) {
-        isToxic = true;
-        score = 0.90;
-        explanation = "Contextual violent incitement detected: 'Champesav po!' under violent context flips to threat.";
-        ctxPct = 82.8;
-      } else {
-        isToxic = false;
-        score = 0.08;
-        explanation = "Gaming praise detected: 'Champesav po!' recognized as benign appreciation ('You killed it!').";
-        ctxPct = 86.3;
-      }
-    } else if (lowered.includes('hospital lekunda') || lowered.includes('nasanam cheyandi') || lowered.includes('thagaletti')) {
-      isToxic = true;
-      score = 0.72;
-      explanation = 'Contextual violent threat detected without explicit curse words from sentence semantics.';
-      ctxPct = 34.0;
-    } else if (lowered.includes('shantinchandi') || lowered.includes('vadileyandi') || lowered.includes('calm ga')) {
-      isToxic = false;
-      score = 0.12;
-      explanation = 'Polite de-escalation recognized; protected against parent toxicity bleed.';
-      ctxPct = 65.3;
-    } else if (lowered.includes('fucking insane') || lowered.includes('crazy acting')) {
-      isToxic = false;
-      score = 0.14;
-      explanation = 'Colloquial expletive in gaming praise overridden by whole-text context.';
-      ctxPct = 52.0;
-    }
-
-    const words = text.split(/\s+/).map((w, idx) => ({
-      token: w,
-      attention: Math.max(0.05, Math.min(0.45, 0.15 + (idx % 3) * 0.08)),
-      is_target: true,
-    }));
-
+  function errorResult(message) {
     return {
-      action: isToxic ? 'FLAG' : 'ALLOW',
-      toxicity_score: score,
-      is_toxic: isToxic,
-      stage_routed: '8-Head Multi-Head Attention',
-      latency_ms: 16.8,
-      categories: {
-        toxic: score,
-        severe_toxic: isToxic ? score * 0.7 : 0.02,
-        insult: isToxic ? score * 0.6 : 0.03,
-        identity_attack: 0.01,
-        threat: isToxic ? score * 0.85 : 0.01,
-      },
-      context_used: parentContext || '(No preceding history)',
-      explanation: explanation,
-      attention_analysis: {
-        num_heads: 8,
-        context_influence_pct: ctxPct,
-        top_attended_words: words.slice(0, 4).map((w) => w.token),
-        tokens: words,
-      },
+      action: 'ERROR',
+      is_toxic: false,
+      toxicity_score: 0,
+      stage_routed: 'unavailable',
+      latency_ms: 0,
+      categories: {},
+      explanation: message,
+      attention_analysis: null,
     };
   }
 
@@ -225,8 +114,8 @@ export default function IndicShieldApp() {
     for (let i = 0; i < preset.turns.length; i++) {
       const turn = preset.turns[i];
       const isTargetTurn = i === preset.turns.length - 1;
-      const parentCtx = newMessages.map((m) => m.text).join(' [SEP] ');
-      const res = await callModerationAPI(turn.text, parentCtx, preset.topic);
+      const history = newMessages.map((m) => m.text);
+      const res = await callModerationAPI(turn.text, history, preset.topic);
 
       newMessages.push({
         id: `${preset.id}_${i}`,
@@ -252,8 +141,8 @@ export default function IndicShieldApp() {
     setInputText('');
     setIsLoading(true);
 
-    const parentCtx = messages.map((m) => m.text).join(' [SEP] ');
-    const res = await callModerationAPI(text, parentCtx, inputTopic);
+    const history = messages.map((m) => m.text);
+    const res = await callModerationAPI(text, history, inputTopic);
 
     const newMsg = {
       id: `msg_${Date.now()}`,
@@ -274,8 +163,8 @@ export default function IndicShieldApp() {
     setDeepDiveLoading(true);
 
     const [withCtx, withoutCtx] = await Promise.all([
-      callModerationAPI(deepDiveTarget, deepDiveParent, deepDiveTopic, false, 'deepdive_with_ctx'),
-      callModerationAPI(deepDiveTarget, '', deepDiveTopic, false, 'deepdive_without_ctx'),
+      callModerationAPI(deepDiveTarget, deepDiveParent ? [deepDiveParent] : [], deepDiveTopic, 'deepdive_with_ctx'),
+      callModerationAPI(deepDiveTarget, [], deepDiveTopic, 'deepdive_without_ctx'),
     ]);
 
     setDeepDiveResult({ withCtx, withoutCtx });
@@ -330,7 +219,7 @@ export default function IndicShieldApp() {
             <span>{backendStatus.mode}</span>
           </div>
           <div className="arch-pill">
-            <span>8-Head Transformer Attention</span>
+            <span>{backendStatus.heads ? `${backendStatus.heads}-Head Transformer Attention` : 'Transformer Attention'}</span>
           </div>
         </div>
       </header>
@@ -362,7 +251,8 @@ export default function IndicShieldApp() {
 
               {/* Preset Scenarios Selector */}
               <div className="preset-bar">
-                {PRESET_SCENARIOS.map((preset) => (
+                {presets.length === 0 && <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No scenarios (backend offline?)</span>}
+                {presets.map((preset) => (
                   <button
                     key={preset.id}
                     className="preset-chip"
@@ -468,7 +358,7 @@ export default function IndicShieldApp() {
                     <div className="stat-card">
                       <div className="stat-label">Stage Routed</div>
                       <div className="stat-val" style={{ fontSize: '13px', color: '#a5b4fc' }}>
-                        {currentResult.stage_routed || '8-Head MHA'}
+                        {currentResult.stage_routed || '-'}
                       </div>
                     </div>
                     <div className="stat-card">
@@ -527,13 +417,13 @@ export default function IndicShieldApp() {
                       <div key={cat} className="cat-row">
                         <div className="cat-info">
                           <span>{cat.replace('_', ' ').toUpperCase()}</span>
-                          <span>{(val * 100).toFixed(1)}%</span>
+                          <span>{val === null || val === undefined ? 'n/a' : `${(val * 100).toFixed(1)}%`}</span>
                         </div>
                         <div className="cat-bar-bg">
                           <div
                             className="cat-bar-fill"
                             style={{
-                              width: `${Math.min(100, Math.max(2, val * 100))}%`,
+                              width: `${Math.min(100, Math.max(2, (val || 0) * 100))}%`,
                               background:
                                 val >= 0.5
                                   ? 'linear-gradient(90deg, #f43f5e, #ef4444)'
@@ -552,7 +442,7 @@ export default function IndicShieldApp() {
                 </>
               ) : (
                 <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
-                  <p>Select a turn in the chat or load a preset scenario to view live 8-head attention telemetry.</p>
+                  <p>Select a turn in the chat or load a preset scenario to view live attention telemetry.</p>
                 </div>
               )}
             </div>
@@ -656,7 +546,7 @@ export default function IndicShieldApp() {
                     {deepDiveResult.withoutCtx.explanation}
                   </p>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Context Influence: <strong style={{ color: '#a5b4fc' }}>0.0% (Isolated Turn)</strong>
+                    Context Influence: <strong style={{ color: '#a5b4fc' }}>n/a (no context given)</strong>
                   </div>
                 </div>
               </div>
@@ -676,64 +566,57 @@ export default function IndicShieldApp() {
                 </svg>
                 Indian-Specific 4-Gate Release Benchmarks
               </span>
-              <span className="badge-passed">ALL RELEASE GATES PASSED (100%)</span>
+              {benchmarks?.evaluated && (
+                <span className="badge-passed">
+                  {benchmarks.slices.filter((x) => x.passed).length}/{benchmarks.slices.length} passed · {benchmarks.evaluated_at}
+                </span>
+              )}
             </div>
 
-            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', marginBottom: '18px' }}>
-              Rigorous release evaluation suite across 4 targeted Indian & Telugu contextual slices:
-            </p>
+            {!benchmarks && <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)' }}>Backend offline — no benchmark data.</p>}
+            {benchmarks && !benchmarks.evaluated && (
+              <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)' }}>{benchmarks.message}</p>
+            )}
 
-            <table className="benchmark-table">
-              <thead>
-                <tr>
-                  <th>Benchmark Slice</th>
-                  <th>Target Gate</th>
-                  <th>Observed Result</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Contrastive Context Flip Accuracy</strong><br /><span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>300 held-out twin pairs with identical Telugu target, opposite parent polarity</span></td>
-                  <td>&ge; 82.0% exact match</td>
-                  <td style={{ color: '#34d399', fontWeight: 700 }}>100.0%</td>
-                  <td><span className="badge-passed">PASSED</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Identity & Caste False Positive Rate</strong><br /><span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Neutral factual mentions of Reddy, Kamma, Mala, Madiga, Andhra, Telangana</span></td>
-                  <td>&le; 3.5% FPR</td>
-                  <td style={{ color: '#34d399', fontWeight: 700 }}>0.0% FPR</td>
-                  <td><span className="badge-passed">PASSED</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Parent-Bleed Robustness Specificity</strong><br /><span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Polite de-escalations following extreme threats ("Shantinchandi bro")</span></td>
-                  <td>&ge; 92.0% allowed</td>
-                  <td style={{ color: '#34d399', fontWeight: 700 }}>100.0%</td>
-                  <td><span className="badge-passed">PASSED</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Median Pipeline Latency (RTX 4060 GPU)</strong><br /><span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>End-to-end inference including IndicNLP cleaning and 8-head attention</span></td>
-                  <td>&le; 25.0 ms</td>
-                  <td style={{ color: '#38bdf8', fontWeight: 700 }}>16.8 ms</td>
-                  <td><span className="badge-passed">PASSED</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Stage 1 Fast Filter Latency</strong><br /><span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Multilingual profanity lookup with regex de-obfuscation</span></td>
-                  <td>&le; 2.0 ms</td>
-                  <td style={{ color: '#38bdf8', fontWeight: 700 }}>&lt; 1.0 ms</td>
-                  <td><span className="badge-passed">PASSED</span></td>
-                </tr>
-              </tbody>
-            </table>
+            {benchmarks?.evaluated && (
+              <table className="benchmark-table">
+                <thead>
+                  <tr>
+                    <th>Benchmark Slice</th>
+                    <th>Target Gate</th>
+                    <th>Observed Result</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {benchmarks.slices.map((b) => (
+                    <tr key={b.id}>
+                      <td><strong>{b.name}</strong><br /><span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{b.description}</span></td>
+                      <td>{b.gate}</td>
+                      <td style={{ color: b.passed ? '#34d399' : '#f87171', fontWeight: 700 }}>{b.value}</td>
+                      <td><span className={b.passed ? 'badge-passed' : 'verdict-tag tag-flagged'}>{b.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {benchmarks?.training_stages && (
+              <ul style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '16px', paddingLeft: '20px' }}>
+                {benchmarks.training_stages.map((st) => (
+                  <li key={st.stage}><strong>Stage {st.stage}</strong> ({st.checkpoint}): {st.metric}</li>
+                ))}
+              </ul>
+            )}
 
             {/* Architecture Summary Box */}
             <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(10, 15, 29, 0.7)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
               <h3 style={{ fontSize: '15px', color: '#ffffff', marginBottom: '10px' }}>4-Stage Cross-Lingual Transfer Curriculum</h3>
               <ul style={{ fontSize: '13px', color: 'var(--text-secondary)', paddingLeft: '20px', lineHeight: '1.7' }}>
-                <li><strong>Stage 1 (Context Mechanics):</strong> Pre-trained on 210K English open threads (toxic-chat & Jigsaw Bias).</li>
-                <li><strong>Stage 2 (Telugu Domain Adaptation):</strong> Masked Language Modeling on 250K IndicCorpV2 Telugu sentences.</li>
-                <li><strong>Stage 3 (Code-Mix & Slang Fine-Tuning):</strong> Fine-tuned on DravidianCodeMix-Telugu and Cultural Identity Safety corpus.</li>
-                <li><strong>Stage 4 (Synthetic Thread Fusion):</strong> 8-Head Multi-Head Attention contrastive twin pairs across gaming, cinema, and political dialogue trees.</li>
+                <li><strong>Stage 1 (Toxicity Mechanics):</strong> English toxic-chat + Jigsaw Unintended Bias.</li>
+                <li><strong>Stage 2 (Telugu Domain Adaptation):</strong> Masked language modelling on Telugu IndicCorp text.</li>
+                <li><strong>Stage 3 (Code-Mix Fine-Tuning):</strong> DravidianCodeMix (Tamil) + Cultural-Safety-Telugu.</li>
+                <li><strong>Stage 4 (Synthetic Thread Fusion):</strong> Contrastive twin pairs (same target, safe vs toxic parent).</li>
               </ul>
             </div>
           </div>

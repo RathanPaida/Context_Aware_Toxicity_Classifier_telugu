@@ -1,0 +1,137 @@
+{
+  "_note": "Evaluation-only data. src/stage4_synthetic_fusion.py drops any training example whose target text appears here. These slices are SMALL hand-written sanity checks, not a benchmark; add native-speaker-annotated items (see docs/PROJECT_PLAN.md).",
+  "contrastive_pairs": [
+    {
+      "target": "Champesav po!",
+      "safe": {
+        "topic": "Gaming",
+        "parent": "Ninna match lo 1v4 clutch chusava?"
+      },
+      "toxic": {
+        "topic": "Politics",
+        "parent": "Aaa journalist bayataki vasthe kottali"
+      }
+    },
+    {
+      "target": "Vesey inka",
+      "safe": {
+        "topic": "Cricket",
+        "parent": "Last over sixer kottali captain!"
+      },
+      "toxic": {
+        "topic": "Violence",
+        "parent": "Vaadu maari rechipothunnadu"
+      }
+    },
+    {
+      "target": "Thokkestha andarni",
+      "safe": {
+        "topic": "BGMI Tournament",
+        "parent": "Next circle lo rush cheddama?"
+      },
+      "toxic": {
+        "topic": "Campus Feud",
+        "parent": "Mee batch motham repu kalavandi"
+      }
+    },
+    {
+      "target": "Ninnu vadalanu ra",
+      "safe": {
+        "topic": "Friendship",
+        "parent": "Birthday treat ivvaledhu nuvvu inka"
+      },
+      "toxic": {
+        "topic": "Threat",
+        "parent": "Naa meedha complaint chesavu kadha"
+      }
+    },
+    {
+      "target": "Baddal baashingalu aipothayi",
+      "safe": {
+        "topic": "Movies",
+        "parent": "Teaser release aindi, goosebumps anthe!"
+      },
+      "toxic": {
+        "topic": "Fight",
+        "parent": "Maa galli ki vasthe mee pani cheptham"
+      }
+    },
+    {
+      "target": "చంపేసావ్ పో!",
+      "safe": {
+        "topic": "సినిమా",
+        "parent": "ఈ పాటలో డ్యాన్స్ చాలా బాగుంది"
+      },
+      "toxic": {
+        "topic": "వివాదం",
+        "parent": "వాడు మనల్ని మోసం చేశాడు, అస్సలు వదలొద్దు"
+      }
+    }
+  ],
+  "identity_terms": [
+    "Reddy",
+    "Kamma",
+    "Madiga",
+    "Mala",
+    "Telangana",
+    "Andhra",
+    "Rayalaseema",
+    "Kapu",
+    "Brahmin"
+  ],
+  "identity_templates": [
+    "{term} culture and historical traditions are very interesting.",
+    "{term} community members organized a peaceful cultural festival today.",
+    "The history of {term} leadership in local governance is well documented.",
+    "People from {term} region celebrated Sankranti with great enthusiasm.",
+    "Many students from {term} background joined the university this year."
+  ],
+  "parent_bleed": {
+    "toxic_parents": [
+      "M@drch0d meeku buddi ledhu, andarni kosi karam pettali!",
+      "Chetha na kodaka, ninnu champi street lo padestha!",
+      "L@nja kodaka, mee batch motham thagalettali!",
+      "ఖూనీ చేస్తా నిన్ను, బయటకు వస్తే అంతు చూస్తా!"
+    ],
+    "polite_replies": [
+      "Shantinchandi bro, vadileyandi andi.",
+      "Enduku antha kopam? Calm ga matladukundam.",
+      "Godavalu vaddu bro, peaceful ga undam.",
+      "శాంతించండి బ్రదర్, గొడవలు ఎందుకు?",
+      "దయచేసి కోపం తగ్గించుకోండి, చర్చించుకుందాం.",
+      "Chill out bro, ignore cheyyandi."
+    ]
+  },
+  "script_parity": [
+    {
+      "roman": "Nuvvu chala worst ga matladthunnav",
+      "native": "నువ్వు చాలా వరస్ట్ గా మాట్లాడుతున్నావ్",
+      "is_toxic": 1
+    },
+    {
+      "roman": "Chala baaga perform chesaru andaru",
+      "native": "చాలా బాగా పెర్ఫార్మ్ చేశారు అందరూ",
+      "is_toxic": 0
+    },
+    {
+      "roman": "Veedi katha thelchalsinde repu",
+      "native": "వీడి కథ తేల్చాల్సిందే రేపు",
+      "is_toxic": 1
+    },
+    {
+      "roman": "Manchi cinema, family thoti chudachu",
+      "native": "మంచి సినిమా, ఫ్యామిలీ తోటి చూడచ్చు",
+      "is_toxic": 0
+    },
+    {
+      "roman": "Mee lanti vallaki buddi radhu ra",
+      "native": "మీ లాంటి వాళ్ళకి బుద్ధి రాదు రా",
+      "is_toxic": 1
+    },
+    {
+      "roman": "Andariki sankranti subhakankshalu!",
+      "native": "అందరికీ సంక్రాంతి శుభాకాంక్షలు!",
+      "is_toxic": 0
+    }
+  ]
+}

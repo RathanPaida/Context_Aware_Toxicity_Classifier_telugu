@@ -1,0 +1,286 @@
+{
+  "_note": "Stage 4 synthetic contrastive training data. Each template: same target, safe vs toxic parent. Labels are [toxic, severe_toxic, identity_attack, insult, threat]. Items overlapping eval_slices.json were removed. This is far too small for real training — extend it (see docs/PROJECT_PLAN.md).",
+  "templates": [
+    {
+      "id": "t05",
+      "target": "Kosi karam pettali veellaki",
+      "safe": {
+        "topic": "Cooking & Food",
+        "parent": "Mirapakaya bajji chesetappudu kaaram saripoledhu",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Mob Harassment",
+        "parent": "Maa party meedha comments chesina vallani em cheddam?",
+        "label": [
+          1,
+          1,
+          0,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "t06",
+      "target": "Asalu mass ra nuvvu",
+      "safe": {
+        "topic": "Movie Fan Club",
+        "parent": "Hero entry scene lo theatre antha papers egiresaru",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Civic Harassment",
+        "parent": "Traffic police paina rowdyism chesi vachadu",
+        "label": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "id": "t08",
+      "target": "Nee pani aipoindi inka",
+      "safe": {
+        "topic": "Office & Work",
+        "parent": "Ninna start chesina project code submit chesava?",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Gang Feud",
+        "parent": "Maa meedha complaint chesavu kadha ra, bayataki ra",
+        "label": [
+          1,
+          1,
+          0,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "t10",
+      "target": "కొట్టి పారేయ్",
+      "safe": {
+        "topic": "క్రికెట్ మ్యాచ్",
+        "parent": "చివరి బంతికి ఫోర్ కొట్టాలి, బౌండరీ లైన్ దగ్గర ఫీల్డర్ లేడు",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "రాజకీయ ఘర్షణ",
+        "parent": "మన పార్టీ బ్యానర్ చింపిన వాళ్ళు అక్కడే నిలబడ్డారు",
+        "label": [
+          1,
+          1,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "t11",
+      "target": "Bro that was fucking insane clutch!",
+      "safe": {
+        "topic": "BGMI Esports",
+        "parent": "1v4 solo squad situation lo zone lo nunchi kotti gelipinchav!",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Online Abuse",
+        "parent": "You ruined our match on purpose, get lost",
+        "label": [
+          1,
+          1,
+          0,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "id": "t12",
+      "target": "Crazy acting ra vedhava, goosebumps!",
+      "safe": {
+        "topic": "Tollywood Fans",
+        "parent": "Climax scene lo hero dialogue delivery chusava?",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Personal Insult",
+        "parent": "Nee valla office project spoil aindi, siggu undali",
+        "label": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "id": "t13",
+      "target": "Lanja level lo step vesadu dance lo bro!",
+      "safe": {
+        "topic": "Cinema Dance Choreography",
+        "parent": "New dance video release aindi, hook step keka anthe!",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Character Defamation",
+        "parent": "Aaa ammayi gurinchi social media lo post cheyandi",
+        "label": [
+          1,
+          1,
+          1,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "id": "t14",
+      "target": "Mee illu thagaletti mee bathuku nasanam cheyandi",
+      "safe": {
+        "topic": "Construction & Cleaning",
+        "parent": "Kotha building lo unna chetha antha tholaginchali",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Violent Arson Incitement",
+        "parent": "Maa colony lo unna opposing party vallani em cheddam?",
+        "label": [
+          1,
+          1,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "t15",
+      "target": "You do not belong in our state, pack your bags and leave or face consequences",
+      "safe": {
+        "topic": "Vacation Planning",
+        "parent": "Tour aipoindi, packing chesukoni hotel room checkout cheyandi",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Xenophobic Hate Speech",
+        "parent": "Other state workers are settling in our city",
+        "label": [
+          1,
+          0,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "t16",
+      "target": "Repu mee batch lo okkadu kooda hospital lekunda undadu, chusukondi",
+      "safe": {
+        "topic": "Medical Checkup",
+        "parent": "Company annual health insurance checkup evaru register chesaru?",
+        "label": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "toxic": {
+        "topic": "Gang Threat",
+        "parent": "Maa meedha complaint chesina gang repu ground loki vasthundhi",
+        "label": [
+          1,
+          1,
+          0,
+          0,
+          1
+        ]
+      }
+    }
+  ],
+  "deescalation": {
+    "toxic_parents": [
+      "Mee andarni nariki padestha chusuko!",
+      "Dengutha ninnu kukkala chusuko!",
+      "Maa party meedha comments chesina vallani em cheddam?",
+      "Traffic police paina rowdyism chesi vachadu",
+      "Maa meedha complaint chesavu kadha ra, bayataki ra",
+      "మన పార్టీ బ్యానర్ చింపిన వాళ్ళు అక్కడే నిలబడ్డారు",
+      "You ruined our match on purpose, get lost",
+      "Nee valla office project spoil aindi, siggu undali"
+    ],
+    "replies": [
+      "Bro relax, ee topic ikkade vadilestham.",
+      "Godava enduku, prashantanga matladukundam.",
+      "Sorry bro, nenu thappuga artham chesukunna.",
+      "Please ilanti matalu vaddu, andaram friends eh.",
+      "అందరూ శాంతంగా ఉండండి, గొడవ అవసరం లేదు.",
+      "క్షమించండి, మనం తర్వాత మాట్లాడుకుందాం."
+    ],
+    "_review": "replies authored during the refactor; need native-speaker review"
+  }
+}

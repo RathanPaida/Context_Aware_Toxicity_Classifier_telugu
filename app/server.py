@@ -1,17 +1,24 @@
 """
-FastAPI Server for Context-Aware Indic & Telugu Toxicity Classifier Web Interface.
-Serves real-time inference endpoints, conversational state management, and the interactive frontend.
+FastAPI server for the Context-Aware Indic & Telugu Toxicity Classifier.
+
+Run from the repository root:   python app/server.py
+Environment:
+    PORT                 (default 7860)
+    CORS_ORIGINS         comma-separated list (default: http://localhost:3000,http://127.0.0.1:3000)
+    ALLOW_UNTRAINED=1    serve an untrained model (UI testing only)
 """
 
-import sys
+import json
 import os
+import sys
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import List, Optional
+
 from pydantic import BaseModel
 
-# Add project root to sys.path
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -22,50 +29,42 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
-from src.config import PRIMARY_MODEL, TOXICITY_LABELS, CHECKPOINT_DIR, get_logger
-from src.inference_pipeline import TwoStageModerationPipeline
+from src.config import CHECKPOINT_DIR, EVAL_RESULTS_PATH, SCENARIOS_PATH, TOXICITY_LABELS, get_logger
+from src.inference_pipeline import ModelNotReadyError, TwoStageModerationPipeline
+from src.model import read_checkpoint_metadata
 
 logger = get_logger("web_server")
+pipeline: Optional[TwoStageModerationPipeline] = None
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    global pipeline
+    pipeline = TwoStageModerationPipeline()
+    yield
+
 
 app = FastAPI(
     title="Indic Shield AI - Context-Aware Toxicity Classifier",
-    description="Production Two-Stage Moderation Cascade for Indian & Telugu Code-Mixed Data",
-    version="2.0.0",
+    description="Two-stage moderation cascade for Indian & Telugu code-mixed text",
+    version="2.1.0",
+    lifespan=lifespan,
 )
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
 
-# Global pipeline instance (loaded lazily on startup)
-pipeline: Optional[TwoStageModerationPipeline] = None
-
-@app.on_event("startup")
-def startup_event():
-    global pipeline
-    logger.info("Initializing TwoStageModerationPipeline for web server...")
-    pipeline = TwoStageModerationPipeline()
-    logger.info("✓ TwoStageModerationPipeline ready for web traffic.")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Request / Response Models
-# ─────────────────────────────────────────────────────────────────────────────
 
 class ModerateRequest(BaseModel):
     text: str
     thread_id: str = "default_thread"
     topic: Optional[str] = None
-    parent_context: Optional[str] = None  # Optional manual parent override (for single deep-dive)
+    parent_context: Optional[str] = None   # explicit parent for single-comment deep dive
+    history: Optional[List[str]] = None    # explicit multi-turn context (oldest → newest)
     update_history: bool = False
 
 
@@ -73,16 +72,20 @@ class ClearThreadRequest(BaseModel):
     thread_id: str
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# API Endpoints
-# ─────────────────────────────────────────────────────────────────────────────
+def _require_pipeline() -> TwoStageModerationPipeline:
+    if pipeline is None:
+        raise HTTPException(status_code=503, detail="Pipeline is starting up")
+    return pipeline
+
 
 @app.get("/api/health")
 def health_check():
+    p = pipeline
+    info = p.info() if p else {"ready": False, "status": "starting"}
+    info["detail"] = info.pop("status")
     return {
-        "status": "healthy",
-        "model_name": PRIMARY_MODEL,
-        "device": str(pipeline.device) if pipeline else "cuda",
+        **info,
+        "status": "ready" if info["ready"] else "not_ready",
         "labels": TOXICITY_LABELS,
         "timestamp": time.time(),
     }
@@ -90,209 +93,118 @@ def health_check():
 
 @app.post("/api/moderate")
 def moderate_comment(req: ModerateRequest):
-    if not pipeline:
-        raise HTTPException(status_code=503, detail="Pipeline not initialized")
-    if not req.text or not req.text.strip():
+    p = _require_pipeline()
+    text = (req.text or "").strip()
+    if not text:
         raise HTTPException(status_code=400, detail="Empty comment text")
 
-    tid = req.thread_id
-    update_hist = req.update_history
-    
-    # If manual parent override is provided (e.g. from single deep-dive mode),
-    # push it to cache and do not contaminate context with the target utterance
-    if req.parent_context and req.parent_context.strip():
-        pipeline.clear_thread(tid)
-        pipeline.cache.push_message(tid, req.parent_context.strip())
-        update_hist = False
-    elif tid == "default_thread":
-        # Default thread is treated as standalone to ensure deterministic repeated runs
-        update_hist = False
+    override = None
+    if req.history:
+        override = [h for h in req.history if h and h.strip()]
+    elif req.parent_context and req.parent_context.strip():
+        override = [req.parent_context.strip()]
 
-    result = pipeline.moderate(
-        text=req.text.strip(),
-        thread_id=tid,
-        topic=req.topic,
-        update_history=update_hist,
-    )
-    
-    # Enrich with preprocessing info for visual inspectability
-    cleaned = pipeline.preprocessor.clean_text(req.text.strip())
-    history = pipeline.cache.get_history(tid, limit=3)
-    
-    response = {
+    try:
+        result = p.moderate(
+            text=text,
+            thread_id=req.thread_id,
+            topic=req.topic,
+            update_history=req.update_history and override is None,
+            history_override=override,
+        )
+    except ModelNotReadyError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    return {
         **result,
-        "raw_text": req.text.strip(),
-        "cleaned_text": cleaned,
-        "thread_id": tid,
+        "raw_text": text,
+        "cleaned_text": p.preprocessor.clean_text(text),
+        "thread_id": req.thread_id,
         "topic": req.topic,
-        "history": history,
+        "history": override if override is not None else p.cache.get_history(req.thread_id, p.cfg.history_turns),
     }
-    return response
 
 
 @app.post("/api/clear-thread")
 def clear_thread(req: ClearThreadRequest):
-    if not pipeline:
-        raise HTTPException(status_code=503, detail="Pipeline not initialized")
-    pipeline.clear_thread(req.thread_id)
-    return {"status": "success", "thread_id": req.thread_id, "message": "Context cache cleared"}
+    _require_pipeline().clear_thread(req.thread_id)
+    return {"status": "success", "thread_id": req.thread_id}
+
+
+SLICE_INFO = {
+    "contrastive_flip": ("Contrastive Context Flip", "Same target under safe vs toxic parent context", "Exact twin match"),
+    "identity_bias": ("Caste & Regional Identity Safety", "Neutral mentions of caste / regional communities", "Subgroup false-positive rate"),
+    "parent_bleed": ("Parent-Bleed Robustness", "Polite de-escalation after a toxic parent", "De-escalation specificity"),
+    "script_parity": ("Script Parity", "Romanized vs native Telugu script", "|ΔF1|"),
+    "latency_p50": ("Latency", "Median model-path latency on the evaluation machine", "p50 latency"),
+}
 
 
 @app.get("/api/benchmarks")
 def get_benchmarks():
-    """Return verified Phase 5 evaluation metrics for the UI dashboard."""
-    return {
-        "slices": [
-            {
-                "id": "contrastive_flip",
-                "name": "Contrastive Context Flip",
-                "description": "300 held-out twin pairs with identical Telugu targets under safe vs toxic parent contexts",
-                "metric": "Exact Twin Match",
-                "value": "83.3%",
-                "gate": "≥ 82.0%",
-                "status": "PASSED",
-                "passed": True,
-            },
-            {
-                "id": "identity_bias",
-                "name": "Caste & Regional Identity Safety",
-                "description": "Factual mentions of Reddy, Kamma, Madiga, Mala, Telangana, Andhra communities",
-                "metric": "Subgroup False Positive Rate",
-                "value": "0.0%",
-                "gate": "≤ 3.5%",
-                "status": "PASSED",
-                "passed": True,
-            },
-            {
-                "id": "parent_bleed",
-                "name": "Parent-Bleed Robustness",
-                "description": "Extreme death threats/slurs followed by polite de-escalation ('Shantinchandi bro')",
-                "metric": "De-escalation Specificity",
-                "value": "91.7%",
-                "gate": "≥ 92.0%",
-                "status": "NEAR-PASS",
-                "passed": True,
-            },
-            {
-                "id": "latency_sla",
-                "name": "Latency SLA (<25ms)",
-                "description": "Two-stage cascade latency on NVIDIA RTX 4060 GPU",
-                "metric": "Median Latency",
-                "value": "16.8 ms",
-                "gate": "≤ 25.0 ms",
-                "status": "PASSED",
-                "passed": True,
-            },
-        ],
-        "training_stages": [
-            {"stage": 1, "name": "Context Mechanics", "data": "toxic-chat + jigsaw-bias (210K)", "metric": "Val Loss: 0.0264", "checkpoint": "stage1_best"},
-            {"stage": 2, "name": "Telugu MLM Adaptation", "data": "IndicCorpV2 Telugu (250K)", "metric": "PPL: 29.4 | Loss: 2.65", "checkpoint": "stage2_final"},
-            {"stage": 3, "name": "Code-Mix & Slang Fine-Tuning", "data": "DravidianCodeMix + Cultural Safety (57K)", "metric": "Macro-F1: 0.0776", "checkpoint": "stage3_best"},
-            {"stage": 4, "name": "Synthetic Thread Fusion", "data": "Contrastive Twin Pairs + De-escalations", "metric": "100.0% Exact Flip Match", "checkpoint": "stage4_best"},
-        ]
-    }
+    """Measured results from `python run_pipeline.py --evaluate` (reports/eval_results.json)."""
+    stages = []
+    for i, name in enumerate(["stage1_best", "stage2_best", "stage3_best", "stage4_best"], start=1):
+        meta = read_checkpoint_metadata(CHECKPOINT_DIR / name)
+        if not meta:
+            stages.append({"stage": i, "name": name, "data": "-", "metric": "not trained", "checkpoint": name})
+            continue
+        vm = meta.get("val_metrics", {})
+        if "macro_f1@threshold" in vm:
+            metric = f"val macro-F1 {vm['macro_f1@threshold']:.3f}"
+            if "flip_accuracy" in vm:
+                metric += f" | held-out flip {vm['flip_accuracy']:.0%}"
+        elif "perplexity" in meta:
+            metric = f"val PPL {meta['perplexity']:.1f}"
+        else:
+            metric = "trained"
+        stages.append({"stage": i, "name": name, "data": meta.get("data", "-"), "metric": metric,
+                       "checkpoint": name, "trained_at": meta.get("timestamp")})
+
+    if not EVAL_RESULTS_PATH.exists():
+        return {"evaluated": False, "message": "No evaluation results yet — run `python run_pipeline.py --evaluate`.",
+                "slices": [], "training_stages": stages}
+
+    res = json.loads(EVAL_RESULTS_PATH.read_text(encoding="utf-8"))
+    slices = []
+    for key, v in res.get("slices", {}).items():
+        name, desc, metric = SLICE_INFO.get(key, (key, "", key))
+        slices.append({
+            "id": key, "name": name, "description": f"{desc} (n={v['n']})", "metric": metric,
+            "value": f"{v['value']}{v['unit']}", "gate": v["gate"],
+            "status": "PASSED" if v["passed"] else "FAILED", "passed": v["passed"],
+        })
+    ho = res.get("heldout_test")
+    if ho:
+        slices.insert(0, {
+            "id": "heldout_test", "name": "Held-out Test Set (real data)",
+            "description": f"DravidianCodeMix + Cultural-Safety-Telugu test split (n={ho['n']:,})",
+            "metric": "Macro-F1 (tuned thresholds)", "value": f"{ho['macro_f1@threshold']:.3f}",
+            "gate": "-", "status": "MEASURED", "passed": True,
+        })
+    return {"evaluated": True, "evaluated_at": res.get("evaluated_at"), "slices": slices, "training_stages": stages}
 
 
 @app.get("/api/scenarios")
 def get_preset_scenarios():
-    """Return pre-built demo scenarios for one-click testing in the UI."""
-    return [
-        {
-            "id": "scenario_gaming_slang_praise",
-            "title": "🔥 Slang & Expletive in Praise (Safe)",
-            "topic": "BGMI Esports",
-            "thread_id": "demo_slang_praise",
-            "turns": [
-                {"speaker": "Gamer 1", "text": "1v4 solo squad situation lo zone lo nunchi kotti gelipinchav!"},
-                {"speaker": "Gamer 2", "text": "Bro that was fucking insane clutch! Champesav po!"},
-            ],
-            "expected": "ALLOWED (Safe Whole-Text Context)",
-            "explanation": "Even though expletive 'fucking' and slang 'champesav' are present, Multi-Head Attention captures whole-text conversational context as high-energy praise.",
-        },
-        {
-            "id": "scenario_zero_cuss_threat",
-            "title": "⚠️ Violent Threat (Zero Cuss Words)",
-            "topic": "Gang Threat",
-            "thread_id": "demo_zero_cuss",
-            "turns": [
-                {"speaker": "Target", "text": "Maa meedha complaint chesina gang repu ground loki vasthundhi"},
-                {"speaker": "Aggressor", "text": "Repu mee batch lo okkadu kooda hospital lekunda undadu, chusukondi"},
-            ],
-            "expected": "FLAGGED (Contextual Threat)",
-            "explanation": "Contains zero explicit cuss words or profanity, yet Multi-Head Attention identifies serious threat of bodily harm from sentence semantics.",
-        },
-        {
-            "id": "scenario_gaming_safe",
-            "title": "🎮 Gaming Banter (Twin A - Safe)",
-            "topic": "Gaming & Esports",
-            "thread_id": "demo_gaming",
-            "turns": [
-                {"speaker": "Player 1", "text": "Ninna match lo 1v4 clutch chusava bro?"},
-                {"speaker": "Player 2", "text": "Boss level clear chesa! Solo squad clutch!"},
-                {"speaker": "Player 1", "text": "Champesav po!"},
-            ],
-            "expected": "ALLOWED",
-            "explanation": "'Champesav po!' in gaming context means 'You killed it / amazing job!'. Multi-Head Attention cross-attention recognizes benign banter.",
-        },
-        {
-            "id": "scenario_politics_toxic",
-            "title": "🏛️ Political Riot (Twin B - Toxic Threat)",
-            "topic": "Regional Politics",
-            "thread_id": "demo_politics",
-            "turns": [
-                {"speaker": "User A", "text": "Aaa journalist bayataki vasthe kottali andaru"},
-                {"speaker": "User B", "text": "Vaadini thagalettali repu"},
-                {"speaker": "User C", "text": "Champesav po!"},
-            ],
-            "expected": "FLAGGED",
-            "explanation": "Identical target text 'Champesav po!' under violent incitement context means 'Kill them off!'. Multi-Head Attention captures malicious polarity flip.",
-        },
-        {
-            "id": "scenario_parent_bleed",
-            "title": "🕊️ De-escalation (Parent-Bleed Robustness)",
-            "topic": "Toxic Flame War",
-            "thread_id": "demo_bleed",
-            "turns": [
-                {"speaker": "Troll", "text": "Chetha na kodaka, ninnu champi street lo padestha!"},
-                {"speaker": "Peacekeeper", "text": "Shantinchandi bro, vadileyandi andi."},
-            ],
-            "expected": "ALLOWED",
-            "explanation": "Even though parent comment is an explicit death threat, the polite reply is protected from parent toxicity bleed via target-span cross-attention.",
-        },
-        {
-            "id": "scenario_telugu_native",
-            "title": "🌸 Native Telugu Script (Cinema Praise)",
-            "topic": "తెలుగు సినిమా",
-            "thread_id": "demo_native",
-            "turns": [
-                {"speaker": "సినిమా లవర్", "text": "ఆ పాటలో డ్యాన్స్ మరియు యాక్టింగ్ అద్భుతంగా ఉన్నాయి!"},
-                {"speaker": "ఫ్యాన్", "text": "చంపేసావ్ పో!"},
-            ],
-            "expected": "ALLOWED",
-            "explanation": "Evaluated in native Telugu script Unicode with Multi-Head Attention IndicNLP normalization.",
-        },
-    ]
+    return json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Static Files & Frontend Routing
-# ─────────────────────────────────────────────────────────────────────────────
-
-static_dir = Path(__file__).parent / "static"
-static_dir.mkdir(parents=True, exist_ok=True)
-
+static_dir = Path(__file__).resolve().parent / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
 
 @app.get("/")
 def serve_index():
     index_file = static_dir / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
-    return JSONResponse({"message": "Indic Shield AI API is running. Frontend static files loading..."})
+    return JSONResponse({"message": "Indic Shield AI API is running."})
 
 
 if __name__ == "__main__":
     import uvicorn
+
     port = int(os.environ.get("PORT", 7860))
-    logger.info(f"Starting Indic Shield AI Web Interface on http://localhost:{port}")
-    uvicorn.run("app.server:app", host="0.0.0.0", port=port, reload=False)
+    logger.info(f"Starting Indic Shield AI on http://localhost:{port}")
+    uvicorn.run(app, host=os.environ.get("HOST", "127.0.0.1"), port=port, reload=False)

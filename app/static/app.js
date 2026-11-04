@@ -8,6 +8,7 @@
 let currentThreadId = "thread_live_" + Math.floor(1000 + Math.random() * 9000);
 let presetScenarios = [];
 let activeScenarioId = null;
+let currentTopic = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("thread-id-display").textContent = currentThreadId;
@@ -20,7 +21,14 @@ async function initApp() {
     const healthRes = await fetch("/api/health");
     if (healthRes.ok) {
       const data = await healthRes.json();
-      document.getElementById("system-status-text").textContent = `IndicBERT-v3 (${data.device.toUpperCase()} Online)`;
+      const statusEl = document.getElementById("system-status-text");
+      if (data.ready) {
+        const name = (data.model_name || "model").split("/").pop();
+        statusEl.textContent = `${name} · ${data.stage || "checkpoint"} (${(data.device || "").toUpperCase()})`;
+      } else {
+        statusEl.textContent = "Model not trained — see server log";
+        statusEl.title = data.detail || "";
+      }
     }
   } catch (err) {
     console.warn("Health check error:", err);
@@ -69,6 +77,7 @@ async function runScenario(scenario) {
 
   // Reset thread
   currentThreadId = scenario.thread_id;
+  currentTopic = scenario.topic || null;
   document.getElementById("thread-id-display").textContent = currentThreadId;
 
   // Clear thread on backend
@@ -108,6 +117,7 @@ async function resetThread() {
   currentThreadId = "thread_live_" + Math.floor(1000 + Math.random() * 9000);
   document.getElementById("thread-id-display").textContent = currentThreadId;
   activeScenarioId = null;
+  currentTopic = null;
   renderScenariosCarousel();
 
   await fetch("/api/clear-thread", {
@@ -190,11 +200,15 @@ async function processMessage(text, author = "User", isLast = true) {
       body: JSON.stringify({
         text: text,
         thread_id: currentThreadId,
+        topic: currentTopic,
         update_history: true,
       }),
     });
 
-    if (!res.ok) throw new Error("API error: " + res.statusText);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || res.statusText);
+    }
     const data = await res.json();
 
     // Render message in stream
@@ -204,14 +218,9 @@ async function processMessage(text, author = "User", isLast = true) {
     updateDiagnosticInspector(data);
   } catch (err) {
     console.error("Moderation request failed:", err);
-    appendMessageBubble(author, text, {
-      is_toxic: false,
-      toxicity_score: 0.0,
-      action: "ERROR",
-      stage_routed: "Network Error",
-      latency_ms: 0,
-      categories: {},
-    });
+    appendMessageBubble(author, text, { action: "ERROR", error: err.message });
+    const expl = document.getElementById("verdict-explanation");
+    if (expl) expl.textContent = "Backend error: " + err.message;
   }
 }
 
@@ -221,8 +230,11 @@ function appendMessageBubble(author, text, result) {
   msgEl.className = "chat-msg";
 
   const isToxic = result.is_toxic;
-  const verdictClass = isToxic ? "verdict-flag" : "verdict-allow";
-  const verdictText = isToxic
+  const isError = result.action === "ERROR";
+  const verdictClass = isError ? "verdict-flag" : isToxic ? "verdict-flag" : "verdict-allow";
+  const verdictText = isError
+    ? `⚠ ERROR: ${escapeHtml(result.error || "request failed")}`
+    : isToxic
     ? `🚩 FLAGGED (${(result.toxicity_score * 100).toFixed(1)}%)`
     : `✓ ALLOWED (${(result.toxicity_score * 100).toFixed(1)}%)`;
 
@@ -270,7 +282,9 @@ function updateDiagnosticInspector(data) {
   // Telemetry
   document.getElementById("telemetry-route").textContent = data.stage_routed;
   document.getElementById("telemetry-latency").textContent = `${data.latency_ms} ms`;
-  document.getElementById("telemetry-pooling").textContent = "MHA 8-Head Fusion";
+  document.getElementById("telemetry-pooling").textContent = data.attention_analysis
+    ? `MHA ${data.attention_analysis.num_heads}-Head Fusion`
+    : "Lexicon only";
 
   // Category Risk Bars
   const cats = data.categories || {};
@@ -278,6 +292,12 @@ function updateDiagnosticInspector(data) {
     const scoreEl = document.getElementById(`score-${key}`);
     const barEl = document.getElementById(`bar-${key}`);
     if (scoreEl && barEl) {
+      if (val === null || val === undefined) {
+        scoreEl.textContent = "n/a";
+        barEl.style.width = "0%";
+        barEl.className = "progress-fill";
+        continue;
+      }
       const p = Math.round(val * 100);
       scoreEl.textContent = `${p}%`;
       barEl.style.width = `${p}%`;
@@ -299,6 +319,8 @@ function updateDiagnosticInspector(data) {
     if (topWordsEl) topWordsEl.textContent = (attn.top_attended_words && attn.top_attended_words.length > 0) ? attn.top_attended_words.join(", ") : "--";
 
     renderTokenHeatmap("token-heatmap-container", attn.tokens);
+  } else {
+    renderTokenHeatmap("token-heatmap-container", []);
   }
 
   // Context Sequence Breakdown
@@ -369,7 +391,10 @@ async function runDeepDive() {
       }),
     });
 
-    if (!res.ok) throw new Error("Deep-dive API error: " + res.statusText);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || res.statusText);
+    }
     const data = await res.json();
 
     const card = document.getElementById("deepdive-verdict-card");
@@ -415,6 +440,9 @@ async function loadBenchmarks() {
     // Render 4 Gates
     const cardsContainer = document.getElementById("benchmark-cards-container");
     cardsContainer.innerHTML = "";
+    if (!data.evaluated) {
+      cardsContainer.innerHTML = `<p class="benchmark-desc">${escapeHtml(data.message || "Not evaluated yet.")}</p>`;
+    }
 
     data.slices.forEach((s) => {
       const card = document.createElement("div");
@@ -422,7 +450,9 @@ async function loadBenchmarks() {
       card.innerHTML = `
         <div class="benchmark-card-header">
           <span class="benchmark-title">${s.name}</span>
-          <span class="badge-tag" style="background: rgba(16, 185, 129, 0.2); color: var(--safe-green); border-color: rgba(16, 185, 129, 0.4);">
+          <span class="badge-tag" style="${s.passed
+            ? "background: rgba(16, 185, 129, 0.2); color: var(--safe-green); border-color: rgba(16, 185, 129, 0.4);"
+            : "background: rgba(239, 68, 68, 0.2); color: var(--toxic-red); border-color: rgba(239, 68, 68, 0.4);"}">
             ${s.status}
           </span>
         </div>

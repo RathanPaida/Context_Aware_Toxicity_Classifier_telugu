@@ -1,26 +1,26 @@
 """
-Phase 6: Stateful Two-Stage Production Inference Pipeline.
+Phase 6: Stateful Two-Stage Moderation Pipeline.
 
-Implements the low-latency moderation cascade backed by thread caching:
-  1. Stage 1 Fast Filter (~3ms): Isolated target comment evaluated by fast classifier.
-     - If p < 0.15 (Clearly Safe) → Fast Exit (ALLOW)
-     - If p > 0.90 (Explicit Slur) → Fast Exit (FLAG)
-  2. Stage 2 IndicBERT-v3 Cross-Encoder (~18-25ms):
-     - For ambiguous cases (0.15 <= p <= 0.90, ~25% of traffic)
-     - Fetches preceding parent turns from thread cache (Redis or in-memory fallback)
-     - Performs context-aware cross-attention with Target-Span Pooling
-     - Decides final multi-label action: Allow or Flag with category probabilities
+  1. Lexicon gate (<1 ms): severe slurs in a message with no thread context and no
+     praise cue are flagged immediately. Mild / ambiguous terms are only reported.
+  2. Context-aware cross-encoder: everything else is scored by the trained model with
+     the preceding thread turns as context. Decision thresholds come from the
+     checkpoint's metadata (tuned on validation), not from constants in this file.
+
+Removed from the old version: the "safe fast exit" (substring match on phrases like
+"good night" let "good night, I will kill you" through), hard-coded category scores
+for lexicon hits, fake attention values for fast exits, and silent use of an
+untrained model when no checkpoint exists.
 """
 
-import os
+import json
+import re
 import sys
 import time
-import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional
 
 import torch
-import numpy as np
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -29,593 +29,323 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import (
-    CHECKPOINT_DIR,
-    PRIMARY_MODEL,
-    TOXICITY_LABELS,
-    MAX_SEQ_LENGTH,
-    TARGET_PREFIX,
-    PARENT_PREFIX,
-    SEP_TOKEN,
-    TOPIC_PREFIX,
-    get_logger,
+from src.config import LEXICON_PATH, SCENARIOS_PATH, TOXICITY_LABELS, InferenceConfig, get_logger
+from src.model import (
+    ContextAwareToxicityClassifier,
+    clean_token,
+    encode_example,
+    find_best_checkpoint,
+    load_classifier_from_checkpoint,
+    load_tokenizer,
+    to_model_inputs,
 )
 from src.preprocessing import IndicPreprocessor
-from src.model import ContextAwareToxicityClassifier, load_tokenizer, tokenize_with_target_mask
 
 logger = get_logger("inference_pipeline")
 
+SEVERE_SUBLABELS = ("severe_toxic", "threat", "identity_attack")
+
+
+class ModelNotReadyError(RuntimeError):
+    pass
+
 
 # ═══════════════════════════════════════════════════════════════════════
-# Thread Cache: Redis with In-Memory Resilient Fallback
+# Thread Cache: Redis (opt-in) with in-memory fallback
 # ═══════════════════════════════════════════════════════════════════════
 
 class ThreadContextCache:
-    """
-    Manages conversational context history for active chat rooms or posts.
-    Uses Redis when available, or an in-memory TTL dictionary as a transparent fallback.
-    """
-    
-    def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0, ttl_seconds: int = 1800):
-        self.ttl = ttl_seconds
+    def __init__(self, cfg: InferenceConfig):
+        self.ttl = cfg.cache_ttl_seconds
+        self.max_history = cfg.max_history_stored
         self.redis_client = None
-        self._in_memory_store: Dict[str, Dict[str, Any]] = {}
-        
-        try:
-            import redis
-            client = redis.Redis(host=host, port=port, db=db, socket_timeout=1.0)
-            client.ping()
-            self.redis_client = client
-            logger.info("  ✓ Connected to Redis thread cache")
-        except Exception:
-            logger.info("  Redis not reachable locally; using resilient in-memory thread cache")
-    
-    def get_history(self, thread_id: str, limit: int = 3) -> List[str]:
-        """Fetch the preceding N messages in chronological order."""
+        self._store: Dict[str, Dict[str, Any]] = {}
+        if cfg.use_redis:
+            try:
+                import redis
+                client = redis.Redis(host=cfg.redis_host, port=cfg.redis_port, socket_timeout=1.0)
+                client.ping()
+                self.redis_client = client
+                logger.info(f"  ✓ Redis thread cache at {cfg.redis_host}:{cfg.redis_port}")
+            except Exception as e:
+                logger.warning(f"  Redis unavailable ({e}); using in-memory cache")
+
+    def get_history(self, thread_id: str, limit: int) -> List[str]:
         if self.redis_client:
             try:
-                # LRANGE thread:{id}:history 0 (limit-1)
                 items = self.redis_client.lrange(f"thread:{thread_id}:history", 0, limit - 1)
-                # Decode and reverse to get oldest -> newest
                 return [i.decode("utf-8") for i in reversed(items)]
             except Exception as e:
                 logger.warning(f"Redis get failed: {e}")
-        
-        # In-memory fallback
-        self._cleanup_in_memory()
-        entry = self._in_memory_store.get(thread_id)
-        if entry:
-            return entry["messages"][-limit:]
-        return []
-    
-    def push_message(self, thread_id: str, message: str, max_history: int = 5):
-        """Append newly normalized message to history and refresh TTL."""
+        self._expire()
+        entry = self._store.get(thread_id)
+        return entry["messages"][-limit:] if entry else []
+
+    def push_message(self, thread_id: str, message: str):
         if self.redis_client:
             try:
-                pipe = self.redis_client.pipeline()
                 key = f"thread:{thread_id}:history"
+                pipe = self.redis_client.pipeline()
                 pipe.lpush(key, message)
-                pipe.ltrim(key, 0, max_history - 1)
+                pipe.ltrim(key, 0, self.max_history - 1)
                 pipe.expire(key, self.ttl)
                 pipe.execute()
                 return
             except Exception as e:
                 logger.warning(f"Redis push failed: {e}")
-        
-        # In-memory fallback
         now = time.time()
-        if thread_id not in self._in_memory_store:
-            self._in_memory_store[thread_id] = {"messages": [], "expires_at": now + self.ttl}
-        self._in_memory_store[thread_id]["messages"].append(message)
-        if len(self._in_memory_store[thread_id]["messages"]) > max_history:
-            self._in_memory_store[thread_id]["messages"] = self._in_memory_store[thread_id]["messages"][-max_history:]
-        self._in_memory_store[thread_id]["expires_at"] = now + self.ttl
-    
+        entry = self._store.setdefault(thread_id, {"messages": [], "expires_at": now + self.ttl})
+        entry["messages"] = (entry["messages"] + [message])[-self.max_history:]
+        entry["expires_at"] = now + self.ttl
+
     def clear_history(self, thread_id: str):
-        """Reset history for a given thread."""
         if self.redis_client:
             try:
                 self.redis_client.delete(f"thread:{thread_id}:history")
             except Exception:
                 pass
-        if thread_id in self._in_memory_store:
-            del self._in_memory_store[thread_id]
-    
-    def _cleanup_in_memory(self):
+        self._store.pop(thread_id, None)
+
+    def _expire(self):
         now = time.time()
-        expired = [k for k, v in self._in_memory_store.items() if v["expires_at"] < now]
-        for k in expired:
-            del self._in_memory_store[k]
+        for k in [k for k, v in self._store.items() if v["expires_at"] < now]:
+            del self._store[k]
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Stage 1 Fast Filter (Isolated Target Classifier)
+# Lexicon gate
 # ═══════════════════════════════════════════════════════════════════════
+
+_PUNCT = re.compile(r"[^\w\sఀ-౿]", re.UNICODE)  # keep Telugu block incl. vowel signs
+
 
 class FastTargetFilter:
-    """
-    Stage 1 fast gate (<3ms): evaluates the target comment in isolation.
-    Checks explicit slurs, cuss words, leetspeak, asterisks, and toxic phrases
-    across English, Hindi, Telugu, and Romanized Tanglish.
-    
-    If explicit profanity is detected -> immediate fast exit FLAG (>0.95).
-    If clearly safe conversational marker -> immediate fast exit ALLOW (<0.10).
-    Otherwise routes ambiguous traffic to Stage 2 Cross-Encoder.
-    """
-    
-    def __init__(self):
-        # Comprehensive multilingual slur lexicon
-        self.english_slurs = frozenset([
-            "fuck", "fucker", "fucking", "fucked", "fuckoff", "fuckin", "fck", "fuk",
-            "motherfucker", "motherfucking", "bitch", "bitches", "bitchy", "bastard", "bastards",
-            "shit", "shitty", "bullshit", "asshole", "assholes", "cunt", "cunts",
-            "dick", "dicks", "dickhead", "pussy", "pussies", "slut", "sluts",
-            "whore", "whores", "idiot", "morons", "moron", "retard", "retarded",
-            "stfu", "wtf", "douchebag", "jackass", "dipshit", "scumbag", "piss"
-        ])
-        
-        self.hindi_slurs = frozenset([
-            "madarchod", "madrchod", "maderchod", "bhenchod", "behenchod", "bhenk",
-            "bhosdike", "bhosadike", "bhosdi", "chutiya", "chutiye", "chutya",
-            "gandu", "gaandu", "gaand", "harami", "haramkhor", "saala", "sala",
-            "lodu", "lauda", "laude", "lavde", "lavda", "kamine", "kutta", "randi",
-            "kutiya", "lund", "loda", "jhaat", "suar", "mc", "bc"
-        ])
-        
-        self.telugu_slurs = frozenset([
-            "lanja", "lanjakodaka", "lanjakoduka", "lanjamunda", "munda",
-            "dengu", "dengey", "dengutha", "dengichuko", "dengudu",
-            "puku", "pukulo", "pooku", "erripuku", "erripuka",
-            "modda", "moddalo", "gudha", "guddha", "gudhala", "kutha",
-            "chetha", "chethana", "chethakodaka", "dheenamma", "dhinamma",
-            "lafoot", "vedhava", "bevars", "sullagada", "chavata", "bochu",
-            "lavada", "lavadalo", "panikirani", "thupuk", "kukka"
-        ])
-        
-        self.telugu_script_slurs = frozenset([
-            "లంజ", "లంజకొడక", "దెంగు", "దెంగేయ్", "పూకు", "పుకు", "ఎర్రిపూకు",
-            "ఎర్రిపుక", "మొడ్డ", "గుద్ద", "గుద", "కుత్త", "వెధవ", "లఫూట్", "బోకు", "చవట", "కుక్క"
-        ])
-        
-        self.all_slurs = self.english_slurs | self.hindi_slurs | self.telugu_slurs | self.telugu_script_slurs
-        
-        # Multi-word toxic/slur phrases
-        self.slur_phrases = [
-            "fuck you", "shut the fuck up", "kill yourself", "go to hell",
-            "erri puku", "erri puka", "chetha na kodaka", "chetha kodaka",
-            "na kodaka", "nee yamma", "nee ayya", "pichi puku", "pichi na kodaka",
-            "munda mopi", "kosi karam", "champi street lo", "nariki padestha",
-            "మడతబెట్టి కొడతా", "ఖూనీ చేస్తా", "అంతు చూస్తా", "నీ యమ్మ", "నా కొడక"
-        ]
-        
-        # Obvious safe conversational greetings and praise tokens
-        self.safe_tokens = frozenset([
-            "hi", "hello", "hey", "good", "morning", "afternoon", "evening", "night",
-            "namaste", "namaskaram", "bagundi", "bavundi", "keka", "super", "supar",
-            "adhurs", "thopu", "thanks", "tq", "nice", "congrats", "welcome",
-            "dhanyavadalu", "chala", "manchi", "great", "awesome", "peace", "love",
-            "calm", "happy", "party", "friend", "bro", "macha", "fine", "ok", "okay"
-        ])
-        
-        # Common multi-word safe phrases
-        self.safe_phrases = [
-            "super ga undi", "chala bagundi", "chala bavundi", "keka bro", "nuvvu thopu",
-            "ela unnavu", "enti visheshalu", "good morning", "good evening", "good night",
-            "thank you", "thanks bro", "all the best", "happy birthday", "shantinchandi bro",
-            "calm ga undandi", "peaceful ga undam", "vadileyandi andi", "well done", "keep it up",
-            "బాగుంది", "బావుంది", "నమస్కారం", "శాంతించండి", "చాలా బాగుంది"
-        ]
-        
-        # Positive gaming/appreciation cues that mitigate expletives
-        self.praise_cues = [
-            "insane clutch", "clutch", "god tier", "praise", "clutch chusava",
-            "solo squad", "boss level", "amazing", "awesome", "keka", "crazy acting", "goosebumps"
-        ]
+    """Lexicon lookup driven by src/resources/lexicons.json."""
 
-    def predict_fast(self, text: str) -> Tuple[float, str]:
-        """
-        Returns (toxicity_probability, routing_decision).
-        routing_decision: 'SAFE_FAST_EXIT', 'SLUR_FAST_EXIT', or 'AMBIGUOUS_ROUTE_STAGE2'
-        """
-        raw_lower = text.lower().strip()
-        
-        # Check for mitigating praise cues (e.g. "fucking insane clutch", "crazy acting ra vedhava")
-        has_praise_cue = any(cue in raw_lower for cue in self.praise_cues)
-        
-        # 1. Check multi-word slur phrases
-        for phrase in self.slur_phrases:
-            if phrase in raw_lower:
-                if has_praise_cue:
-                    return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
-                return 0.98, "SLUR_FAST_EXIT"
-        
-        # 2. Leet / symbol de-obfuscation
-        leet_clean = raw_lower
-        for k, v in {"@": "a", "0": "o", "1": "i", "$": "s", "3": "e", "!": "i", "*": "u", "+": "t"}.items():
-            leet_clean = leet_clean.replace(k, v)
-            
-        for phrase in self.slur_phrases:
-            if phrase in leet_clean:
-                if has_praise_cue:
-                    return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
-                return 0.98, "SLUR_FAST_EXIT"
-        
-        # 3. Strip all punctuation for token matching (handles 'fuck!', 'lanja!', 'bitch.')
-        clean_tokens = re.sub(r"[^\w\s]", " ", leet_clean).split()
-        for t in clean_tokens:
-            if t in self.all_slurs:
-                if has_praise_cue:
-                    return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
-                return 0.97, "SLUR_FAST_EXIT"
-                
-        # 4. Regex for masked words like f*ck, b*tch, p*ku, l*nja
-        if (re.search(r"\bf[\*\._-]*(?:u|a|o)?[\*\._-]*c[\*\._-]*k\b", raw_lower) or
-            re.search(r"\bb[\*\._-]*i[\*\._-]*t[\*\._-]*c[\*\._-]*h\b", raw_lower) or
-            re.search(r"\bp[\*\._-]*[u|o]+[\*\._-]*k[\*\._-]*u\b", raw_lower) or
-            re.search(r"\bl[\*\._-]*a[\*\._-]*n[\*\._-]*j[\*\._-]*a\b", raw_lower)):
-            if has_praise_cue:
-                return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
-            return 0.97, "SLUR_FAST_EXIT"
-        
-        # 5. Check for clearly safe multi-word phrases
-        for p in self.safe_phrases:
-            if p in raw_lower:
-                return 0.04, "SAFE_FAST_EXIT"
-        
-        # 6. Check for clearly safe everyday conversational markers
-        raw_tokens = re.sub(r"[^\w\s]", " ", raw_lower).split()
-        if len(raw_tokens) <= 4 and any(w in self.safe_tokens for w in raw_tokens):
-            return 0.04, "SAFE_FAST_EXIT"
-        
-        # Middle band (ambiguous banter, sarcasm, threats, context-dependent phrasing)
-        return 0.45, "AMBIGUOUS_ROUTE_STAGE2"
+    def __init__(self, lexicon_path: Path = LEXICON_PATH):
+        lex = json.loads(Path(lexicon_path).read_text(encoding="utf-8"))
+        self.severe = {w.lower() for words in lex["severe"].values() for w in words}
+        self.mild = {w.lower() for words in lex["mild"].values() for w in words}
+        self.severe_phrases = [p.lower() for p in lex.get("severe_phrases", [])]
+        self.mild_phrases = [p.lower() for p in lex.get("mild_phrases", [])]
+        self.praise_cues = [p.lower() for p in lex.get("praise_cues", [])]
+        self.masked = [re.compile(p) for p in lex.get("masked_patterns", [])]
+
+    @staticmethod
+    def _normalize(text: str) -> str:
+        return " ".join(_PUNCT.sub(" ", text.lower()).split())
+
+    def analyze(self, text: str) -> Dict[str, Any]:
+        raw = text.lower()
+        norm = self._normalize(text)
+        padded = f" {norm} "
+        tokens = set(norm.split())
+        severe = sorted(tokens & self.severe) + [p for p in self.severe_phrases if f" {p} " in padded]
+        severe += [m.group(0) for rx in self.masked for m in [rx.search(raw)] if m]
+        mild = sorted(tokens & self.mild) + [p for p in self.mild_phrases if f" {p} " in padded]
+        praise = [c for c in self.praise_cues if c in norm]
+        return {"severe": sorted(set(severe)), "mild": sorted(set(mild)), "praise_cues": praise}
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Two-Stage Stateful Moderation Pipeline
+# Pipeline
 # ═══════════════════════════════════════════════════════════════════════
 
 class TwoStageModerationPipeline:
-    """
-    Full Phase 6 Stateful Production Moderation Engine.
-    Combines FastTargetFilter + ThreadContextCache + IndicBERT-v3 Cross-Encoder.
-    """
-    
-    def __init__(
-        self,
-        checkpoint_dir: Optional[str] = None,
-        model_name: str = PRIMARY_MODEL,
-        device: Optional[str] = None,
-    ):
-        self.device = torch.device(device if device else ("cuda" if torch.cuda.is_available() else "cpu"))
-        logger.info(f"Initializing Production Moderation Pipeline on {self.device}...")
-        
-        # Preprocessor
+
+    def __init__(self, checkpoint_dir: Optional[str] = None, device: Optional[str] = None,
+                 config: Optional[InferenceConfig] = None):
+        self.cfg = config or InferenceConfig()
+        self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         self.preprocessor = IndicPreprocessor(enable_transliteration=False, enable_normalization=True)
-        
-        # Stage 1 Fast Filter
         self.fast_filter = FastTargetFilter()
-        
-        # Thread Cache
-        self.cache = ThreadContextCache()
-        
-        # Stage 2 IndicBERT Cross-Encoder
-        self.tokenizer = load_tokenizer(model_name)
-        self.model = ContextAwareToxicityClassifier(
-            model_name=model_name,
-            num_labels=len(TOXICITY_LABELS),
-            use_target_span_pooling=True,
-        )
-        
-        # Load weights if available
-        ckpt = checkpoint_dir
-        if not ckpt:
-            for candidate in ["stage4_best", "stage3_best", "stage1_best"]:
-                p = CHECKPOINT_DIR / candidate / "model.pt"
-                if p.exists():
-                    ckpt = str(CHECKPOINT_DIR / candidate)
-                    break
-        
-        if ckpt and (Path(ckpt) / "model.pt").exists():
-            logger.info(f"  Loading Cross-Encoder weights from {ckpt}")
-            state = torch.load(Path(ckpt) / "model.pt", map_location="cpu")
-            self.model.load_state_dict(state, strict=False)
-            logger.info("  ✓ Weights loaded")
-        
-        self.model.to(self.device)
-        self.model.eval()
-        logger.info("✓ Two-Stage Moderation Pipeline ready.")
-    
-    def moderate(
-        self,
-        text: str,
-        thread_id: Optional[str] = None,
-        topic: Optional[str] = None,
-        update_history: bool = False,
-    ) -> Dict[str, Any]:
-        """
-        Process incoming live comment with context-awareness and fast exit routing.
-        
-        Args:
-            text: Raw user comment
-            thread_id: Chatroom or post ID for thread tracking (None or 'default_thread' for standalone)
-            topic: Optional category/topic if available
-            update_history: Whether to append this comment to the thread cache (default: False for determinism)
-        
-        Returns:
-            Dict containing classification decision, probabilities, latency, and routing info.
-        """
-        t0 = time.time()
-        
-        # Step 1: Preprocessing & De-obfuscation
-        cleaned_text = self.preprocessor.clean_text(text)
-        
-        # Step 2: Thread Context Fetch
-        # Only use persistent thread history if explicitly provided and not default
-        is_standalone = (thread_id is None or thread_id == "default_thread")
-        if is_standalone:
-            history = []
-            parent_context = ""
+        self.cache = ThreadContextCache(self.cfg)
+
+        self.model: Optional[ContextAwareToxicityClassifier] = None
+        self.tokenizer = None
+        self.metadata: Dict[str, Any] = {}
+        self.checkpoint: Optional[Path] = Path(checkpoint_dir) if checkpoint_dir else find_best_checkpoint()
+
+        if self.checkpoint and (self.checkpoint / "model.pt").exists():
+            self.model, self.tokenizer, self.metadata = load_classifier_from_checkpoint(self.checkpoint, self.device)
+            self.status = f"loaded {self.checkpoint.name}"
+        elif self.cfg.require_checkpoint:
+            self.status = ("no trained checkpoint found in models/checkpoints/ — train first "
+                           "(python run_pipeline.py --all) or set ALLOW_UNTRAINED=1 for UI testing")
+            logger.error(self.status)
         else:
-            history = self.cache.get_history(thread_id, limit=3)
-            parent_context = " [SEP] ".join(history) if history else ""
-        
-        # Step 3: Fast Gate Filter
-        fast_prob, fast_decision = self.fast_filter.predict_fast(cleaned_text)
-        has_slur_lexicon = (fast_decision == "SLUR_FAST_EXIT")
-        has_safe_token = (fast_decision == "SAFE_FAST_EXIT")
-        
-        # Fast exit: clearly safe greeting/praise (inherently non-toxic)
-        if fast_decision == "SAFE_FAST_EXIT":
-            if update_history and not is_standalone and thread_id:
-                if not history or history[-1] != cleaned_text:
-                    self.cache.push_message(thread_id, cleaned_text)
-            latency_ms = (time.time() - t0) * 1000
-            words = cleaned_text.split()
-            attn_val = round(1.0 / max(1, len(words)), 4)
-            return {
-                "action": "ALLOW",
-                "toxicity_score": 0.04,
-                "is_toxic": False,
-                "stage_routed": "Stage 1 Fast Filter (Isolated Target Classifier)",
-                "latency_ms": round(latency_ms, 2),
-                "categories": {lbl: 0.01 for lbl in TOXICITY_LABELS},
-                "context_used": parent_context if parent_context else "(None - First Turn)",
-                "explanation": "Clearly safe conversational marker / friendly greeting confirmed by Fast Filter.",
-                "attention_analysis": {
-                    "num_heads": 8,
-                    "context_influence_pct": 0.0,
-                    "top_attended_words": words[:4],
-                    "is_cuss_word_overridden": False,
-                    "tokens": [{"token": w, "attention": attn_val, "is_target": True} for w in words[:8]],
-                },
-            }
-        
-        # Fast exit: explicit slur with no mitigating context
-        if fast_decision == "SLUR_FAST_EXIT" and not parent_context:
-            if update_history and not is_standalone and thread_id:
-                if not history or history[-1] != cleaned_text:
-                    self.cache.push_message(thread_id, cleaned_text)
-            latency_ms = (time.time() - t0) * 1000
-            words = cleaned_text.split()
-            attn_val = round(1.0 / max(1, len(words)), 4)
-            return {
-                "action": "FLAG",
-                "toxicity_score": 0.98,
-                "is_toxic": True,
-                "stage_routed": "Stage 1 Fast Filter (Slur Lexicon Gate)",
-                "latency_ms": round(latency_ms, 2),
-                "categories": {"toxic": 0.98, "severe_toxic": 0.85, "identity_attack": 0.50, "insult": 0.95, "threat": 0.40},
-                "context_used": "(None - First Turn)",
-                "explanation": "Explicit slur / abusive phrase detected by Stage 1 Lexicon Gate.",
-                "attention_analysis": {
-                    "num_heads": 8,
-                    "context_influence_pct": 0.0,
-                    "top_attended_words": words[:4],
-                    "is_cuss_word_overridden": False,
-                    "tokens": [{"token": w, "attention": attn_val, "is_target": True} for w in words[:8]],
-                },
-            }
-        
-        # Assemble canonical context window:
-        # [CLS] Topic: {topic} [SEP] Parent: {context} [SEP] Target: {target} [SEP]
-        has_custom_topic = bool(topic and topic.strip() and topic.strip().lower() not in ["general", "none", "default"])
-        
-        if parent_context:
-            if has_custom_topic:
-                assembled = f"{TOPIC_PREFIX} {topic.strip()} {SEP_TOKEN} {PARENT_PREFIX} {parent_context} {SEP_TOKEN} {TARGET_PREFIX} {cleaned_text}"
-            else:
-                assembled = f"{PARENT_PREFIX} {parent_context} {SEP_TOKEN} {TARGET_PREFIX} {cleaned_text}"
-        else:
-            if has_custom_topic:
-                assembled = f"{TOPIC_PREFIX} {topic.strip()} {SEP_TOKEN} {TARGET_PREFIX} {cleaned_text}"
-            else:
-                assembled = f"{TARGET_PREFIX} {cleaned_text}"
-        
-        # Step 4: Multi-Head Attention Transformer Forward Pass
-        encoding = tokenize_with_target_mask(assembled, self.tokenizer, max_length=MAX_SEQ_LENGTH)
-        inputs = {k: v.unsqueeze(0).to(self.device) for k, v in encoding.items()}
-        
-        with torch.no_grad():
-            outputs = self.model(**inputs, return_attention=True)
-            probs = outputs["probs"][0].cpu().numpy()
-        
-        # Multi-label category scores
-        category_scores = {lbl: round(float(probs[i]), 4) for i, lbl in enumerate(TOXICITY_LABELS)}
-        primary_score = float(probs[0])
-        max_specialized = max(float(probs[i]) for i in range(1, len(TOXICITY_LABELS))) if len(TOXICITY_LABELS) > 1 else 0.0
-        
-        # Calibrated multi-label decision:
-        # 1. Primary toxicity flag at standard threshold (0.50)
-        # 2. Strong specialized threat/severe attack flag (primary >= 0.35 and specialized >= 0.65)
-        is_toxic = (primary_score >= 0.50) or (primary_score >= 0.35 and max_specialized >= 0.65)
-        effective_score = max(primary_score, max_specialized) if is_toxic else primary_score
-        
-        # Step 5: Extract Token-Level Attention Weights and Explanations
-        token_attn_raw = outputs.get("token_attention")
-        tokens_with_attn = []
-        top_attended_words = []
-        context_influence_pct = 0.0
-        
-        if token_attn_raw is not None:
-            token_weights = token_attn_raw[0].cpu().numpy()
-            input_ids_list = encoding["input_ids"].tolist()
-            token_strings = self.tokenizer.convert_ids_to_tokens(input_ids_list)
-            attn_mask_list = encoding["attention_mask"].tolist()
-            target_mask_list = encoding["target_mask"].tolist()
-            
-            # Filter non-padding tokens
-            valid_tokens = []
-            context_attn_sum = 0.0
-            target_attn_sum = 0.0
-            
-            for i, (tok, w, m, t_m) in enumerate(zip(token_strings, token_weights, attn_mask_list, target_mask_list)):
-                if m == 1:
-                    clean_tok = tok.replace(" ", "").replace("##", "")
-                    if clean_tok and clean_tok not in ["[PAD]", "[CLS]", "[SEP]"]:
-                        weight_val = round(float(w), 4)
-                        is_target = bool(t_m == 1)
-                        valid_tokens.append({
-                            "token": clean_tok,
-                            "attention": weight_val,
-                            "is_target": is_target,
-                        })
-                        if is_target:
-                            target_attn_sum += weight_val
-                        else:
-                            context_attn_sum += weight_val
-            
-            total_valid_attn = context_attn_sum + target_attn_sum
-            if total_valid_attn > 0:
-                context_influence_pct = round((context_attn_sum / total_valid_attn) * 100, 1)
-            
-            tokens_with_attn = valid_tokens
-            sorted_tokens = sorted(valid_tokens, key=lambda x: x["attention"], reverse=True)
-            top_attended_words = [t["token"] for t in sorted_tokens[:5]]
-        
-        # Contextual Overrides & Intent Diagnostics
-        is_cuss_word_overridden = False
-        if has_slur_lexicon and not is_toxic:
-            is_cuss_word_overridden = True
-            explanation = "Colloquial slang/cuss word detected, but Multi-Head Attention captured benign praise/banter across the whole text."
-        elif not has_slur_lexicon and is_toxic:
-            explanation = "No explicit cuss words detected; Multi-Head Attention captured toxicity from whole-text context and sentence semantics."
-        elif is_toxic:
-            explanation = f"Evaluated with Multi-Head Attention (8 Heads); toxic intent confirmed across whole context."
-        else:
-            explanation = f"Evaluated with Multi-Head Attention (8 Heads); safe context confirmed across whole text."
-        
-        # Update thread cache
-        if update_history and not is_standalone and thread_id:
-            if not history or history[-1] != cleaned_text:
-                self.cache.push_message(thread_id, cleaned_text)
-        latency_ms = (time.time() - t0) * 1000
-        
+            logger.warning("ALLOW_UNTRAINED=1: serving an UNTRAINED model — predictions are meaningless")
+            self.model = ContextAwareToxicityClassifier().to(self.device).eval()
+            self.tokenizer = load_tokenizer(self.model.model_name)
+            self.status = "untrained (ALLOW_UNTRAINED=1)"
+
+        self.thresholds = {l: float(self.metadata.get("thresholds", {}).get(l, self.cfg.toxic_threshold))
+                           for l in TOXICITY_LABELS}
+        self.max_len = int(self.metadata.get("max_seq_length", self.cfg.max_seq_length))
+        logger.info(f"Pipeline ready on {self.device}: {self.status} | thresholds={self.thresholds}")
+
+    @property
+    def ready(self) -> bool:
+        return self.model is not None
+
+    def info(self) -> Dict[str, Any]:
         return {
-            "action": "FLAG" if is_toxic else "ALLOW",
-            "toxicity_score": round(effective_score, 4),
-            "is_toxic": is_toxic,
-            "stage_routed": "Multi-Head Attention Transformer (8 Heads)",
-            "latency_ms": round(latency_ms, 2),
-            "categories": category_scores,
-            "context_used": parent_context if parent_context else "(None - First Turn)",
-            "explanation": explanation,
-            "attention_analysis": {
-                "num_heads": 8,
-                "context_influence_pct": context_influence_pct,
-                "top_attended_words": top_attended_words,
-                "is_cuss_word_overridden": is_cuss_word_overridden,
-                "tokens": tokens_with_attn,
-            },
+            "ready": self.ready,
+            "status": self.status,
+            "checkpoint": str(self.checkpoint) if self.checkpoint else None,
+            "model_name": getattr(self.model, "model_name", None),
+            "num_heads": getattr(self.model, "num_heads", None),
+            "device": str(self.device),
+            "thresholds": self.thresholds,
+            "trained_at": self.metadata.get("timestamp"),
+            "stage": self.metadata.get("stage"),
         }
-    
+
+    # ── main entry point ──────────────────────────────────────────────
+    def moderate(self, text: str, thread_id: Optional[str] = None, topic: Optional[str] = None,
+                 update_history: bool = False, history_override: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Classify `text` given the thread's preceding turns.
+        `history_override` supplies explicit context (oldest → newest) without touching the cache.
+        """
+        t0 = time.perf_counter()
+        cleaned = self.preprocessor.clean_text(text)
+
+        standalone = thread_id in (None, "", "default_thread")
+        if history_override is not None:
+            history = [self.preprocessor.clean_text(h) for h in history_override if h and h.strip()]
+        elif standalone:
+            history = []
+        else:
+            history = self.cache.get_history(thread_id, self.cfg.history_turns)
+        history = history[-self.cfg.history_turns:]
+        topic = topic.strip() if topic and topic.strip().lower() not in {"general", "none", "default"} else None
+
+        lex = self.fast_filter.analyze(cleaned)
+        context_used = " ⏎ ".join(history) if history else "(none — first turn)"
+
+        def finish(result: Dict[str, Any]) -> Dict[str, Any]:
+            if update_history and not standalone and history_override is None:
+                if not history or history[-1] != cleaned:
+                    self.cache.push_message(thread_id, cleaned)
+            result["latency_ms"] = round((time.perf_counter() - t0) * 1000, 2)
+            result["lexicon"] = lex
+            result["context_used"] = context_used
+            result["thresholds"] = self.thresholds
+            return result
+
+        # ── Stage 1: lexicon fast exit ──
+        if self.cfg.lexicon_fast_exit and lex["severe"] and not history and not lex["praise_cues"]:
+            score = self.cfg.lexicon_flag_score
+            return finish({
+                "action": "FLAG",
+                "is_toxic": True,
+                "toxicity_score": score,
+                "stage_routed": "Stage 1 Lexicon Gate",
+                "categories": {l: (score if l == "toxic" else None) for l in TOXICITY_LABELS},
+                "explanation": f"Severe term(s) {lex['severe']} with no mitigating context; model not consulted.",
+                "attention_analysis": None,
+            })
+
+        if not self.ready:
+            raise ModelNotReadyError(self.status)
+
+        # ── Stage 2: model ──
+        enc = encode_example(self.tokenizer, cleaned, history=history, topic=topic, max_length=self.max_len)
+        with torch.no_grad():
+            out = self.model(**to_model_inputs(enc, self.device), return_attention=True)
+        probs = out["probs"][0].float().cpu().numpy()
+        cats = {l: round(float(probs[i]), 4) for i, l in enumerate(TOXICITY_LABELS)}
+
+        reasons = []
+        if cats["toxic"] >= self.thresholds["toxic"]:
+            reasons.append(f"toxic {cats['toxic']:.2f} ≥ {self.thresholds['toxic']:.2f}")
+        for l in SEVERE_SUBLABELS:
+            th = max(self.thresholds[l], self.cfg.subtype_flag_threshold)
+            if cats[l] >= th:
+                reasons.append(f"{l} {cats[l]:.2f} ≥ {th:.2f}")
+        is_toxic = bool(reasons)
+        score = max([cats["toxic"]] + ([cats[l] for l in SEVERE_SUBLABELS] if is_toxic else []))
+
+        if is_toxic:
+            explanation = "Flagged by model: " + "; ".join(reasons) + "."
+        else:
+            explanation = f"Model score toxic={cats['toxic']:.2f} below threshold {self.thresholds['toxic']:.2f}."
+        if lex["severe"] and not is_toxic:
+            explanation += f" Lexicon terms {lex['severe']} were present but the model judged them benign in context."
+        elif lex["mild"]:
+            explanation += f" Mild/ambiguous terms noted: {lex['mild']}."
+
+        return finish({
+            "action": "FLAG" if is_toxic else "ALLOW",
+            "is_toxic": is_toxic,
+            "toxicity_score": round(score, 4),
+            "stage_routed": f"Stage 2 Cross-Encoder ({self.model.num_heads}-head attention)",
+            "categories": cats,
+            "explanation": explanation,
+            "attention_analysis": self._attention(enc, out),
+        })
+
+    def _attention(self, enc: Dict[str, List[int]], out: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        weights = out.get("token_attention")
+        if weights is None:
+            return None
+        w = weights[0].float().cpu().numpy()
+        special = set(self.tokenizer.all_special_ids)
+        toks = self.tokenizer.convert_ids_to_tokens(enc["input_ids"])
+        items, ctx_sum, tgt_sum = [], 0.0, 0.0
+        for tid, tok, weight, is_t in zip(enc["input_ids"], toks, w, enc["target_mask"]):
+            if tid in special:
+                continue
+            display = clean_token(tok)
+            if not display:
+                continue
+            items.append({"token": display, "attention": round(float(weight), 4), "is_target": bool(is_t)})
+            if is_t:
+                tgt_sum += float(weight)
+            else:
+                ctx_sum += float(weight)
+        total = ctx_sum + tgt_sum
+        top = sorted(items, key=lambda x: x["attention"], reverse=True)[:5]
+        return {
+            "num_heads": self.model.num_heads,
+            # Share of the whole-text pooling attention that falls on context tokens.
+            # A rough saliency proxy, not a causal measure of context influence.
+            "context_influence_pct": round(100 * ctx_sum / total, 1) if total > 0 else 0.0,
+            "top_attended_words": [t["token"] for t in top],
+            "tokens": items,
+        }
+
     def clear_thread(self, thread_id: str):
-        """Reset conversation context history for the specified thread."""
         self.cache.clear_history(thread_id)
-        logger.info(f"Thread context cleared: {thread_id}")
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Demo Runner
+# Demo: run the scenarios from src/resources/scenarios.json
 # ═══════════════════════════════════════════════════════════════════════
 
 def run_inference_demo():
-    """Demonstrate the two-stage pipeline on live test conversations."""
     pipeline = TwoStageModerationPipeline()
-    print("=" * 75)
-    print("PHASE 6: TWO-STAGE PRODUCTION INFERENCE PIPELINE DEMO")
-    print("=" * 75)
-    
-    test_conversations = [
-        # Conversation 1: Gaming Thread (Non-Toxic Contrastive Case)
-        {
-            "thread_id": "thread_gaming_101",
-            "topic": "Gaming",
-            "turns": [
-                "Ninna match lo 1v4 clutch chusava bro?",
-                "Boss level clear chesa! Solo squad clutch!",
-                "Champesav po!",  # Target comment: Friendly praise in gaming context
-            ]
-        },
-        # Conversation 2: Political Thread (Toxic Contrastive Case)
-        {
-            "thread_id": "thread_politics_202",
-            "topic": "Politics",
-            "turns": [
-                "Aaa journalist bayataki vasthe kottali andaru",
-                "Vaadini thagalettali",
-                "Champesav po!",  # Target comment: Encouraging violence in political context
-            ]
-        },
-        # Conversation 3: Slang / Expletive in Praise (Overridden by MHA Context)
-        {
-            "thread_id": "thread_praise_303",
-            "topic": "Gaming",
-            "turns": [
-                "Bro that was fucking insane clutch! You are god tier!",
-            ]
-        },
-        # Conversation 4: Zero-Cuss Violent Threat (Captured by Whole-Text MHA)
-        {
-            "thread_id": "thread_threat_404",
-            "topic": "Threat",
-            "turns": [
-                "Mee illu thagaletti mee bathuku nasanam cheyandi",
-            ]
-        },
-        # Conversation 5: Parent Bleed Robustness
-        {
-            "thread_id": "thread_bleed_505",
-            "topic": "Flame War",
-            "turns": [
-                "Chetha na kodaka, ninnu champi street lo padestha!",
-                "Shantinchandi bro, vadileyandi andi.",  # De-escalating polite reply
-            ]
-        }
-    ]
-    
-    for conv in test_conversations:
-        tid = conv["thread_id"]
-        topic = conv["topic"]
-        print(f"\n--- Thread: {tid} (Topic: {topic}) ---")
-        for i, turn in enumerate(conv["turns"]):
-            res = pipeline.moderate(turn, thread_id=tid, topic=topic, update_history=True)
-            flag_str = "[FLAGGED]" if res["is_toxic"] else "[ALLOWED]"
-            print(f"  Turn {i+1}: \"{turn}\"")
-            print(f"    -> {flag_str} | Score: {res['toxicity_score']} | Stage: {res['stage_routed']} | Latency: {res['latency_ms']}ms")
-            print(f"      Explanation: {res['explanation']}")
-            attn = res.get("attention_analysis", {})
-            if attn.get("top_attended_words"):
-                print(f"      MHA (8 Heads): Context Influence={attn.get('context_influence_pct', 0)}% | Top Attended Tokens: {attn.get('top_attended_words')}")
-            if res.get("context_used") and res["context_used"] != "(None - First Turn)":
-                print(f"      Preceding Context: \"{res['context_used']}\"")
-    
-    print("\n" + "=" * 75)
-    print("DEMO COMPLETE")
-    print("=" * 75)
+    if not pipeline.ready:
+        print(f"Cannot run demo: {pipeline.status}")
+        return
+    scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
+    passed = 0
+    for sc in scenarios:
+        pipeline.clear_thread(sc["thread_id"])
+        print(f"\n--- {sc['title']} (topic: {sc['topic']}) ---")
+        res = None
+        for turn in sc["turns"]:
+            res = pipeline.moderate(turn["text"], thread_id=sc["thread_id"], topic=sc["topic"], update_history=True)
+            print(f"  {turn['speaker']}: {turn['text']}")
+            print(f"    → {res['action']} score={res['toxicity_score']} [{res['stage_routed']}] {res['latency_ms']}ms")
+        got = "FLAGGED" if res["is_toxic"] else "ALLOWED"
+        ok = got == sc["expected"]
+        passed += ok
+        print(f"  expected {sc['expected']}, got {got} → {'OK' if ok else 'MISMATCH'}")
+    print(f"\n{passed}/{len(scenarios)} demo scenarios match expectations")
 
 
 if __name__ == "__main__":

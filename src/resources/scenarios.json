@@ -1,0 +1,118 @@
+[
+  {
+    "id": "scenario_gaming_slang_praise",
+    "title": "🔥 Slang & Expletive in Praise (Safe)",
+    "topic": "BGMI Esports",
+    "thread_id": "demo_slang_praise",
+    "turns": [
+      {
+        "speaker": "Gamer 1",
+        "text": "1v4 solo squad situation lo zone lo nunchi kotti gelipinchav!"
+      },
+      {
+        "speaker": "Gamer 2",
+        "text": "Bro that was fucking insane clutch! Champesav po!"
+      }
+    ],
+    "expected": "ALLOWED",
+    "explanation": "Even though expletive 'fucking' and slang 'champesav' are present, Multi-Head Attention captures whole-text conversational context as high-energy praise."
+  },
+  {
+    "id": "scenario_zero_cuss_threat",
+    "title": "⚠️ Violent Threat (Zero Cuss Words)",
+    "topic": "Gang Threat",
+    "thread_id": "demo_zero_cuss",
+    "turns": [
+      {
+        "speaker": "Target",
+        "text": "Maa meedha complaint chesina gang repu ground loki vasthundhi"
+      },
+      {
+        "speaker": "Aggressor",
+        "text": "Repu mee batch lo okkadu kooda hospital lekunda undadu, chusukondi"
+      }
+    ],
+    "expected": "FLAGGED",
+    "explanation": "Contains zero explicit cuss words or profanity, yet Multi-Head Attention identifies serious threat of bodily harm from sentence semantics."
+  },
+  {
+    "id": "scenario_gaming_safe",
+    "title": "🎮 Gaming Banter (Twin A - Safe)",
+    "topic": "Gaming & Esports",
+    "thread_id": "demo_gaming",
+    "turns": [
+      {
+        "speaker": "Player 1",
+        "text": "Ninna match lo 1v4 clutch chusava bro?"
+      },
+      {
+        "speaker": "Player 2",
+        "text": "Boss level clear chesa! Solo squad clutch!"
+      },
+      {
+        "speaker": "Player 1",
+        "text": "Champesav po!"
+      }
+    ],
+    "expected": "ALLOWED",
+    "explanation": "'Champesav po!' in gaming context means 'You killed it / amazing job!'. Multi-Head Attention cross-attention recognizes benign banter."
+  },
+  {
+    "id": "scenario_politics_toxic",
+    "title": "🏛️ Political Riot (Twin B - Toxic Threat)",
+    "topic": "Regional Politics",
+    "thread_id": "demo_politics",
+    "turns": [
+      {
+        "speaker": "User A",
+        "text": "Aaa journalist bayataki vasthe kottali andaru"
+      },
+      {
+        "speaker": "User B",
+        "text": "Vaadini thagalettali repu"
+      },
+      {
+        "speaker": "User C",
+        "text": "Champesav po!"
+      }
+    ],
+    "expected": "FLAGGED",
+    "explanation": "Identical target text 'Champesav po!' under violent incitement context means 'Kill them off!'. Multi-Head Attention captures malicious polarity flip."
+  },
+  {
+    "id": "scenario_parent_bleed",
+    "title": "🕊️ De-escalation (Parent-Bleed Robustness)",
+    "topic": "Toxic Flame War",
+    "thread_id": "demo_bleed",
+    "turns": [
+      {
+        "speaker": "Troll",
+        "text": "Chetha na kodaka, ninnu champi street lo padestha!"
+      },
+      {
+        "speaker": "Peacekeeper",
+        "text": "Shantinchandi bro, vadileyandi andi."
+      }
+    ],
+    "expected": "ALLOWED",
+    "explanation": "Even though parent comment is an explicit death threat, the polite reply is protected from parent toxicity bleed via target-span cross-attention."
+  },
+  {
+    "id": "scenario_telugu_native",
+    "title": "🌸 Native Telugu Script (Cinema Praise)",
+    "topic": "తెలుగు సినిమా",
+    "thread_id": "demo_native",
+    "turns": [
+      {
+        "speaker": "సినిమా లవర్",
+        "text": "ఆ పాటలో డ్యాన్స్ మరియు యాక్టింగ్ అద్భుతంగా ఉన్నాయి!"
+      },
+      {
+        "speaker": "ఫ్యాన్",
+        "text": "చంపేసావ్ పో!"
+      }
+    ],
+    "expected": "ALLOWED",
+    "explanation": "Evaluated in native Telugu script Unicode with Multi-Head Attention IndicNLP normalization."
+  }
+]

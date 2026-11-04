@@ -8,6 +8,7 @@ subword embeddings to colloquial Telugu syntax and transliterated output.
 Key Points:
   - Classification head is NOT trained here (unsupervised)
   - All encoder layers are fine-tuned with MLM objective
+  - The adapted encoder is saved to <ckpt>/encoder (HF format) and picked up by Stage 3
   - Teaches the model Telugu-specific vocabulary and syntax
   - 250K Telugu sentences sampled from IndicCorp
 """
@@ -22,7 +23,6 @@ from typing import Dict, Optional
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from torch.cuda.amp import autocast, GradScaler
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -197,17 +197,20 @@ def train_stage2(
             logger.info(f"  Loading Stage 1 encoder weights from {stage1_path}")
             state_dict = torch.load(stage1_path, map_location="cpu")
             
-            # Extract only encoder weights (skip classification head)
-            encoder_state = {
-                k.replace("encoder.", ""): v 
-                for k, v in state_dict.items() 
-                if k.startswith("encoder.")
-            }
-            
-            mlm_model.base_model.load_state_dict(encoder_state, strict=False)
-            logger.info("  ✓ Stage 1 encoder weights loaded")
+            # Extract only encoder weights (skip classification heads).
+            # BUGFIX: the old code used k.replace("encoder.", ""), which also stripped the
+            # inner "encoder." of "encoder.encoder.layer.N…" so every transformer layer
+            # failed to match and strict=False silently discarded all Stage 1 weights.
+            prefix = "encoder."
+            encoder_state = {k[len(prefix):]: v for k, v in state_dict.items() if k.startswith(prefix)}
+            result = mlm_model.base_model.load_state_dict(encoder_state, strict=False)
+            missing = [k for k in result.missing_keys if "pooler" not in k]
+            if missing:
+                raise RuntimeError(f"Stage 1 → MLM weight transfer failed; missing {len(missing)} keys e.g. {missing[:3]}")
+            logger.info(f"  ✓ Stage 1 encoder weights loaded ({len(encoder_state)} tensors)")
     
     mlm_model.to(device)
+    use_amp = config.fp16 and device.type == "cuda"
     
     # Initialize preprocessor for Telugu normalization
     preprocessor = IndicPreprocessor(
@@ -240,8 +243,8 @@ def train_stage2(
         batch_size=config.batch_size,
         shuffle=True,
         collate_fn=data_collator,
-        num_workers=2,
-        pin_memory=True,
+        num_workers=config.num_workers,
+        pin_memory=torch.cuda.is_available(),
         drop_last=True,
     )
     
@@ -250,8 +253,8 @@ def train_stage2(
         batch_size=config.batch_size * 2,
         shuffle=False,
         collate_fn=data_collator,
-        num_workers=2,
-        pin_memory=True,
+        num_workers=config.num_workers,
+        pin_memory=torch.cuda.is_available(),
     )
     
     # ─── Optimizer & Scheduler ───
@@ -267,7 +270,7 @@ def train_stage2(
         num_training_steps=config.max_steps,
     )
     
-    scaler = GradScaler() if config.fp16 else None
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     
     logger.info(f"  Train samples: {len(train_dataset):,}")
     logger.info(f"  Eval samples:  {len(eval_dataset):,}")
@@ -304,33 +307,15 @@ def train_stage2(
         attention_mask = batch["attention_mask"].to(device)
         labels = batch["labels"].to(device)
         
-        # Forward pass
         optimizer.zero_grad()
-        
-        if config.fp16 and scaler is not None:
-            with autocast():
-                outputs = mlm_model(
-                    input_ids=input_ids,
-                    attention_mask=attention_mask,
-                    labels=labels,
-                )
-                loss = outputs.loss
-            
-            scaler.scale(loss).backward()
-            scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(mlm_model.parameters(), 1.0)
-            scaler.step(optimizer)
-            scaler.update()
-        else:
-            outputs = mlm_model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                labels=labels,
-            )
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_amp):
+            outputs = mlm_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
             loss = outputs.loss
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(mlm_model.parameters(), 1.0)
-            optimizer.step()
+        scaler.scale(loss).backward()
+        scaler.unscale_(optimizer)
+        torch.nn.utils.clip_grad_norm_(mlm_model.parameters(), 1.0)
+        scaler.step(optimizer)
+        scaler.update()
         
         scheduler.step()
         global_step += 1
@@ -454,25 +439,20 @@ def save_mlm_checkpoint(model, tokenizer, optimizer, scheduler, step, loss, save
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     
-    # Save full model (HuggingFace format for easy loading)
+    # Save the MLM model and the bare encoder (HF format). Stage 3 loads <dir>/encoder.
     model.save_pretrained(save_dir / "model")
+    model.base_model.save_pretrained(save_dir / "encoder")
     tokenizer.save_pretrained(save_dir / "tokenizer")
-    
-    # Save training state
-    torch.save({
-        "optimizer": optimizer.state_dict(),
-        "scheduler": scheduler.state_dict(),
-        "step": step,
-    }, save_dir / "training_state.pt")
     
     # Save metadata
     metadata = {
+        "stage": "stage2",
         "step": step,
         "loss": loss,
         "perplexity": float(np.exp(min(loss, 100))),
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
-    with open(save_dir / "metadata.json", "w") as f:
+    with open(save_dir / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
     
     logger.info(f"  MLM checkpoint saved to {save_dir}")
@@ -492,7 +472,7 @@ if __name__ == "__main__":
                         help="Learning rate")
     parser.add_argument("--max-steps", type=int, default=10000,
                         help="Maximum training steps")
-    parser.add_argument("--batch-size", type=int, default=16,
+    parser.add_argument("--batch-size", type=int, default=Stage2Config.batch_size,
                         help="Batch size")
     parser.add_argument("--sample-size", type=int, default=250000,
                         help="Number of Telugu sentences to sample")

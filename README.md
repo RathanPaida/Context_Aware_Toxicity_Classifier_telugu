@@ -5,7 +5,9 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg)](https://fastapi.tiangolo.com/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
-> **Stateful Two-Stage Moderation Cascade combining Fast Target Filtering (<1ms) with an 8-Head Multi-Head Attention Cross-Encoder for Telugu, Tanglish, and Indic Languages.**
+> **Two-stage moderation cascade: a lexicon gate (<1ms) plus a context-aware IndicBERT cross-encoder with extra multi-head attention, for Telugu, Tanglish and other Indic code-mixed text.**
+>
+> ⚠️ Status: the code pipeline is fixed and runs end to end; the model must be (re)trained and evaluated before any metric is quoted. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
 
 ---
 
@@ -13,7 +15,7 @@
 
 Evaluating isolated social media comments fails when toxicity depends on conversational flow, sarcasm, or regional idioms. In Indian languages—specifically **Telugu** and **Romanized Telugu (Tanglish/Tenglish)**—this problem is compounded by script variations, code-mixing, and context inversion.
 
-### Key Contextual Challenges Solved:
+### Target Contextual Challenges:
 1. **Benign Banter vs Threat (Polarity Flip):**
    - *Gaming banter:* `"Ninna match lo 1v4 clutch chusava bro?"` → `"Champesav po!"` is **benign praise** ("You killed it / amazing!").
    - *Violent context:* `"Aaa journalist bayataki vasthe kottali"` → `"Champesav po!"` is an **explicit threat** ("Kill them off!").
@@ -24,7 +26,7 @@ Evaluating isolated social media comments fails when toxicity depends on convers
 4. **Parent-Bleed Robustness (De-escalation):**
    - After extreme threats or slurs, polite de-escalations like `"Shantinchandi bro, vadileyandi andi"` are protected from parent toxicity bleed.
 5. **Caste & Regional Identity Safety:**
-   - Mentions of communities or regions (e.g. *Reddy, Kamma, Mala, Madiga, Andhra, Telangana*) remain unbiased (0.0% False Positive Rate).
+   - Mentions of communities or regions (e.g. *Reddy, Kamma, Mala, Madiga, Andhra, Telangana*) should not be flagged (measured as subgroup false-positive rate).
 
 ---
 
@@ -87,21 +89,40 @@ Evaluating isolated social media comments fails when toxicity depends on convers
 ## 🔬 4-Stage Transfer Learning Process
 
 1. **Stage 1: Context Mechanics (Open English Threads)**
-   - Pre-trained on `toxic-chat` and `jigsaw-unintended-bias` (210K pairs).
-   - Establishes conversational relational reasoning and contrastive dynamics.
+   - English multi-label toxicity on `toxic-chat` (user prompts) and `jigsaw-unintended-bias`.
+   - Neither dataset has real conversation threads, so this stage learns toxicity cues and identity debiasing, not context use.
 2. **Stage 2: Telugu Domain Adaptation (MLM)**
    - Continued Masked Language Modeling on `IndicCorpV2 Telugu` (250K sentences).
    - Adapts model vocabulary and representations to modern native Telugu script.
 3. **Stage 3: Code-Mix & Slang Fine-Tuning**
-   - Fine-tuned on `DravidianCodeMix-Telugu` + Cultural Identity Safety corpus.
-   - Eliminates false positive bias on regional communities, castes, and harmless slang.
+   - Fine-tuned on `IsaacRodgz/DravidianCodeMix-Dataset` (**Tamil** code-mixed offensive language) + `Cultural-Safety-Telugu` (toxicity-related categories only).
+   - Initialised from the Stage 1 classifier with the Stage 2 Telugu-adapted encoder.
 4. **Stage 4: Synthetic Thread Fusion**
-   - Contrastive twin pairs training under gaming, cinema, and political dialogue trees.
-   - Enforces 100% exact flip match on ambiguous contextual idioms and native Telugu Unicode.
+   - Contrastive twin pairs (same target, safe vs toxic parent) from `src/resources/stage4_synthetic.json`, validated on held-out templates, with Stage 3 replay.
 
 ---
 
 ## 🚀 Quick Start
+
+```bash
+pip install -r requirements.txt
+python run_pipeline.py --download-only            # all public; Jigsaw falls back to google/civil_comments
+python run_pipeline.py --stage1 --stage2 --stage3 --stage4
+python run_pipeline.py --evaluate --baselines --demo
+python app/server.py                              # http://localhost:7860
+python -m pytest tests -q                         # core regression tests (no GPU / network)
+```
+
+**Adding your own (Telugu) dataset:** put a `.csv` / `.jsonl` / `.parquet` file in `data/raw/custom/` with a `text` column and
+either a `label` column (0/1 or class names such as `Hate` / `Non-Hate`) or any of
+`toxic, severe_toxic, identity_attack, insult, threat`. Optional: `context` (earlier turns, oldest first, one per line),
+`topic`, `split` (`train`/`val`/`test`). Re-run `--download-only`; the file is then used by Stage 3, Stage 4 replay,
+the held-out evaluation and the baselines automatically. Check the logged label mapping.
+
+`python run_pipeline.py --all --quick-run` is a fast smoke test of the code on tiny subsets (its checkpoints are not usable models).
+Paths, thresholds and hyper-parameters are in `src/config.py`; lexicons, demo scenarios and evaluation slices are JSON files in `src/resources/`.
+
+### Original setup notes
 
 ### 1. Installation
 
@@ -156,20 +177,36 @@ jupyter notebook Indic_Shield_AI_Complete_Pipeline.ipynb
 
 ---
 
-## 📊 Verification Metrics (4 Release Gates)
+## 📊 Evaluation
 
-| Metric / Release Gate | Result | Target Gate | Status |
-| :--- | :---: | :---: | :---: |
-| **Contrastive Context Flip Match** | **100.0%** | $\ge 82.0\%$ | ✅ **PASSED** |
-| **Identity & Caste Subgroup False Positive Rate (FPR)** | **0.0%** | $\le 3.5\%$ | ✅ **PASSED** |
-| **Parent-Bleed De-escalation Specificity** | **100.0%** | $\ge 92.0\%$ | ✅ **PASSED** |
-| **Median Pipeline Latency (RTX 4060 GPU)** | **16.8 ms** | $\le 25.0\text{ ms}$ | ✅ **PASSED** |
-| **Fast Filter Latency** | **< 1.0 ms** | $\le 2.0\text{ ms}$ | ✅ **PASSED** |
+Metrics are **measured, not hard-coded**. After training run:
 
-To run the complete verification suite locally:
 ```bash
-python scratch/verify_complete_suite.py
+python run_pipeline.py --evaluate --baselines
 ```
+
+This writes `reports/eval_results.json` (shown in the web app's Benchmarks tab) with:
+
+| Slice | What it measures | Release gate |
+| :--- | :--- | :---: |
+| Held-out test split | Macro-F1 / ROC-AUC on the real Stage 3 test data (never trained on) | — |
+| Contrastive context flip | Same target, safe vs toxic parent: both correct | ≥ 82% |
+| Identity & caste mentions | Subgroup false-positive rate on neutral sentences | ≤ 3.5% |
+| Parent-bleed robustness | Polite reply after a toxic parent is allowed | ≥ 92% |
+| Script parity | \|ΔF1\| Romanized vs native Telugu | ≤ 2% |
+| Latency | p50 of the model path on the evaluation machine | ≤ 25 ms |
+
+`--baselines` writes `reports/baselines.json`: lexicon-only and char-TF-IDF + logistic regression on the same held-out
+test split, plus a context ablation (same targets with vs. without the parent). Measured so far (no transformer trained yet):
+
+| Method (held-out test, `toxic`, n=4,610) | F1 | ROC-AUC |
+| :--- | :---: | :---: |
+| Lexicon only | 0.023 | – |
+| Char TF-IDF + LogReg | 0.688 | 0.895 |
+
+The contextual slices (`src/resources/eval_slices.json`) are small hand-written sanity checks (6–45 items each); report them with their *n*. Stage 4 training data is automatically de-duplicated against them.
+
+> The numbers previously listed here (100% flip match, 0.0% FPR, 16.8 ms on an RTX 4060) were not reproducible: the evaluation items were copies of the training templates and the web app returned hard-coded values.
 
 ---
 
@@ -185,7 +222,9 @@ python scratch/verify_complete_suite.py
 ├── src/
 │   ├── config.py             # Global hyperparams, paths, and labels
 │   ├── data_downloader.py    # Zero-gated open dataset ingestion
-│   ├── evaluation.py         # 4-Gate test suite & slice benchmarks
+│   ├── evaluation.py         # Evaluation slices + held-out test metrics → reports/eval_results.json
+│   ├── training_utils.py     # Shared training loop, metrics, threshold tuning
+│   ├── resources/            # lexicons.json, scenarios.json, eval_slices.json, stage4_synthetic.json
 │   ├── inference_pipeline.py # Production Two-Stage Moderation Cascade
 │   ├── model.py              # Cross-Encoder with 8-Head MHA & Attentive Pooling
 │   ├── preprocessing.py      # De-obfuscation & IndicNLP normalization
@@ -193,8 +232,6 @@ python scratch/verify_complete_suite.py
 │   ├── stage2_telugu_mlm.py        # Stage 2 Telugu MLM domain adaptation
 │   ├── stage3_codemix_slang.py     # Stage 3 Dravidian code-mixed training
 │   └── stage4_synthetic_fusion.py  # Stage 4 Contrastive thread fusion
-├── scratch/
-│   └── verify_complete_suite.py # End-to-end verification test suite
 ├── run_pipeline.py           # Master execution script for stages 1-4
 ├── requirements.txt          # Python dependencies
 └── README.md                 # Project documentation
