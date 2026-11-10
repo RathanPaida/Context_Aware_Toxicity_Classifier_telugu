@@ -1,494 +1,250 @@
 """
 Stage 2: Telugu MLM Domain Adaptation.
 
-Performs unsupervised Masked Language Modeling (15% token masking) on the 
-encoder body using native Telugu text from IndicCorp. This re-aligns 
-subword embeddings to colloquial Telugu syntax and transliterated output.
+Masked-language-model training (15% masking) of the encoder on native Telugu text
+(IndicCorpV2), starting from the Stage 1 encoder. No classification head is trained.
 
-Key Points:
-  - Classification head is NOT trained here (unsupervised)
-  - All encoder layers are fine-tuned with MLM objective
-  - The adapted encoder is saved to <ckpt>/encoder (HF format) and picked up by Stage 3
-  - Teaches the model Telugu-specific vocabulary and syntax
-  - 250K Telugu sentences sampled from IndicCorp
+Output: `stage2_best/encoder` (HF format) + `stage2_best/tokenizer`, picked up by Stage 3.
+Robustness:
+  * memory options (frozen embeddings, gradient checkpointing, accumulation) from the hardware profile
+  * early stopping on held-out MLM loss
+  * resume point (`stage2_last/`) every eval; `resume=True` continues from it
+  * only one checkpoint on disk (the old code wrote ~2.2 GB every 2,000 steps)
 """
 
-import os
-import sys
 import json
+import math
+import random
+import shutil
+import sys
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import List, Optional
 
-import torch
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import pandas as pd
+import torch
+from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
-from transformers import (
-    AutoModelForMaskedLM,
-    AutoTokenizer,
-    DataCollatorForLanguageModeling,
-    get_linear_schedule_with_warmup,
-)
+from transformers import AutoModelForMaskedLM, AutoTokenizer, DataCollatorForLanguageModeling, get_linear_schedule_with_warmup
 
-# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import (
-    Stage2Config,
-    PROCESSED_DIR,
-    CHECKPOINT_DIR,
-    LOG_DIR,
-    PRIMARY_MODEL,
-    FALLBACK_MODEL,
-    MAX_SEQ_LENGTH,
-    get_logger,
-)
+from src.config import CHECKPOINT_DIR, LOG_DIR, PRIMARY_MODEL, PROCESSED_DIR, Stage2Config, get_logger
+from src.model import atomic_torch_save, ensure_disk_space, write_json_atomic
 from src.preprocessing import IndicPreprocessor
+from src.training_utils import clear_done, last_dir_for, mark_done, set_seed
 
 logger = get_logger("stage2_mlm")
 
+SAVE_DIR = CHECKPOINT_DIR / "stage2_best"
 
-# ═══════════════════════════════════════════════════════════════════════
-# Telugu MLM Dataset
-# ═══════════════════════════════════════════════════════════════════════
 
 class TeluguMLMDataset(Dataset):
-    """
-    Dataset for Telugu Masked Language Modeling.
-    
-    Tokenizes Telugu sentences and prepares them for MLM training.
-    The DataCollatorForLanguageModeling handles random masking during
-    batch collation (not at dataset creation time).
-    """
-    
-    def __init__(
-        self,
-        texts: list,
-        tokenizer,
-        max_length: int = MAX_SEQ_LENGTH,
-        preprocessor: Optional[IndicPreprocessor] = None,
-    ):
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-        self.preprocessor = preprocessor
-        
-        # Pre-tokenize and filter
-        logger.info(f"Pre-tokenizing {len(texts):,} Telugu sentences...")
-        self.encodings = []
-        
-        for text in tqdm(texts, desc="Tokenizing", dynamic_ncols=True):
-            if not text or not isinstance(text, str):
+    """Pre-tokenised Telugu sentences (token ids only); masking happens in the collator."""
+
+    def __init__(self, texts: List[str], tokenizer, max_length: int, preprocessor: Optional[IndicPreprocessor] = None):
+        self.items = []
+        for text in tqdm(texts, desc="Tokenizing", dynamic_ncols=True, mininterval=5):
+            if not isinstance(text, str):
                 continue
-            
-            # Apply preprocessing (Unicode normalization primarily)
-            if self.preprocessor:
-                text = self.preprocessor.clean_text(text)
-            
+            if preprocessor:
+                text = preprocessor.clean_text(text)
             if len(text.strip()) < 5:
                 continue
-            
-            encoding = tokenizer(
-                text,
-                max_length=max_length,
-                truncation=True,
-                padding=False,  # Padding handled by DataCollator
-                return_special_tokens_mask=True,
-            )
-            
-            # Only keep if we have meaningful tokens
-            if len(encoding["input_ids"]) > 5:
-                self.encodings.append(encoding)
-        
-        logger.info(f"  Kept {len(self.encodings):,} valid tokenized sentences")
-    
+            enc = tokenizer(text, max_length=max_length, truncation=True, return_special_tokens_mask=True)
+            if len(enc["input_ids"]) > 5:
+                self.items.append((enc["input_ids"], enc["special_tokens_mask"]))
+        logger.info(f"  kept {len(self.items):,} sentences")
+
     def __len__(self):
-        return len(self.encodings)
-    
+        return len(self.items)
+
     def __getitem__(self, idx):
-        return {k: torch.tensor(v) for k, v in self.encodings[idx].items()}
+        ids, special = self.items[idx]
+        return {"input_ids": torch.tensor(ids), "special_tokens_mask": torch.tensor(special)}
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# Stage 2 Training
-# ═══════════════════════════════════════════════════════════════════════
-
-def train_stage2(
-    config: Optional[Stage2Config] = None,
-    model_name: str = PRIMARY_MODEL,
-    stage1_checkpoint: Optional[str] = None,
-):
-    """
-    Execute Stage 2 training: Telugu MLM Domain Adaptation.
-    
-    This stage applies Masked Language Modeling on Telugu text to:
-    1. Re-align subword embeddings to Telugu morphology
-    2. Improve tokenization fertility for Dravidian text
-    3. Prepare the encoder for Stage 3 Telugu-specific classification
-    
-    Args:
-        config: Stage2Config hyperparameters
-        model_name: HuggingFace model identifier
-        stage1_checkpoint: Path to Stage 1 checkpoint (for encoder weights)
-    """
-    if config is None:
-        config = Stage2Config()
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logger.info(f"Using device: {device}")
-    if torch.cuda.is_available():
-        logger.info(f"  GPU: {torch.cuda.get_device_name(0)}")
-        mem_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
-        logger.info(f"  VRAM: {mem_gb:.1f} GB")
-    
-    # ─── Load Telugu Text Data ───
-    logger.info("Loading Telugu MLM data...")
-    
-    mlm_data_path = PROCESSED_DIR / "indic_corp_telugu_mlm.parquet"
-    
-    if mlm_data_path.exists():
-        df = pd.read_parquet(mlm_data_path)
-        texts = df["text"].tolist()
+def load_texts(config: Stage2Config) -> List[str]:
+    path = PROCESSED_DIR / "indic_corp_telugu_mlm.parquet"
+    if path.exists():
+        texts = pd.read_parquet(path)["text"].tolist()
     else:
-        logger.warning(f"Telugu MLM data not found at {mlm_data_path}")
-        logger.info("Attempting to download Telugu data...")
-        
         from src.data_downloader import download_indic_corp_telugu
-        df = download_indic_corp_telugu(sample_size=config.telugu_sample_size)
-        texts = df["text"].tolist()
-    
-    if not texts:
-        logger.error("No Telugu text data available for MLM training!")
-        return
-    
-    logger.info(f"  Loaded {len(texts):,} Telugu sentences")
-    
-    # Sample if needed
+        texts = download_indic_corp_telugu(sample_size=config.telugu_sample_size)["text"].tolist()
     if len(texts) > config.telugu_sample_size:
-        rng = np.random.RandomState(42)
-        indices = rng.choice(len(texts), config.telugu_sample_size, replace=False)
-        texts = [texts[i] for i in indices]
-        logger.info(f"  Sampled to {len(texts):,} sentences")
-    
-    # ─── Initialize Components ───
-    logger.info(f"Loading MLM model: {model_name}")
-    
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        mlm_model = AutoModelForMaskedLM.from_pretrained(model_name)
-        logger.info(f"  ✓ Loaded {model_name} for MLM")
-    except Exception as e:
-        logger.warning(f"  Failed to load {model_name}: {e}")
-        logger.info(f"  Falling back to {FALLBACK_MODEL}")
-        tokenizer = AutoTokenizer.from_pretrained(FALLBACK_MODEL)
-        mlm_model = AutoModelForMaskedLM.from_pretrained(FALLBACK_MODEL)
-        model_name = FALLBACK_MODEL
-    
-    # Ensure pad token
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token or "[PAD]"
-    
-    # Load Stage 1 encoder weights if available
-    if stage1_checkpoint:
-        stage1_path = Path(stage1_checkpoint) / "model.pt"
-        if stage1_path.exists():
-            logger.info(f"  Loading Stage 1 encoder weights from {stage1_path}")
-            state_dict = torch.load(stage1_path, map_location="cpu")
-            
-            # Extract only encoder weights (skip classification heads).
-            # BUGFIX: the old code used k.replace("encoder.", ""), which also stripped the
-            # inner "encoder." of "encoder.encoder.layer.N…" so every transformer layer
-            # failed to match and strict=False silently discarded all Stage 1 weights.
-            prefix = "encoder."
-            encoder_state = {k[len(prefix):]: v for k, v in state_dict.items() if k.startswith(prefix)}
-            result = mlm_model.base_model.load_state_dict(encoder_state, strict=False)
-            missing = [k for k in result.missing_keys if "pooler" not in k]
-            if missing:
-                raise RuntimeError(f"Stage 1 → MLM weight transfer failed; missing {len(missing)} keys e.g. {missing[:3]}")
-            logger.info(f"  ✓ Stage 1 encoder weights loaded ({len(encoder_state)} tensors)")
-    
-    mlm_model.to(device)
-    use_amp = config.fp16 and device.type == "cuda"
-    
-    # Initialize preprocessor for Telugu normalization
-    preprocessor = IndicPreprocessor(
-        enable_transliteration=False,  # Telugu text already in native script
-        enable_normalization=True,     # Unicode canonicalization important
-    )
-    
-    # ─── Dataset & DataLoader ───
-    # Split: 95% train, 5% eval
-    split_idx = int(len(texts) * 0.95)
-    train_texts = texts[:split_idx]
-    eval_texts = texts[split_idx:]
-    
-    train_dataset = TeluguMLMDataset(
-        train_texts, tokenizer, config.max_seq_length, preprocessor
-    )
-    eval_dataset = TeluguMLMDataset(
-        eval_texts, tokenizer, config.max_seq_length, preprocessor
-    )
-    
-    # MLM Data Collator (handles random masking)
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer,
-        mlm=True,
-        mlm_probability=config.mlm_probability,
-    )
-    
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.batch_size,
-        shuffle=True,
-        collate_fn=data_collator,
-        num_workers=config.num_workers,
-        pin_memory=torch.cuda.is_available(),
-        drop_last=True,
-    )
-    
-    eval_loader = DataLoader(
-        eval_dataset,
-        batch_size=config.batch_size * 2,
-        shuffle=False,
-        collate_fn=data_collator,
-        num_workers=config.num_workers,
-        pin_memory=torch.cuda.is_available(),
-    )
-    
-    # ─── Optimizer & Scheduler ───
-    optimizer = torch.optim.AdamW(
-        mlm_model.parameters(),
-        lr=config.learning_rate,
-        weight_decay=config.weight_decay,
-    )
-    
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer,
-        num_warmup_steps=config.warmup_steps,
-        num_training_steps=config.max_steps,
-    )
-    
-    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
-    
-    logger.info(f"  Train samples: {len(train_dataset):,}")
-    logger.info(f"  Eval samples:  {len(eval_dataset):,}")
-    logger.info(f"  Max steps: {config.max_steps:,}")
-    logger.info(f"  MLM probability: {config.mlm_probability}")
-    logger.info(f"  LR: {config.learning_rate}")
-    
-    # ─── Training Loop ───
-    logger.info("\n" + "=" * 70)
-    logger.info("STARTING STAGE 2 TRAINING: TELUGU MLM ADAPTATION")
-    logger.info("=" * 70)
-    
-    mlm_model.train()
-    global_step = 0
-    best_eval_loss = float("inf")
-    training_log = []
-    running_loss = 0.0
-    log_steps = 0
-    
-    # Create infinite data iterator
-    def infinite_loader():
-        while True:
-            for batch in train_loader:
-                yield batch
-    
-    data_iter = iter(infinite_loader())
-    pbar = tqdm(total=config.max_steps, desc="MLM Training", dynamic_ncols=True)
-    
-    while global_step < config.max_steps:
-        batch = next(data_iter)
-        
-        # Move to device
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-        labels = batch["labels"].to(device)
-        
-        optimizer.zero_grad()
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_amp):
-            outputs = mlm_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-            loss = outputs.loss
-        scaler.scale(loss).backward()
-        scaler.unscale_(optimizer)
-        torch.nn.utils.clip_grad_norm_(mlm_model.parameters(), 1.0)
-        scaler.step(optimizer)
-        scaler.update()
-        
-        scheduler.step()
-        global_step += 1
-        running_loss += loss.item()
-        log_steps += 1
-        
-        pbar.update(1)
-        pbar.set_postfix({
-            "loss": f"{loss.item():.4f}",
-            "avg": f"{running_loss / log_steps:.4f}",
-            "lr": f"{scheduler.get_last_lr()[0]:.2e}",
-        })
-        
-        # Logging
-        if global_step % config.logging_steps == 0:
-            avg_loss = running_loss / log_steps
-            log_entry = {
-                "step": global_step,
-                "loss": loss.item(),
-                "avg_loss": avg_loss,
-                "lr": scheduler.get_last_lr()[0],
-                "perplexity": np.exp(min(avg_loss, 100)),
-            }
-            training_log.append(log_entry)
-            logger.info(
-                f"  Step {global_step}/{config.max_steps} | "
-                f"Loss={avg_loss:.4f} | PPL={log_entry['perplexity']:.1f} | "
-                f"LR={scheduler.get_last_lr()[0]:.2e}"
-            )
-            running_loss = 0.0
-            log_steps = 0
-        
-        # Evaluation
-        if global_step % config.eval_steps == 0:
-            eval_loss = evaluate_mlm(mlm_model, eval_loader, device)
-            eval_ppl = np.exp(min(eval_loss, 100))
-            
-            logger.info(
-                f"  [Eval @ Step {global_step}] "
-                f"Loss={eval_loss:.4f} | PPL={eval_ppl:.1f}"
-            )
-            
-            if eval_loss < best_eval_loss:
-                best_eval_loss = eval_loss
-                save_mlm_checkpoint(
-                    mlm_model, tokenizer, optimizer, scheduler,
-                    global_step, eval_loss,
-                    CHECKPOINT_DIR / "stage2_best",
-                )
-                logger.info(f"  ✓ New best MLM model (Loss={eval_loss:.4f})")
-            
-            mlm_model.train()
-        
-        # Periodic save
-        if global_step % config.save_steps == 0:
-            save_mlm_checkpoint(
-                mlm_model, tokenizer, optimizer, scheduler,
-                global_step, loss.item(),
-                CHECKPOINT_DIR / f"stage2_step_{global_step}",
-            )
-    
-    pbar.close()
-    
-    # Final save
-    save_mlm_checkpoint(
-        mlm_model, tokenizer, optimizer, scheduler,
-        global_step, running_loss / max(log_steps, 1),
-        CHECKPOINT_DIR / "stage2_final",
-    )
-    
-    # Save training log
-    log_path = LOG_DIR / "stage2_training_log.json"
-    with open(log_path, "w", encoding="utf-8") as f:
-        json.dump(training_log, f, indent=2)
-    
-    logger.info("\n" + "=" * 70)
-    logger.info("STAGE 2 TRAINING COMPLETE: TELUGU MLM ADAPTATION")
-    logger.info(f"  Best Eval Loss: {best_eval_loss:.4f}")
-    logger.info(f"  Best Eval PPL:  {np.exp(min(best_eval_loss, 100)):.1f}")
-    logger.info(f"  Checkpoint: {CHECKPOINT_DIR / 'stage2_best'}")
-    logger.info(f"  Training log: {log_path}")
-    logger.info("=" * 70)
-    
-    return mlm_model, tokenizer
+        idx = np.random.RandomState(42).choice(len(texts), config.telugu_sample_size, replace=False)
+        texts = [texts[i] for i in idx]
+    return texts
 
-
-# ═══════════════════════════════════════════════════════════════════════
-# MLM Evaluation
-# ═══════════════════════════════════════════════════════════════════════
 
 @torch.no_grad()
-def evaluate_mlm(model, eval_loader, device) -> float:
-    """Evaluate MLM model and return average loss."""
+def evaluate_mlm(model, loader, device, use_amp: bool) -> float:
+    """Average MLM loss with a fixed masking seed, so evals are comparable."""
     model.eval()
-    total_loss = 0.0
-    n_batches = 0
-    
-    for batch in eval_loader:
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-        labels = batch["labels"].to(device)
-        
-        outputs = model(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            labels=labels,
-        )
-        
-        total_loss += outputs.loss.item()
-        n_batches += 1
-    
-    return total_loss / max(n_batches, 1)
+    cpu_state = torch.get_rng_state()
+    torch.manual_seed(1234)
+    total, n = 0.0, 0
+    for batch in loader:
+        batch = {k: v.to(device) for k, v in batch.items()}
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_amp):
+            total += model(**batch).loss.item()
+        n += 1
+    torch.set_rng_state(cpu_state)
+    model.train()
+    return total / max(1, n)
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# Checkpoint Management
-# ═══════════════════════════════════════════════════════════════════════
-
-def save_mlm_checkpoint(model, tokenizer, optimizer, scheduler, step, loss, save_dir):
-    """Save MLM training checkpoint."""
-    save_dir = Path(save_dir)
-    save_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Save the MLM model and the bare encoder (HF format). Stage 3 loads <dir>/encoder.
-    model.save_pretrained(save_dir / "model")
-    model.base_model.save_pretrained(save_dir / "encoder")
-    tokenizer.save_pretrained(save_dir / "tokenizer")
-    
-    # Save metadata
-    metadata = {
-        "stage": "stage2",
-        "step": step,
-        "loss": loss,
-        "perplexity": float(np.exp(min(loss, 100))),
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-    }
-    with open(save_dir / "metadata.json", "w", encoding="utf-8") as f:
-        json.dump(metadata, f, indent=2)
-    
-    logger.info(f"  MLM checkpoint saved to {save_dir}")
+def save_encoder(mlm_model, tokenizer, step: int, eval_loss: float, config: Stage2Config) -> None:
+    """Write encoder + tokenizer into a temp dir, then swap it in (never leaves a half-written checkpoint)."""
+    tmp = SAVE_DIR.parent / (SAVE_DIR.name + ".tmp")
+    shutil.rmtree(tmp, ignore_errors=True)
+    n_bytes = sum(p.numel() * 2 for p in mlm_model.base_model.parameters())
+    ensure_disk_space(SAVE_DIR.parent, n_bytes, "Stage 2 encoder")
+    mlm_model.base_model.save_pretrained(tmp / "encoder", safe_serialization=True)
+    tokenizer.save_pretrained(tmp / "tokenizer")
+    write_json_atomic(tmp / "metadata.json", {
+        "stage": "stage2", "step": step, "loss": eval_loss, "perplexity": float(math.exp(min(eval_loss, 50))),
+        "data": "IndicCorpV2 Telugu", "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "config": {k: v for k, v in vars(config).items()},
+    })
+    shutil.rmtree(SAVE_DIR, ignore_errors=True)
+    tmp.rename(SAVE_DIR)
+    logger.info(f"  saved Telugu-adapted encoder → {SAVE_DIR} (eval loss {eval_loss:.4f})")
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# Entry Point
-# ═══════════════════════════════════════════════════════════════════════
+def load_stage1_encoder(mlm_model, stage1_checkpoint: Optional[str]) -> None:
+    if not stage1_checkpoint or not (Path(stage1_checkpoint) / "model.pt").exists():
+        logger.warning("  no Stage 1 checkpoint — MLM starts from the pretrained encoder")
+        return
+    state = torch.load(Path(stage1_checkpoint) / "model.pt", map_location="cpu", weights_only=True)
+    prefix = "encoder."  # strip only the leading prefix ("encoder.encoder.layer.N" → "encoder.layer.N")
+    enc = {k[len(prefix):]: v.float() for k, v in state.items() if k.startswith(prefix)}
+    result = mlm_model.base_model.load_state_dict(enc, strict=False)
+    missing = [k for k in result.missing_keys if "pooler" not in k]
+    if missing:
+        raise RuntimeError(f"Stage 1 → MLM weight transfer failed; missing {len(missing)} keys e.g. {missing[:3]}")
+    logger.info(f"  loaded Stage 1 encoder ({len(enc)} tensors)")
+
+
+def train_stage2(config: Optional[Stage2Config] = None, model_name: str = PRIMARY_MODEL,
+                 stage1_checkpoint: Optional[str] = None, resume: bool = False):
+    config = config or Stage2Config()
+    set_seed(42)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    use_amp = config.fp16 and device.type == "cuda"
+    last_dir = last_dir_for(SAVE_DIR)
+    clear_done(SAVE_DIR)
+
+    texts = load_texts(config)
+    if not texts:
+        logger.error("No Telugu text available — Stage 2 skipped (Stage 3 will use the Stage 1 encoder).")
+        return None
+    logger.info(f"  {len(texts):,} Telugu sentences | device {device} | batch {config.batch_size}x"
+                f"{config.gradient_accumulation_steps} | max steps {config.max_steps:,}")
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    mlm_model = AutoModelForMaskedLM.from_pretrained(model_name)
+    load_stage1_encoder(mlm_model, stage1_checkpoint)
+    if config.freeze_embeddings:
+        for p in mlm_model.get_input_embeddings().parameters():
+            p.requires_grad = False
+    if config.gradient_checkpointing:
+        mlm_model.gradient_checkpointing_enable()
+    mlm_model.to(device)
+
+    pre = IndicPreprocessor(enable_transliteration=False, enable_normalization=True)
+    split = int(len(texts) * 0.97)
+    train_ds = TeluguMLMDataset(texts[:split], tokenizer, config.max_seq_length, pre)
+    eval_ds = TeluguMLMDataset(texts[split:][:2000], tokenizer, config.max_seq_length, pre)
+    collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=True, mlm_probability=config.mlm_probability)
+    train_loader = DataLoader(train_ds, batch_size=config.batch_size, shuffle=True, collate_fn=collator,
+                              num_workers=config.num_workers, drop_last=True)
+    eval_loader = DataLoader(eval_ds, batch_size=config.batch_size * 2, collate_fn=collator)
+
+    params = [p for p in mlm_model.parameters() if p.requires_grad]
+    optimizer = torch.optim.AdamW(params, lr=config.learning_rate, weight_decay=config.weight_decay)
+    scheduler = get_linear_schedule_with_warmup(optimizer, config.warmup_steps, config.max_steps)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
+
+    step, best_loss, bad_evals, history = 0, float("inf"), 0, []
+    if resume and (last_dir / "resume.pt").exists():
+        st = torch.load(last_dir / "resume.pt", map_location="cpu", weights_only=False)
+        mlm_model.load_state_dict(st["trainable"], strict=False)
+        optimizer.load_state_dict(st["optimizer"])
+        scheduler.load_state_dict(st["scheduler"])
+        scaler.load_state_dict(st["scaler"])
+        step, best_loss, bad_evals, history = st["step"], st["best_loss"], st["bad_evals"], st["history"]
+        logger.info(f"  resumed Stage 2 at step {step}")
+    elif last_dir.exists():
+        shutil.rmtree(last_dir, ignore_errors=True)
+
+    def save_resume():
+        last_dir.mkdir(parents=True, exist_ok=True)
+        trainable = {n: p.detach().cpu() for n, p in mlm_model.named_parameters() if p.requires_grad}
+        ensure_disk_space(last_dir, sum(t.numel() * 4 for t in trainable.values()) * 3, "Stage 2 resume state")
+        atomic_torch_save({"trainable": trainable, "optimizer": optimizer.state_dict(),
+                           "scheduler": scheduler.state_dict(), "scaler": scaler.state_dict(), "step": step,
+                           "best_loss": best_loss, "bad_evals": bad_evals, "history": history,
+                           "python_rng": random.getstate()}, last_dir / "resume.pt")
+
+    mlm_model.train()
+    pbar = tqdm(total=config.max_steps, initial=step, desc="Stage 2 MLM", dynamic_ncols=True, mininterval=5)
+    running, micro = 0.0, 0
+    stopped = False
+    while step < config.max_steps and not stopped:
+        for batch in train_loader:
+            batch = {k: v.to(device) for k, v in batch.items()}
+            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_amp):
+                loss = mlm_model(**batch).loss / config.gradient_accumulation_steps
+            scaler.scale(loss).backward()
+            running += loss.item()
+            micro += 1
+            if micro % config.gradient_accumulation_steps:
+                continue
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(params, 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            scheduler.step()
+            optimizer.zero_grad()
+            step += 1
+            pbar.update(1)
+            if step % config.logging_steps == 0:
+                pbar.set_postfix(loss=f"{running / config.logging_steps:.3f}")
+                running = 0.0
+            if step % config.eval_steps == 0 or step >= config.max_steps:
+                ev = evaluate_mlm(mlm_model, eval_loader, device, use_amp)
+                history.append({"step": step, "eval_loss": ev})
+                logger.info(f"  [step {step}] eval loss {ev:.4f} | ppl {math.exp(min(ev, 50)):.1f}")
+                if ev < best_loss - 1e-3:
+                    best_loss, bad_evals = ev, 0
+                    save_encoder(mlm_model, tokenizer, step, ev, config)
+                else:
+                    bad_evals += 1
+                    if config.early_stopping_patience and bad_evals >= config.early_stopping_patience:
+                        logger.info(f"  early stopping: no improvement in {bad_evals} evals")
+                        stopped = True
+                save_resume()
+            if step >= config.max_steps or stopped:
+                break
+    pbar.close()
+
+    (LOG_DIR / "stage2_training_log.json").write_text(json.dumps(history, indent=2), encoding="utf-8")
+    mark_done(SAVE_DIR, {"stage": "stage2", "best_eval_loss": best_loss, "steps": step})
+    shutil.rmtree(last_dir, ignore_errors=True)
+    logger.info(f"Stage 2 done: best eval loss {best_loss:.4f} (ppl {math.exp(min(best_loss, 50)):.1f})")
+    return best_loss
+
 
 if __name__ == "__main__":
     import argparse
-    
-    parser = argparse.ArgumentParser(description="Stage 2: Telugu MLM Adaptation")
-    parser.add_argument("--model", type=str, default=PRIMARY_MODEL,
-                        help="HuggingFace model name")
-    parser.add_argument("--lr", type=float, default=5e-5,
-                        help="Learning rate")
-    parser.add_argument("--max-steps", type=int, default=10000,
-                        help="Maximum training steps")
-    parser.add_argument("--batch-size", type=int, default=Stage2Config.batch_size,
-                        help="Batch size")
-    parser.add_argument("--sample-size", type=int, default=250000,
-                        help="Number of Telugu sentences to sample")
-    parser.add_argument("--stage1-checkpoint", type=str, default=None,
-                        help="Path to Stage 1 checkpoint for encoder initialization")
-    args = parser.parse_args()
-    
-    config = Stage2Config(
-        learning_rate=args.lr,
-        max_steps=args.max_steps,
-        batch_size=args.batch_size,
-        telugu_sample_size=args.sample_size,
-    )
-    
-    train_stage2(
-        config=config,
-        model_name=args.model,
-        stage1_checkpoint=args.stage1_checkpoint,
-    )
+
+    p = argparse.ArgumentParser(description="Stage 2: Telugu MLM Adaptation")
+    p.add_argument("--model", default=PRIMARY_MODEL)
+    p.add_argument("--max-steps", type=int, default=Stage2Config.max_steps)
+    p.add_argument("--batch-size", type=int, default=Stage2Config.batch_size)
+    p.add_argument("--stage1-checkpoint", default=str(CHECKPOINT_DIR / "stage1_best"))
+    p.add_argument("--resume", action="store_true")
+    a = p.parse_args()
+    train_stage2(Stage2Config(max_steps=a.max_steps, batch_size=a.batch_size), a.model, a.stage1_checkpoint, a.resume)

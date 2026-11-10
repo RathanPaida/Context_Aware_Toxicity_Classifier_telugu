@@ -107,7 +107,8 @@ def flip_accuracy(model, tokenizer, df: pd.DataFrame, thresholds: Dict[str, floa
 
 
 def train_stage4(config: Optional[Stage4Config] = None, model_name: str = PRIMARY_MODEL,
-                 base_checkpoint: Optional[str] = None, replay_rows: int = 2000):
+                 base_checkpoint: Optional[str] = None, replay_rows: int = 2000,
+                 resume: bool = False):
     config = config or Stage4Config()
     synth = build_synthetic_dataset()
     train_df, val_df = split_by_group(synth, 0.2, config.seed)
@@ -152,6 +153,7 @@ def train_stage4(config: Optional[Stage4Config] = None, model_name: str = PRIMAR
         save_dir=CHECKPOINT_DIR / "stage4_best", stage="stage4",
         extra_metadata={"data": "synthetic contrastive twins + stage3 replay", "base_checkpoint": str(base)},
         selection_fn=select,
+        resume=resume,
     )
     return metrics
 

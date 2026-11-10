@@ -66,7 +66,7 @@ def build_stage3_init_model(model_name: str, config: Stage3Config) -> ContextAwa
 
 
 def train_stage3(config: Optional[Stage3Config] = None, model_name: str = PRIMARY_MODEL,
-                 max_samples: Optional[int] = None):
+                 max_samples: Optional[int] = None, resume: bool = False):
     config = config or Stage3Config()
     train_df, val_df, test_df = load_stage3_frames(max_samples or config.max_samples, config.seed)
     logger.info(f"  train={len(train_df):,} val={len(val_df):,} test(held out)={len(test_df):,}")
@@ -83,6 +83,7 @@ def train_stage3(config: Optional[Stage3Config] = None, model_name: str = PRIMAR
         config,
         save_dir=CHECKPOINT_DIR / "stage3_best", stage="stage3",
         extra_metadata={"data": "DravidianCodeMix (Tamil) + Cultural-Safety-Telugu", "train_rows": len(train_df)},
+        resume=resume,
     )
     logger.info(f"Stage 3 done. Best val macro-F1 (tuned): {metrics.get('macro_f1@threshold', float('nan')):.4f}")
     return metrics

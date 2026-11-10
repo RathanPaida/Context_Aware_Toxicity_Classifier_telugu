@@ -12,6 +12,8 @@ Replaces three copy-pasted training loops. Fixes over the old loops:
 
 import math
 import random
+import shutil
+import time
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -23,13 +25,16 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from transformers import get_linear_schedule_with_warmup
 
-from src.config import TOXICITY_LABELS, UNKNOWN_LABEL, TrainConfig, get_logger
+from src.config import DONE_MARKER, TOXICITY_LABELS, UNKNOWN_LABEL, TrainConfig, get_logger
 from src.model import (
     ContextAwareToxicityClassifier,
     _special_ids,
     collate_encodings,
+    atomic_torch_save,
     encode_example,
+    ensure_disk_space,
     save_model_checkpoint,
+    write_json_atomic,
 )
 from src.preprocessing import IndicPreprocessor
 
@@ -208,6 +213,72 @@ def log_metrics(prefix: str, m: Dict[str, Any]) -> None:
 # Training loop
 # ═══════════════════════════════════════════════════════════════════════
 
+# ── resume / completion markers ─────────────────────────────────────
+
+def last_dir_for(save_dir: Path) -> Path:
+    """stage3_best → stage3_last (where the end-of-epoch resume state lives)."""
+    save_dir = Path(save_dir)
+    return save_dir.parent / (save_dir.name.replace("_best", "") + "_last")
+
+
+def is_done(save_dir: Path) -> bool:
+    return (Path(save_dir) / DONE_MARKER).exists()
+
+
+def mark_done(save_dir: Path, info: Dict[str, Any]) -> None:
+    Path(save_dir).mkdir(parents=True, exist_ok=True)
+    write_json_atomic(Path(save_dir) / DONE_MARKER, {"finished_at": time.strftime("%Y-%m-%d %H:%M:%S"), **info})
+
+
+def clear_done(save_dir: Path) -> None:
+    (Path(save_dir) / DONE_MARKER).unlink(missing_ok=True)
+
+
+def save_resume_state(model, optimizer, scheduler, scaler, last_dir: Path, info: Dict[str, Any]) -> None:
+    """Trainable weights (fp32) + optimizer/scheduler/scaler/RNG state. Frozen weights are rebuilt on resume."""
+    last_dir = Path(last_dir)
+    last_dir.mkdir(parents=True, exist_ok=True)
+    trainable = {n: p.detach().cpu() for n, p in model.named_parameters() if p.requires_grad}
+    buffers = {n: b.detach().cpu() for n, b in model.named_buffers()}
+    approx = sum(t.numel() * t.element_size() for t in trainable.values()) * 3  # weights + 2 Adam moments
+    ensure_disk_space(last_dir, approx, "resume state")
+    atomic_torch_save({
+        "trainable": trainable, "buffers": buffers,
+        "optimizer": optimizer.state_dict(), "scheduler": scheduler.state_dict(), "scaler": scaler.state_dict(),
+        "rng": {"python": random.getstate(), "numpy": np.random.get_state(), "torch": torch.get_rng_state(),
+                "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None},
+        "info": info,
+    }, last_dir / "resume.pt")
+    logger.info(f"  resume point saved → {last_dir} (epoch {info.get('completed_epochs')})")
+
+
+def load_resume_state(model, optimizer, scheduler, scaler, last_dir: Path) -> Optional[Dict[str, Any]]:
+    path = Path(last_dir) / "resume.pt"
+    if not path.exists():
+        return None
+    state = torch.load(path, map_location="cpu", weights_only=False)
+    result = model.load_state_dict({**state["trainable"], **state["buffers"]}, strict=False)
+    expected = {n for n, p in model.named_parameters() if p.requires_grad}
+    missing = expected & set(result.missing_keys)
+    if missing:
+        raise RuntimeError(f"Resume state in {last_dir} does not match the model (e.g. {sorted(missing)[:3]}); "
+                           "delete that folder to restart the stage.")
+    optimizer.load_state_dict(state["optimizer"])
+    scheduler.load_state_dict(state["scheduler"])
+    scaler.load_state_dict(state["scaler"])
+    rng = state.get("rng", {})
+    try:
+        random.setstate(rng["python"])
+        np.random.set_state(rng["numpy"])
+        torch.set_rng_state(rng["torch"])
+        if rng.get("cuda") is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(rng["cuda"])
+    except Exception as e:  # different GPU count etc. — not fatal
+        logger.warning(f"  could not restore RNG state: {e}")
+    logger.info(f"  resumed from {last_dir} after epoch {state['info'].get('completed_epochs')}")
+    return state["info"]
+
+
 def train_classifier(
     model: ContextAwareToxicityClassifier,
     tokenizer,
@@ -218,10 +289,14 @@ def train_classifier(
     stage: str,
     extra_metadata: Optional[Dict[str, Any]] = None,
     selection_fn: Optional[Callable[[ContextAwareToxicityClassifier, Dict[str, Any]], float]] = None,
+    resume: bool = False,
 ) -> Dict[str, Any]:
     """
     Train `model`, evaluate every epoch (or every `config.eval_steps`), save the best
     checkpoint to `save_dir` together with tuned thresholds and metrics.
+
+    resume=True continues from `<stage>_last/` (written at the end of every epoch) if it exists.
+    When the stage finishes, a DONE marker is written into `save_dir` and the resume state is removed.
 
     `selection_fn(model, val_metrics) -> float` overrides the model-selection score
     (default: tuned macro-F1 on the validation set).
@@ -230,8 +305,11 @@ def train_classifier(
     device = get_device()
     model.to(device)
     use_amp = config.fp16 and device.type == "cuda"
+    save_dir, last_dir = Path(save_dir), last_dir_for(save_dir)
+    clear_done(save_dir)
     logger.info(f"[{stage}] device={device} amp={use_amp} train={len(train_dataset):,} "
-                f"val={len(val_dataset) if val_dataset else 0:,}")
+                f"val={len(val_dataset) if val_dataset else 0:,} | batch {config.batch_size}x"
+                f"{config.gradient_accumulation_steps} | epochs {config.num_epochs}")
 
     train_loader = make_loader(train_dataset, config.batch_size, shuffle=True)
     val_loader = make_loader(val_dataset, config.batch_size * 2, shuffle=False) if val_dataset else None
@@ -245,13 +323,24 @@ def train_classifier(
         ],
         weight_decay=config.weight_decay,
     )
-    steps_per_epoch = max(1, len(train_loader) // config.gradient_accumulation_steps)
+    steps_per_epoch = max(1, math.ceil(len(train_loader) / config.gradient_accumulation_steps))
     total_steps = steps_per_epoch * config.num_epochs
     scheduler = get_linear_schedule_with_warmup(optimizer, int(total_steps * config.warmup_ratio), total_steps)
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
-    best_score, best_metrics, bad_evals, global_step = -float("inf"), {}, 0, 0
+    best_score, best_metrics, bad_evals, global_step, start_epoch = -float("inf"), {}, 0, 0, 0
     history: List[Dict[str, Any]] = []
+
+    if resume:
+        info = load_resume_state(model, optimizer, scheduler, scaler, last_dir)
+        if info:
+            start_epoch = info["completed_epochs"]
+            global_step, bad_evals = info["global_step"], info["bad_evals"]
+            best_score, best_metrics, history = info["best_score"], info["best_metrics"], info["history"]
+            if info.get("stopped"):
+                start_epoch = config.num_epochs  # it had already early-stopped
+    elif last_dir.exists():
+        shutil.rmtree(last_dir, ignore_errors=True)  # stale state from an older run
 
     def run_eval() -> bool:
         """Evaluate, maybe save. Returns True if training should stop early."""
@@ -279,15 +368,17 @@ def train_classifier(
                 "max_seq_length": config.max_seq_length,
                 **(extra_metadata or {}),
             })
-            logger.info(f"  ✓ new best ({score:.4f}) → {save_dir}")
+            logger.info(f"  new best ({score:.4f}) -> {save_dir}")
             return False
         bad_evals += 1
         return config.early_stopping_patience > 0 and bad_evals >= config.early_stopping_patience
 
     stop = False
-    for epoch in range(config.num_epochs):
+    t_start = time.time()
+    for epoch in range(start_epoch, config.num_epochs):
         model.train()
-        pbar = tqdm(train_loader, desc=f"{stage} epoch {epoch + 1}/{config.num_epochs}", dynamic_ncols=True)
+        pbar = tqdm(train_loader, desc=f"{stage} epoch {epoch + 1}/{config.num_epochs}", dynamic_ncols=True,
+                    mininterval=5)
         optimizer.zero_grad()
         for i, batch in enumerate(pbar):
             inputs = {k: batch[k].to(device) for k in ("input_ids", "attention_mask", "target_mask")}
@@ -309,10 +400,18 @@ def train_classifier(
                     if run_eval():
                         stop = True
                         break
+        if not stop and not config.eval_steps and run_eval():
+            stop = True
+        elapsed = time.time() - t_start
+        done_epochs = epoch + 1 - start_epoch
+        remaining = (config.num_epochs - epoch - 1) * elapsed / max(1, done_epochs)
+        logger.info(f"[{stage}] epoch {epoch + 1}/{config.num_epochs} done ({elapsed / 60:.1f} min so far)"
+                    + ("" if stop else f" | at most ~{remaining / 60:.0f} min left in this stage"))
+        save_resume_state(model, optimizer, scheduler, scaler, last_dir, {
+            "completed_epochs": epoch + 1, "global_step": global_step, "bad_evals": bad_evals,
+            "best_score": best_score, "best_metrics": best_metrics, "history": history, "stopped": stop,
+        })
         if stop:
-            logger.info(f"[{stage}] early stopping")
-            break
-        if not config.eval_steps and run_eval():
             logger.info(f"[{stage}] early stopping after epoch {epoch + 1}")
             break
 
@@ -320,4 +419,6 @@ def train_classifier(
         save_model_checkpoint(model, tokenizer, save_dir, {"stage": stage, "step": global_step, **(extra_metadata or {})})
 
     best_metrics["history"] = history
+    mark_done(save_dir, {"stage": stage, "best_score": best_score, "global_step": global_step})
+    shutil.rmtree(last_dir, ignore_errors=True)
     return best_metrics

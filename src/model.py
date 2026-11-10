@@ -10,6 +10,8 @@ Implements:
 """
 
 import json
+import os
+import shutil
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -423,33 +425,46 @@ def encode_example(
         topic_ids = enc(f"{TOPIC_PREFIX} {topic.strip()}")[: min(24, budget - 1)]
         budget -= len(topic_ids) + 1
 
+    def prefix_len(ids: List[int], prefix: str) -> int:
+        """How many leading ids are the scaffolding prefix ("Parent:", "Topic:" …)."""
+        p_ids = enc(prefix)
+        return len(p_ids) if ids[: len(p_ids)] == p_ids else 0
+
     turns = [t for t in (history or []) if t and str(t).strip()]
-    kept_turns: List[List[int]] = []
+    kept_turns: List[tuple] = []  # (ids, segment label, prefix length)
     for i, turn in enumerate(reversed(turns)):  # newest first
         position = len(turns) - i
         prefix = PARENT_PREFIX if i == 0 else f"{CONTEXT_PREFIX}{position}:"
         ids = enc(f"{prefix} {turn}")
         cost = len(ids) + (1 if kept_turns else 0)
         if cost <= budget:
-            kept_turns.insert(0, ids)
+            kept_turns.insert(0, (ids, f"turn-{position}", prefix_len(ids, prefix)))
             budget -= cost
         else:
             room = budget - (1 if kept_turns else 0)
             if room >= 8:
-                kept_turns.insert(0, ids[-room:])  # keep the most recent tokens of this turn
+                kept_turns.insert(0, (ids[-room:], f"turn-{position}", 0))  # most recent tokens of this turn
             break
 
+    # segments[i] says what input_ids[i] is: "special", "prefix" (scaffolding), "topic",
+    # "turn-<n>" (earlier message n, oldest = 1) or "target". Used for display only.
     context_ids: List[int] = []
-    for part in ([topic_ids] if topic_ids else []) + kept_turns:
+    context_segments: List[str] = []
+    parts = ([(topic_ids, "topic", prefix_len(topic_ids, TOPIC_PREFIX))] if topic_ids else []) + kept_turns
+    for ids, label, n_prefix in parts:
         if context_ids:
             context_ids.append(sep_id)
-        context_ids.extend(part)
+            context_segments.append("special")
+        context_ids.extend(ids)
+        context_segments.extend(["prefix"] * n_prefix + [label] * (len(ids) - n_prefix))
 
     if context_ids:
         input_ids = [cls_id] + context_ids + [sep_id] + target_ids + [sep_id]
+        segments = ["special"] + context_segments + ["special"] + ["target"] * len(target_ids) + ["special"]
         target_start = len(context_ids) + 2
     else:
         input_ids = [cls_id] + target_ids + [sep_id]
+        segments = ["special"] + ["target"] * len(target_ids) + ["special"]
         target_start = 1
 
     target_mask = [0] * len(input_ids)
@@ -460,6 +475,7 @@ def encode_example(
         "input_ids": input_ids,
         "attention_mask": [1] * len(input_ids),
         "target_mask": target_mask,
+        "segments": segments,
     }
 
 
@@ -500,21 +516,63 @@ def load_tokenizer(model_name_or_path: str = PRIMARY_MODEL):
 # Checkpoint helpers
 # ═══════════════════════════════════════════════════════════════════════
 
+class CheckpointSaveError(RuntimeError):
+    pass
+
+
+def ensure_disk_space(target_dir: Path, needed_bytes: int, what: str = "checkpoint") -> None:
+    """Raise a clear error instead of dying mid-write when the disk is (nearly) full."""
+    target_dir = Path(target_dir)
+    probe = target_dir if target_dir.exists() else next((p for p in target_dir.parents if p.exists()), Path("."))
+    free = shutil.disk_usage(probe).free
+    if free < needed_bytes * 1.2:
+        raise CheckpointSaveError(
+            f"Not enough disk space to save the {what} in {target_dir}: need ~{needed_bytes / 1e9:.2f} GB, "
+            f"{free / 1e9:.2f} GB free. Free up space and rerun with --resume."
+        )
+
+
+def atomic_torch_save(obj: Any, path: Path) -> None:
+    """torch.save to <path>.tmp then rename, so a crash never leaves a half-written file."""
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        torch.save(obj, tmp)
+        os.replace(tmp, path)
+    except Exception as e:
+        tmp.unlink(missing_ok=True)
+        raise CheckpointSaveError(f"Failed to save {path}: {e}") from e
+
+
+def write_json_atomic(path: Path, data: Dict[str, Any]) -> None:
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False, default=float), encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def to_fp16_state(state: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    """Store floating weights in fp16 (halves checkpoint size: ~1.2 GB → ~0.6 GB for IndicBERTv2)."""
+    return {k: (v.detach().to("cpu", torch.float16) if v.is_floating_point() else v.detach().cpu())
+            for k, v in state.items()}
+
+
 def save_model_checkpoint(model: ContextAwareToxicityClassifier, tokenizer, save_dir: Path, metadata: Dict[str, Any]):
-    """Write model.pt + tokenizer/ + metadata.json (model name, thresholds, metrics…)."""
+    """Write model.pt (fp16) + tokenizer/ + metadata.json atomically, after checking free disk."""
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(model.state_dict(), save_dir / "model.pt")
+    state = to_fp16_state(model.state_dict())
+    ensure_disk_space(save_dir, sum(t.numel() * t.element_size() for t in state.values()))
+    atomic_torch_save(state, save_dir / "model.pt")
     tokenizer.save_pretrained(save_dir / "tokenizer")
-    meta = {
+    write_json_atomic(save_dir / "metadata.json", {
         "model_name": model.model_name,
         "labels": TOXICITY_LABELS,
         "num_heads": model.num_heads,
+        "weights_dtype": "float16",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         **metadata,
-    }
-    with open(save_dir / "metadata.json", "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=2, default=float)
+    })
     logger.info(f"  Checkpoint saved to {save_dir}")
 
 
@@ -537,6 +595,7 @@ def load_model_weights(model: nn.Module, ckpt_dir: Path, allow_missing_heads: bo
     """
     ckpt_dir = Path(ckpt_dir)
     state = torch.load(ckpt_dir / "model.pt", map_location="cpu", weights_only=True)
+    state = {k: (v.float() if v.is_floating_point() else v) for k, v in state.items()}  # fp16 on disk → fp32
     result = model.load_state_dict(state, strict=False)
     missing = [k for k in result.missing_keys]
     unexpected = [k for k in result.unexpected_keys]

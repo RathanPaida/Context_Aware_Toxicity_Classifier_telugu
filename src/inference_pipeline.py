@@ -31,7 +31,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import LEXICON_PATH, SCENARIOS_PATH, TOXICITY_LABELS, InferenceConfig, get_logger
+from src.config import LABEL_DISPLAY_NAMES, LEXICON_PATH, SCENARIOS_PATH, TOXICITY_LABELS, InferenceConfig, get_logger
 from src.model import (
     ContextAwareToxicityClassifier,
     clean_token,
@@ -167,10 +167,13 @@ class TwoStageModerationPipeline:
         self.tokenizer = None
         self.metadata: Dict[str, Any] = {}
         self.checkpoint: Optional[Path] = Path(checkpoint_dir) if checkpoint_dir else find_best_checkpoint()
+        self.trained = False
 
         if self.checkpoint and (self.checkpoint / "model.pt").exists():
             self.model, self.tokenizer, self.metadata = load_classifier_from_checkpoint(self.checkpoint, self.device)
-            self.status = f"loaded {self.checkpoint.name}"
+            self.trained = True
+            src_stage = self.metadata.get("release", {}).get("source", self.checkpoint.name)
+            self.status = f"loaded {self.checkpoint.name}" + (f" ({src_stage})" if src_stage != self.checkpoint.name else "")
         elif self.cfg.require_checkpoint:
             self.status = ("no trained checkpoint found in models/checkpoints/ — train first "
                            "(python run_pipeline.py --all) or set ALLOW_UNTRAINED=1 for UI testing")
@@ -193,7 +196,10 @@ class TwoStageModerationPipeline:
     def info(self) -> Dict[str, Any]:
         return {
             "ready": self.ready,
+            "trained": self.trained,
             "status": self.status,
+            "release_source": self.metadata.get("release", {}).get("source"),
+            "label_display_names": LABEL_DISPLAY_NAMES,
             "checkpoint": str(self.checkpoint) if self.checkpoint else None,
             "model_name": getattr(self.model, "model_name", None),
             "num_heads": getattr(self.model, "num_heads", None),
@@ -234,6 +240,8 @@ class TwoStageModerationPipeline:
             result["lexicon"] = lex
             result["context_used"] = context_used
             result["thresholds"] = self.thresholds
+            result["untrained"] = not self.trained
+            result.setdefault("needs_review", False)
             return result
 
         # ── Stage 1: lexicon fast exit ──
@@ -244,7 +252,9 @@ class TwoStageModerationPipeline:
                 "is_toxic": True,
                 "toxicity_score": score,
                 "stage_routed": "Stage 1 Lexicon Gate",
+                "decided_by": "word list",
                 "categories": {l: (score if l == "toxic" else None) for l in TOXICITY_LABELS},
+                "reason": f"Contains a severe abusive word ({', '.join(lex['severe'])}) and there is no earlier message that changes its meaning.",
                 "explanation": f"Severe term(s) {lex['severe']} with no mitigating context; model not consulted.",
                 "attention_analysis": None,
             })
@@ -278,12 +288,31 @@ class TwoStageModerationPipeline:
         elif lex["mild"]:
             explanation += f" Mild/ambiguous terms noted: {lex['mild']}."
 
+        needs_review = abs(cats["toxic"] - self.thresholds["toxic"]) <= self.cfg.review_margin
+        top = [LABEL_DISPLAY_NAMES[l].lower() for l in TOXICITY_LABELS[1:] if cats[l] >= self.thresholds[l]]
+        if is_toxic:
+            reason = "The model rates this message as harmful" + (f" ({', '.join(top)})" if top else "")
+        else:
+            reason = "The model does not consider this message harmful"
+        reason += " given the earlier messages." if history else "."
+        if needs_review:
+            reason += " The score is close to the decision line, so a person should double-check."
+        if lex["severe"] and not is_toxic:
+            reason += f" It contains '{', '.join(lex['severe'])}', but the context suggests it is not meant as abuse."
+
         return finish({
             "action": "FLAG" if is_toxic else "ALLOW",
             "is_toxic": is_toxic,
             "toxicity_score": round(score, 4),
             "stage_routed": f"Stage 2 Cross-Encoder ({self.model.num_heads}-head attention)",
+            "decided_by": "model",
             "categories": cats,
+            # score at which each label alone flags the message (None = cannot flag on its own)
+            "flag_lines": {l: (self.thresholds[l] if l == "toxic" else
+                               max(self.thresholds[l], self.cfg.subtype_flag_threshold) if l in SEVERE_SUBLABELS else None)
+                           for l in TOXICITY_LABELS},
+            "needs_review": needs_review,
+            "reason": reason,
             "explanation": explanation,
             "attention_analysis": self._attention(enc, out),
         })
@@ -296,13 +325,15 @@ class TwoStageModerationPipeline:
         special = set(self.tokenizer.all_special_ids)
         toks = self.tokenizer.convert_ids_to_tokens(enc["input_ids"])
         items, ctx_sum, tgt_sum = [], 0.0, 0.0
-        for tid, tok, weight, is_t in zip(enc["input_ids"], toks, w, enc["target_mask"]):
-            if tid in special:
+        for tid, tok, weight, is_t, seg in zip(enc["input_ids"], toks, w, enc["target_mask"], enc["segments"]):
+            if tid in special or seg in ("special", "prefix"):
                 continue
             display = clean_token(tok)
             if not display:
                 continue
-            items.append({"token": display, "attention": round(float(weight), 4), "is_target": bool(is_t)})
+            items.append({"token": display, "attention": round(float(weight), 4), "is_target": bool(is_t),
+                          # WordPiece "##x" continues the previous word; SentencePiece marks word *starts* with "▁"
+                          "continuation": tok.startswith("##"), "segment": seg})
             if is_t:
                 tgt_sum += float(weight)
             else:

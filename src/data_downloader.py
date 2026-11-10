@@ -40,6 +40,7 @@ from src.config import (
     UNKNOWN_LABEL,
     get_logger,
 )
+from src.preprocessing import romanize_telugu
 
 logger = get_logger("data_downloader")
 
@@ -278,7 +279,7 @@ def _parse_categories(value) -> List[str]:
     return [s]
 
 
-def download_cultural_safety_telugu() -> pd.DataFrame:
+def download_cultural_safety_telugu(romanize: bool = True) -> pd.DataFrame:
     """
     salmankhanpm/Cultural-Safety-Telugu is an LLM-*prompt* safety set translated to Telugu
     (e.g. "how do I get poison"), not a toxic-comment corpus. We keep:
@@ -324,6 +325,17 @@ def download_cultural_safety_telugu() -> pd.DataFrame:
     df["split"] = _hash_split(df["text"].astype(str))
     df = _finalize(df, "cultural_safety_telugu")
     logger.info(f"  Cultural-Safety-Telugu: kept {len(df):,}, dropped {dropped:,} non-toxicity UNSAFE rows")
+    if romanize:
+        # Romanized twin of every row (same labels, same split — no train/test leakage), so the model
+        # also learns Telugu typed in Latin script ("Tanglish"), not just native script.
+        roman = df.copy()
+        roman["text"] = roman["text"].map(romanize_telugu)
+        roman = roman[roman["text"] != df["text"]]
+        if len(roman):
+            df = pd.concat([df, _finalize(roman, "cultural_safety_telugu_roman")], ignore_index=True)
+            logger.info(f"  + {len(roman):,} Romanized-Telugu copies (e.g. {roman['text'].iloc[0][:60]!r})")
+        else:
+            logger.warning("  indic-transliteration not installed — no Romanized copies (pip install -r requirements.txt)")
     for label in TOXICITY_LABELS:
         logger.info(f"    {label}: {df[label].mean():.2%} positive")
     return df
@@ -403,7 +415,7 @@ def load_custom_datasets() -> Dict[str, pd.DataFrame]:
 # ═══════════════════════════════════════════════════════════════════════
 
 def download_and_format_all(skip_indic_corp: bool = False, jigsaw_sample_size: int = 200_000,
-                            telugu_sample_size: int = 250_000) -> Dict[str, pd.DataFrame]:
+                            telugu_sample_size: int = 250_000, romanize: bool = True) -> Dict[str, pd.DataFrame]:
     logger.info("=" * 70)
     logger.info("DATASET DOWNLOAD & FORMATTING")
     logger.info("=" * 70)
@@ -413,7 +425,7 @@ def download_and_format_all(skip_indic_corp: bool = False, jigsaw_sample_size: i
         ("toxic_chat", download_toxic_chat),
         ("jigsaw_bias", lambda: sample_jigsaw(download_jigsaw_bias(), jigsaw_sample_size)),
         ("dravidian_codemix", download_dravidian_codemix),
-        ("cultural_safety_telugu", download_cultural_safety_telugu),
+        ("cultural_safety_telugu", lambda: download_cultural_safety_telugu(romanize)),
     ]
     for name, fn in steps:
         try:

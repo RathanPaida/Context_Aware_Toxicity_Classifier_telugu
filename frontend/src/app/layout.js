@@ -1,21 +1,14 @@
-import "./globals.css";
+import './globals.css';
 
 export const metadata = {
-  title: "Indic Shield AI - Context-Aware Toxicity Classifier",
-  description: "8-Head Multi-Head Attention Cross-Encoder Moderation Cascade for Telugu, Tanglish, and Indic Code-Mixed Text.",
+  title: 'Indic Shield',
+  description: 'Context-aware toxicity checker for Telugu, Romanized Telugu and code-mixed chat.',
+  icons: { icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230f766e'/%3E%3C/svg%3E" },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

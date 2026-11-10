@@ -104,76 +104,64 @@ Evaluating isolated social media comments fails when toxicity depends on convers
 
 ## 🚀 Quick Start
 
+### Train (on any NVIDIA GPU machine — see [docs/TRAINING_GUIDE.md](docs/TRAINING_GUIDE.md))
+
 ```bash
 pip install -r requirements.txt
-python run_pipeline.py --download-only            # all public; Jigsaw falls back to google/civil_comments
-python run_pipeline.py --stage1 --stage2 --stage3 --stage4
-python run_pipeline.py --evaluate --baselines --demo
-python app/server.py                              # http://localhost:7860
-python -m pytest tests -q                         # core regression tests (no GPU / network)
+python run_pipeline.py --check-env      # GPU, disk, internet, other GPU processes
+python run_pipeline.py --all            # download → stages 1-4 → release → evaluation → baselines
+python run_pipeline.py --all --resume   # continue after any interruption
 ```
 
-**Adding your own (Telugu) dataset:** put a `.csv` / `.jsonl` / `.parquet` file in `data/raw/custom/` with a `text` column and
-either a `label` column (0/1 or class names such as `Hate` / `Non-Hate`) or any of
-`toxic, severe_toxic, identity_attack, insult, threat`. Optional: `context` (earlier turns, oldest first, one per line),
-`topic`, `split` (`train`/`val`/`test`). Re-run `--download-only`; the file is then used by Stage 3, Stage 4 replay,
-the held-out evaluation and the baselines automatically. Check the logged label mapping.
+Batch size and memory savers are picked automatically for the GPU (`src/hardware.py`). Every stage saves a resume point
+each epoch and a `DONE` marker when finished. After Stage 4, the better of Stage 3 / Stage 4 *on real validation data*
+is copied to `models/checkpoints/release/`, which is what the app serves (~0.6 GB, fp16).
+`--preset quick` runs the whole pipeline on tiny subsets in a few minutes (its model is not usable).
 
-`python run_pipeline.py --all --quick-run` is a fast smoke test of the code on tiny subsets (its checkpoints are not usable models).
-Paths, thresholds and hyper-parameters are in `src/config.py`; lexicons, demo scenarios and evaluation slices are JSON files in `src/resources/`.
-
-### Original setup notes
-
-### 1. Installation
+### Run the app
 
 ```bash
-git clone https://github.com/RathanPaida/Context_Aware_Toxicity_Classifier_telugu.git
-cd Context_Aware_Toxicity_Classifier_telugu
-pip install -r requirements.txt
+python app/server.py                    # http://localhost:7860  (no Node needed)
+# or the Next.js version, same screens:
+cd frontend && npm install && npm run dev   # http://localhost:3000  (needs the Python server running)
 ```
 
-### 2. Launch the Application
+Both interfaces have the same three screens:
 
-#### Option A: Next.js Frontend + FastAPI Backend (Recommended)
-1. Start the FastAPI backend server:
+- **Check a message** — add the earlier messages (optional) and the message to check. You get *Allowed / Flagged /
+  Needs review*, a one-sentence reason, the harm score against the decision line, scores per type of harm, and
+  (optionally) the same message checked *without* the earlier messages side by side.
+- **Conversation** — a chat where every new message is checked with the ones before it; examples play out turn by turn
+  and show expected vs. actual.
+- **Results** — trained stages, evaluation and the comparison with simple baselines, read from `reports/`.
+
+Without a trained model the app says so (only the word list works). `ALLOW_UNTRAINED=1` serves a random model for UI
+work and is shown with a red warning banner.
+
+### Tests
+
 ```bash
-python app/server.py
-```
-2. Start the modern Next.js frontend (in a separate terminal):
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Open your browser and navigate to:
-```
-http://localhost:3000/
+python -m pytest tests -q               # no GPU / network needed
 ```
 
-#### Option B: Standalone FastAPI Glassmorphic Web App
-```bash
-python app/server.py
-```
-Navigate to:
-```
-http://localhost:7860/
-```
+### Adding your own (Telugu) dataset
 
-### 3. Run in Jupyter Notebook / Google Colab
-Open [`Indic_Shield_AI_Complete_Pipeline.ipynb`](Indic_Shield_AI_Complete_Pipeline.ipynb) directly in Jupyter, VS Code, or Google Colab:
-- Fully self-contained pipeline execution (data loading, preprocessing, 8-head attention model, training, and evaluation).
-- Interactive Matplotlib/Seaborn token saliency attention heatmaps.
-```bash
-jupyter notebook Indic_Shield_AI_Complete_Pipeline.ipynb
-```
+Put a `.csv` / `.jsonl` / `.parquet` file in `data/raw/custom/` with a `text` column and either a `label` column
+(0/1 or class names such as `Hate` / `Non-Hate`) or any of `toxic, severe_toxic, identity_attack, insult, threat`.
+Optional: `context` (earlier turns, oldest first, one per line), `topic`, `split` (`train`/`val`/`test`). Re-run
+`--download-only`; the file is then used by Stage 3, Stage 4 replay, the held-out evaluation and the baselines
+automatically. Check the logged label mapping.
 
-### 4. Features in the Web App
-- **Interactive Multi-Turn Thread Simulator:** Test live conversational chat streams with dynamic real-time moderation verdicts.
-- **Multi-Head Attention Token Heatmap:** Visualizes token-level attention saliency weights with color intensity (cyan for target, purple for context).
-- **Context Influence Metric:** Real-time telemetry reporting the exact percentage influence of preceding conversational history.
-- **Interactive Preset Scenarios:** 1-click simulations for gaming banter, zero-cuss violent threats, political incitement, and parent bleed.
-- **Single Utterance Deep-Dive:** Direct side-by-side contrast of the same utterance with vs. without parent context.
-- **5-Label Risk Telemetry:** Real-time probability breakdown across *toxicity*, *severe toxicity*, *insult*, *identity attack*, and *threat*.
+Native-script Telugu data automatically gets a Romanized copy (`చంపేసావ్ పో!` → `champesav po!`) so the model also
+learns Telugu typed in English letters; turn this off with `--no-romanize`.
+
+Paths, thresholds and hyper-parameters are in `src/config.py`; word lists, demo scenarios and evaluation slices are
+JSON files in `src/resources/`.
+
+### Notebook
+
+[`Indic_Shield_AI_Complete_Pipeline.ipynb`](Indic_Shield_AI_Complete_Pipeline.ipynb) imports from `src/` and shows the
+data, the model inputs, the measured results and an attention view for any message.
 
 ---
 
@@ -214,27 +202,25 @@ The contextual slices (`src/resources/eval_slices.json`) are small hand-written 
 
 ```
 ├── app/
-│   ├── server.py             # FastAPI backend with REST endpoints
-│   └── static/
-│       ├── app.js            # Client-side dynamic interaction & telemetry
-│       ├── index.html        # Modern responsive dark glassmorphic UI
-│       └── style.css         # CSS design system & micro-animations
+│   ├── server.py                 # FastAPI: /api/moderate, /api/health, /api/benchmarks, /api/baselines, /api/scenarios
+│   └── static/                   # web page served at :7860 (index.html, app.js, style.css — no build step)
+├── frontend/                     # Next.js version of the same page (src/components/*, src/lib/api.js)
 ├── src/
-│   ├── config.py             # Global hyperparams, paths, and labels
-│   ├── data_downloader.py    # Zero-gated open dataset ingestion
-│   ├── evaluation.py         # Evaluation slices + held-out test metrics → reports/eval_results.json
-│   ├── training_utils.py     # Shared training loop, metrics, threshold tuning
-│   ├── resources/            # lexicons.json, scenarios.json, eval_slices.json, stage4_synthetic.json
-│   ├── inference_pipeline.py # Production Two-Stage Moderation Cascade
-│   ├── model.py              # Cross-Encoder with 8-Head MHA & Attentive Pooling
-│   ├── preprocessing.py      # De-obfuscation & IndicNLP normalization
-│   ├── stage1_context_mechanics.py # Stage 1 English thread training
-│   ├── stage2_telugu_mlm.py        # Stage 2 Telugu MLM domain adaptation
-│   ├── stage3_codemix_slang.py     # Stage 3 Dravidian code-mixed training
-│   └── stage4_synthetic_fusion.py  # Stage 4 Contrastive thread fusion
-├── run_pipeline.py           # Master execution script for stages 1-4
-├── requirements.txt          # Python dependencies
-└── README.md                 # Project documentation
+│   ├── config.py                 # paths, presets, hyper-parameters, thresholds
+│   ├── hardware.py               # GPU detection → training settings; --check-env
+│   ├── data_downloader.py        # public datasets + data/raw/custom/ → data/processed/
+│   ├── preprocessing.py          # de-obfuscation, normalisation, Romanized-Telugu conversion
+│   ├── model.py                  # cross-encoder, input assembly, fp16/atomic checkpoints
+│   ├── training_utils.py         # shared training loop, metrics, threshold tuning, resume
+│   ├── stage1_context_mechanics.py … stage4_synthetic_fusion.py
+│   ├── evaluation.py             # release selection + evaluation → reports/eval_results.json
+│   ├── baselines.py              # word list / TF-IDF / model + context ablation → reports/baselines.json
+│   ├── inference_pipeline.py     # word-list gate + model, used by the server
+│   └── resources/                # lexicons, demo scenarios, evaluation slices, Stage 4 pairs (JSON)
+├── tests/                        # pytest, no GPU / network
+├── docs/TRAINING_GUIDE.md        # how to train on another computer
+├── run_pipeline.py               # one command for everything
+└── requirements.txt
 ```
 
 ---

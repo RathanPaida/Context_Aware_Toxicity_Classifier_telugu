@@ -22,7 +22,7 @@ from src.training_utils import ToxicityDataset, train_classifier
 logger = get_logger("stage1_training")
 
 
-def train_stage1(config: Optional[Stage1Config] = None, model_name: str = PRIMARY_MODEL):
+def train_stage1(config: Optional[Stage1Config] = None, model_name: str = PRIMARY_MODEL, resume: bool = False):
     config = config or Stage1Config()
     train_path, val_path = PROCESSED_DIR / "stage1_train.parquet", PROCESSED_DIR / "stage1_val.parquet"
     if not train_path.exists():
@@ -47,6 +47,7 @@ def train_stage1(config: Optional[Stage1Config] = None, model_name: str = PRIMAR
         model, tokenizer, train_ds, val_ds, config,
         save_dir=CHECKPOINT_DIR / "stage1_best", stage="stage1",
         extra_metadata={"data": "toxic-chat + jigsaw", "train_rows": len(train_df)},
+        resume=resume,
     )
     logger.info(f"Stage 1 done. Best val macro-F1 (tuned): {metrics.get('macro_f1@threshold', float('nan')):.4f}")
     return metrics

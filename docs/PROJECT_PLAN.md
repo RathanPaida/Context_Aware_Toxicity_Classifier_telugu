@@ -1,9 +1,11 @@
 # Project Completion Plan — Context-Aware Telugu Toxicity Classifier
 
-Status after the refactor (2026-11-03). The code now runs end to end. The full
-curriculum (stages 1–4, evaluation, demo, API) was smoke-tested with a tiny test
-model on synthetic data. **No real model has been trained yet**, so no metric
-should be quoted until Phase 3 below is done.
+Status (2026-11-10). The code runs end to end and is ready for the long training run on another
+machine: `python run_pipeline.py --all` (see [TRAINING_GUIDE.md](TRAINING_GUIDE.md)). Verified here:
+the whole pipeline with a tiny test model, crash + `--resume`, and a real IndicBERT run on the RTX 3050
+(2.66 GB peak VRAM with the auto-profile, 0.58 GB checkpoint that reloads). **No real model has been
+trained yet**: the app's earlier wrong predictions came from `ALLOW_UNTRAINED=1` (a random model).
+Do not quote metrics until Phase 3 is done.
 
 ---
 
@@ -65,23 +67,23 @@ toxic-chat 9.7k, Jigsaw via `google/civil_comments` 60k sample (all 5 labels), D
    - split 50/50 into `stage4_synthetic.json` (train) and `eval_slices.json` (test), **split by target phrase**, so no target appears in both.
 5. Have a native speaker review `src/resources/lexicons.json` (severe vs mild tiers) and the 6 new de-escalation replies in `stage4_synthetic.json`.
 
-## Phase 2 — Training on an RTX 3050 6 GB (2–4 days of compute)
+## Phase 2 — Training (unattended, on a friend's GPU machine)
 
-IndicBERTv2 is about 278M parameters; full fine-tuning with AdamW is close to the 6 GB limit.
+Follow [TRAINING_GUIDE.md](TRAINING_GUIDE.md). In short: `--check-env`, then `--all` (add `--resume` after any
+interruption), then copy `models/checkpoints/release/` and `reports/` back. Expected ~10 h on a 4–6 GB GPU,
+~5 h on 8–12 GB.
 
-0. Close other GPU users first (browser hardware acceleration, Jupyter kernels holding CUDA, old training runs) — a
-   first test run ran out of memory because an orphaned training process still held ~4 GB.
-   Embeddings are frozen by default (`TrainConfig.freeze_embeddings`): IndicBERTv2's 250k-token embedding table is
-   ~190M of its 290M parameters, and training it does not fit in 6 GB. Trainable params: 97.7M.
-   If it still does not fit: `gradient_checkpointing=True` in `TrainConfig`, then `--batch-size 4`.
-1. Start with a 1k-row timing run to measure speed and memory:
-   `python run_pipeline.py --stage1 --max-samples 1000 --epochs 1 --batch-size 8`
-2. If it runs out of memory: `--batch-size 4`, set `gradient_accumulation_steps=4` in `Stage1Config`, or `freeze_ratio=0.25`. `MAX_SEQ_LENGTH=256` is already set (was 512).
-3. Stage 1: use `--jigsaw-sample 60000` during download if 200k is too slow. 1–2 epochs.
-4. Stage 2 (MLM): `--max-steps 3000 --telugu-sample 50000` is a reasonable budget. Check that perplexity decreases in the log.
-5. Stage 3: default 4 epochs with early stopping. Watch the per-label log lines; labels with "no positives in split" are not learned.
-6. Stage 4: only after Phase 1.4 provides enough pairs; with the current 10 templates it mainly checks that the code works.
-7. Keep every run's `metadata.json` (it stores the data, thresholds and metrics) for the report.
+Built in, so nothing needs hand-tuning:
+- batch size / gradient accumulation / gradient checkpointing / frozen embeddings chosen from the GPU size
+  (`src/hardware.py`); effective batch is always 32;
+- full-data preset with early stopping on every stage (`PRESETS["full"]` in `src/config.py`);
+- fp16, atomic checkpoints with a disk-space check; only one checkpoint per stage on disk;
+- resume point every epoch (Stage 2: every evaluation); finished stages are skipped on `--resume`;
+- release selection: Stage 4 is served only if it does not lower macro-F1 on the *real* validation data;
+- Romanized copies of the native-script Telugu data, for Tanglish input.
+
+After the run, check in `models/checkpoints/*/metadata.json` that val macro-F1 went up from Stage 1 → 3, and
+in the log that Stage 2 perplexity went down.
 
 ## Phase 3 — Evaluation & error analysis (2 days)
 
@@ -97,9 +99,13 @@ IndicBERTv2 is about 278M parameters; full fine-tuning with AdamW is close to th
 
 ## Phase 4 — Application (1 day)
 
-1. `python app/server.py`. Health should show `ready: true` and the checkpoint stage.
-2. Next.js: `cd frontend && npm install && npm run dev` (set `BACKEND_URL` if the API is not on 127.0.0.1:7860). Only a syntax check was run after the edit, not `npm run build`.
-3. Update `src/resources/scenarios.json` so every demo scenario is one the trained model actually gets right, or show mismatches openly.
+1. ~~Redesign both interfaces~~ — done (2026-11-10): same three screens (Check a message / Conversation / Results)
+   in `app/static/` and `frontend/`, plain-language verdicts (Allowed / Flagged / Needs review) with reasons, a
+   with-vs-without-context comparison, neutral design without gradients. Both tested in Chrome at desktop, phone and
+   dark mode with no console errors; `npm run build` passes.
+2. After training: `python app/server.py`. The header should read **Model ready · stage…**.
+3. The demo examples (`src/resources/scenarios.json`) show *expected vs. actual*. Keep the mismatches visible rather
+   than hiding them, and discuss them in the report.
 
 ## Phase 5 — Notebook, report, cleanup (1–2 days)
 

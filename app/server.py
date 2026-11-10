@@ -33,7 +33,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from src.config import CHECKPOINT_DIR, EVAL_RESULTS_PATH, SCENARIOS_PATH, TOXICITY_LABELS, get_logger
+from src.config import (
+    CHECKPOINT_DIR, EVAL_RESULTS_PATH, LABEL_DISPLAY_NAMES, REPORTS_DIR, SCENARIOS_PATH, TOXICITY_LABELS, get_logger,
+)
 from src.inference_pipeline import ModelNotReadyError, TwoStageModerationPipeline
 from src.model import read_checkpoint_metadata
 
@@ -81,7 +83,8 @@ def _require_pipeline() -> TwoStageModerationPipeline:
 @app.get("/api/health")
 def health_check():
     p = pipeline
-    info = p.info() if p else {"ready": False, "status": "starting"}
+    info = p.info() if p else {"ready": False, "trained": False, "status": "starting",
+                               "label_display_names": LABEL_DISPLAY_NAMES}
     info["detail"] = info.pop("status")
     return {
         **info,
@@ -144,10 +147,11 @@ SLICE_INFO = {
 def get_benchmarks():
     """Measured results from `python run_pipeline.py --evaluate` (reports/eval_results.json)."""
     stages = []
-    for i, name in enumerate(["stage1_best", "stage2_best", "stage3_best", "stage4_best"], start=1):
+    for i, name in enumerate(["stage1_best", "stage2_best", "stage3_best", "stage4_best", "release"], start=1):
         meta = read_checkpoint_metadata(CHECKPOINT_DIR / name)
         if not meta:
-            stages.append({"stage": i, "name": name, "data": "-", "metric": "not trained", "checkpoint": name})
+            stages.append({"stage": i if name != "release" else "★", "name": name, "data": "-",
+                           "metric": "not trained" if name != "release" else "not selected yet", "checkpoint": name})
             continue
         vm = meta.get("val_metrics", {})
         if "macro_f1@threshold" in vm:
@@ -158,11 +162,13 @@ def get_benchmarks():
             metric = f"val PPL {meta['perplexity']:.1f}"
         else:
             metric = "trained"
-        stages.append({"stage": i, "name": name, "data": meta.get("data", "-"), "metric": metric,
+        if name == "release":
+            metric = f"serving {meta.get('release', {}).get('source', '?')} | " + metric
+        stages.append({"stage": i if name != "release" else "★", "name": name, "data": meta.get("data", "-"), "metric": metric,
                        "checkpoint": name, "trained_at": meta.get("timestamp")})
 
     if not EVAL_RESULTS_PATH.exists():
-        return {"evaluated": False, "message": "No evaluation results yet — run `python run_pipeline.py --evaluate`.",
+        return {"evaluated": False, "message": "No evaluation results yet — run: python run_pipeline.py --evaluate",
                 "slices": [], "training_stages": stages}
 
     res = json.loads(EVAL_RESULTS_PATH.read_text(encoding="utf-8"))
@@ -183,6 +189,15 @@ def get_benchmarks():
             "gate": "-", "status": "MEASURED", "passed": True,
         })
     return {"evaluated": True, "evaluated_at": res.get("evaluated_at"), "slices": slices, "training_stages": stages}
+
+
+@app.get("/api/baselines")
+def get_baselines():
+    """Lexicon vs TF-IDF vs model + context ablation from `python run_pipeline.py --baselines`."""
+    path = REPORTS_DIR / "baselines.json"
+    if not path.exists():
+        return {"available": False, "message": "No baseline results yet — run: python run_pipeline.py --baselines"}
+    return {"available": True, **json.loads(path.read_text(encoding="utf-8"))}
 
 
 @app.get("/api/scenarios")

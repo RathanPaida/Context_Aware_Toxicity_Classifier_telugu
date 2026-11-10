@@ -35,7 +35,7 @@ CACHE_DIR = DATA_DIR / "cache"
 MODEL_DIR = _env_path("INDIC_SHIELD_MODEL_DIR", PROJECT_ROOT / "models")
 CHECKPOINT_DIR = MODEL_DIR / "checkpoints"
 LOG_DIR = _env_path("INDIC_SHIELD_LOG_DIR", PROJECT_ROOT / "logs")
-REPORTS_DIR = PROJECT_ROOT / "reports"   # evaluation results consumed by the web app
+REPORTS_DIR = _env_path("INDIC_SHIELD_REPORTS_DIR", PROJECT_ROOT / "reports")  # results consumed by the web app
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"  # lexicons, demo scenarios
 
 EVAL_RESULTS_PATH = REPORTS_DIR / "eval_results.json"
@@ -63,9 +63,13 @@ PRIMARY_MODEL = os.environ.get("INDIC_SHIELD_MODEL", "ai4bharat/IndicBERTv2-MLM-
 FALLBACK_MODEL = "google/muril-base-cased"
 TRANSLITERATION_MODEL = "ai4bharat/indic-xlit"  # en→te engine
 
-# Checkpoint names, in the order the curriculum produces them.
-# Inference / evaluation load the most advanced one that exists.
-CHECKPOINT_PRIORITY = ["stage4_best", "stage3_best", "stage1_best"]
+# Checkpoint names. `release` is written by evaluation.select_release_checkpoint() after Stage 4
+# (the better of stage3/stage4 on *real* validation data); inference prefers it, then falls back
+# to the most advanced stage that exists.
+RELEASE_CHECKPOINT = "release"
+CHECKPOINT_PRIORITY = [RELEASE_CHECKPOINT, "stage4_best", "stage3_best", "stage1_best"]
+DONE_MARKER = "DONE"                 # written into a stage's checkpoint dir when the stage finished
+MIN_FREE_DISK_GB = float(os.environ.get("INDIC_SHIELD_MIN_DISK_GB", 15))  # --check-env fails below this
 
 
 # ─────────────────────── Dataset Identifiers ─────────────────────
@@ -149,6 +153,10 @@ TARGET_PREFIX = "Target:"
 # ──────────────────── Label Mappings ─────────────────────────────
 # Unified multi-label toxicity schema
 TOXICITY_LABELS = ["toxic", "severe_toxic", "identity_attack", "insult", "threat"]
+LABEL_DISPLAY_NAMES = {
+    "toxic": "Toxic", "severe_toxic": "Severe", "identity_attack": "Identity attack",
+    "insult": "Insult", "threat": "Threat",
+}
 LABEL2ID = {label: idx for idx, label in enumerate(TOXICITY_LABELS)}
 ID2LABEL = {idx: label for idx, label in enumerate(TOXICITY_LABELS)}
 
@@ -231,6 +239,10 @@ class Stage2Config:
     save_steps: int = 2000
     eval_steps: int = 1000
     num_workers: int = 0               # >0 is unreliable on Windows
+    freeze_embeddings: bool = False    # set by the hardware profile on small GPUs
+    gradient_checkpointing: bool = False
+    gradient_accumulation_steps: int = 1
+    early_stopping_patience: int = 3   # evals without improvement before stopping
 
 
 @dataclass
@@ -252,15 +264,24 @@ class Stage4Config(TrainConfig):
     topic_dropout: float = 0.5         # drop the topic string so the model can't shortcut on it
 
 
-# Settings used by `run_pipeline.py --quick-run` (smoke test, not real training)
-QUICK_RUN = {
-    "stage1_max_samples": 2000,
-    "stage1_epochs": 1,
-    "stage2_max_steps": 100,
-    "stage2_sample_size": 2000,
-    "stage3_max_samples": 1500,
-    "stage3_epochs": 1,
-    "stage4_epochs": 2,
+# ──────────────────── Run presets ────────────────────────────────
+# `full`  — real training (unattended; early stopping ends stages that stop improving).
+# `quick` — smoke test of the code on tiny subsets; its checkpoints are NOT usable models.
+PRESETS = {
+    "full": {
+        "jigsaw_sample": 200_000, "telugu_sample": 200_000,
+        "stage1_epochs": 3, "stage1_max_samples": None,
+        "stage2_max_steps": 20_000, "stage2_eval_steps": 1_000,
+        "stage3_epochs": 6, "stage3_max_samples": None,
+        "stage4_epochs": 5, "stage4_replay": 4_000,
+    },
+    "quick": {
+        "jigsaw_sample": 5_000, "telugu_sample": 2_000,
+        "stage1_epochs": 1, "stage1_max_samples": 2_000,
+        "stage2_max_steps": 100, "stage2_eval_steps": 50,
+        "stage3_epochs": 1, "stage3_max_samples": 1_500,
+        "stage4_epochs": 2, "stage4_replay": 200,
+    },
 }
 
 
@@ -284,6 +305,8 @@ class InferenceConfig:
     # Lexicon gate
     lexicon_fast_exit: bool = True     # skip the model for unambiguous severe slurs w/o context
     lexicon_flag_score: float = 0.97   # reported score for a lexicon fast-exit
+    # Model scores within this distance of the toxic threshold are marked "needs review"
+    review_margin: float = 0.10
     # Thread cache
     cache_ttl_seconds: int = 1800
     redis_host: str = os.environ.get("REDIS_HOST", "localhost")

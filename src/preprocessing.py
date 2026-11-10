@@ -144,6 +144,32 @@ _ENGLISH_STOPWORDS = frozenset({
 _TELUGU_RANGE = range(0x0C00, 0x0C80)
 
 
+def romanize_telugu(text: str) -> str:
+    """
+    Native Telugu → colloquial Romanized Telugu ("Tanglish" spelling), e.g.
+    "చంపేసావ్ పో!" → "champesav po!", "నువ్వు చాలా" → "nuvvu chala".
+
+    Rule-based (indic-transliteration ITRANS, then simplified the way people type: no long-vowel
+    marks, anusvara → m/n, no diacritics). Used to create Romanized training copies of native-script
+    data. Returns the text unchanged if the package is missing or the text has no Telugu letters.
+    """
+    if not text or not any(ord(ch) in _TELUGU_RANGE for ch in text):
+        return text
+    try:
+        from indic_transliteration import sanscript
+        from indic_transliteration.sanscript import transliterate
+    except ImportError:
+        return text
+    s = transliterate(text, sanscript.TELUGU, sanscript.ITRANS)
+    s = re.sub(r"M(?=[pbmPB]|\b|$)", "m", s)     # anusvara before labials / at word end ("visham")
+    s = s.replace("M", "n").replace("~N", "n").replace("~n", "n").replace(".N", "n")
+    s = s.replace("R^i", "ru").replace("RRi", "ru").replace(".h", "").replace("H", "h")
+    s = s.replace("A", "a").replace("I", "i").replace("U", "u").replace("E", "e").replace("O", "o")
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))  # è → e, ò → o
+    return _MULTI_SPACE.sub(" ", s.lower()).strip()
+
+
 def _is_telugu_script(word: str) -> bool:
     """Check if a word is already in Telugu (Devanagari-adjacent) script."""
     return any(ord(ch) in _TELUGU_RANGE for ch in word)
