@@ -1,0 +1,64 @@
+{
+  "status": "implementation_verified_real_context_training_blocked_by_network",
+  "tests": {
+    "command": "python -m pytest tests -q --tb=short",
+    "passed": 47,
+    "failed": 0,
+    "seconds": 34.63
+  },
+  "notebook": {
+    "path": "Context_Aware_Toxicity.ipynb",
+    "schema_valid": true,
+    "all_code_cells_executed_in_order": true,
+    "execution_method": "Same Python process, working directory notebooks/, offline tiny model and synthetic graph fixtures",
+    "real_jupyter_kernel_verified": false,
+    "kernel_limitation": "Local socket creation blocks in this managed Windows runtime"
+  },
+  "frontend": {
+    "command": "npm run build",
+    "status": "passed"
+  },
+  "real_encoder": {
+    "model": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+    "revision": "bb783337859e3d7957de5ba82766ddea51e8fc3e",
+    "device": "cuda",
+    "embedding_shape": [
+      4,
+      768
+    ],
+    "finite": true,
+    "english_and_telugu_checked": true,
+    "long_paragraph_tail_changes_embedding": true
+  },
+  "api": {
+    "request_schema_and_handlers": "passed",
+    "live_http_verified": false,
+    "limitation": "TestClient event loop blocks creating localhost socketpair; inspected stack and stopped checks"
+  },
+  "data": {
+    "download_command": "python run_pipeline.py --download",
+    "download_succeeded": false,
+    "reason": "DNS lookup for zissou.infosci.cornell.edu failed (getaddrinfo 11001)",
+    "expected_archive": "data/raw/contextual/cga-wiki.zip",
+    "download_url": "https://zissou.infosci.cornell.edu/convokit/datasets/conversations-gone-awry-corpus/conversations-gone-awry-corpus.zip"
+  },
+  "production_checkpoint_created": false,
+  "real_contextual_accuracy_measured": false,
+  "synthetic_fixtures_are_software_tests_only": true,
+  "path_checks": [
+    "Project paths independent of cwd",
+    "CLI --help from app/ succeeds",
+    "Notebook cells run from notebooks/"
+  ],
+  "preserved_existing_edits": [
+    "Indic_Shield_AI_Complete_Pipeline.ipynb",
+    "src/evaluation.py",
+    "reports/baselines.json",
+    "notebooks/",
+    "reports/eval_results.json"
+  ],
+  "next_run_with_network": [
+    "python -m pip install -r requirements-contextual.txt",
+    "python run_pipeline.py --all"
+  ]
+}

@@ -1,50 +1,52 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import StatusBar from '../components/StatusBar';
-import CheckMessage from '../components/CheckMessage';
-import Conversation from '../components/Conversation';
-import ResultsView from '../components/ResultsView';
-import About from '../components/About';
-import { DEFAULT_LABELS, api } from '../lib/api';
+import { useEffect, useState } from "react";
 
-const TABS = [
-  ['check', 'Check a message'],
-  ['conversation', 'Conversation'],
-  ['results', 'Results'],
-  ['about', 'About'],
-];
-
-export default function Home() {
-  const [tab, setTab] = useState('check');
+export default function ContextAwareApp() {
+  const [text, setText] = useState("");
+  const [history, setHistory] = useState("");
   const [health, setHealth] = useState(null);
-  const [scenarios, setScenarios] = useState([]);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const refresh = () => api('/api/health').then(setHealth);
-    refresh();
-    api('/api/scenarios').then((r) => r.ok && setScenarios(r.data));
-    const id = setInterval(refresh, 30000);
-    return () => clearInterval(id);
+    fetch("/api/health").then(r => r.json()).then(setHealth).catch(e => setError(e.message));
   }, []);
 
-  const labels = { ...DEFAULT_LABELS, ...(health && health.ok ? health.data.label_display_names : {}) };
+  async function analyze(event) {
+    event.preventDefault();
+    setBusy(true); setError(""); setResult(null);
+    try {
+      const response = await fetch("/api/moderate", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, history: history.split("\n").filter(t => t.trim()) })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+      setResult(data);
+    } catch (e) { setError(e.message); }
+    finally { setBusy(false); }
+  }
 
   return (
-    <div className="shell">
-      <StatusBar health={health} />
-      <nav className="tabs" role="tablist" aria-label="Sections">
-        {TABS.map(([id, label]) => (
-          <button key={id} className="tab" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}</button>
-        ))}
-      </nav>
-      <main>
-        {/* Keep the first two views mounted so typed input and the chat survive tab switches. */}
-        <section hidden={tab !== 'check'} role="tabpanel"><CheckMessage scenarios={scenarios} labels={labels} /></section>
-        <section hidden={tab !== 'conversation'} role="tabpanel"><Conversation scenarios={scenarios} labels={labels} /></section>
-        {tab === 'results' && <section role="tabpanel"><ResultsView /></section>}
-        {tab === 'about' && <section role="tabpanel"><About /></section>}
-      </main>
-    </div>
+    <main style={{ maxWidth: "850px", margin: "4rem auto", padding: "2rem" }}>
+      <h1>Context-aware toxicity</h1>
+      <p>Individual message embeddings. Learned parent?child context. No conversation category to select.</p>
+      <p role="status">{health ? (health.ready ? "Trained model ready" : health.detail || "Model unavailable") : "Checking model?"}</p>
+      <form onSubmit={analyze} style={{ display: "grid", gap: "1rem" }}>
+        <label htmlFor="history">Parent messages, oldest first (one per line)</label>
+        <textarea id="history" rows={5} value={history} onChange={e => setHistory(e.target.value)} />
+        <label htmlFor="target">Target message or paragraph</label>
+        <textarea id="target" rows={4} required value={text} onChange={e => setText(e.target.value)} />
+        <button disabled={busy || !health?.ready}>{busy ? "Analyzing?" : "Analyze"}</button>
+      </form>
+      {error && <p role="alert">{error}</p>}
+      {result && <section aria-live="polite">
+        <h2>{result.is_toxic ? "Flagged target" : "Target below threshold"}</h2>
+        <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{JSON.stringify(result, null, 2)}</pre>
+      </section>}
+      <p>The result refers to the target message. Scores are not calibrated confidence estimates, and attention is not a causal explanation.</p>
+    </main>
   );
 }

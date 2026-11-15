@@ -121,7 +121,12 @@ def run_evaluation_suite(pipeline: Optional[TwoStageModerationPipeline] = None,
     test_frames = []
     for p in indic_supervised_sources():
         d = pd.read_parquet(p)
-        test_frames.append(d[d["split"] == "test"])
+        if "split" in d.columns:
+            test_frames.append(d[d["split"] == "test"])
+        else:
+            from src.data_downloader import _hash_split
+            s = _hash_split(d["text"].astype(str))
+            test_frames.append(d[s == "test"])
     if test_frames:
         test_df = pd.concat(test_frames, ignore_index=True)
         ds = ToxicityDataset(test_df, pipeline.tokenizer, pipeline.max_len,

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Context-aware toxicity</title>
+<style>body{font:1rem system-ui;background:#101827;color:#e7edf7;max-width:850px;margin:4rem auto;padding:1.5rem}textarea{box-sizing:border-box;width:100%;padding:1rem;margin:.5rem 0 1.5rem;background:#1b293c;color:inherit;border:1px solid #6e819b;border-radius:.5rem}button{padding:.8rem 1.5rem;background:#9de4ce;border:0;border-radius:.5rem;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}label{display:block}small{color:#b7c4d6}</style></head>
+<body><h1>Context-aware toxicity</h1><p>Write a message and its actual conversation history. The model learns context from the text itself.</p><p id="health">Checking trained model…</p>
+<form id="form"><label for="history">Parent messages, oldest first (one message per line)</label><textarea id="history" rows="5"></textarea><label for="text">Target message or paragraph</label><textarea id="text" rows="4" required></textarea><button id="submit">Analyze</button></form>
+<p><small>The score refers to the target message. A toxic parent does not automatically make its reply toxic. Scores are not calibrated confidence estimates.</small></p><pre id="result" aria-live="polite"></pre>
+<script>
+const output=document.getElementById('result');
+fetch('/api/health').then(r=>r.json()).then(d=>{document.getElementById('health').textContent=d.ready?'Trained model ready':d.detail||'Model unavailable';}).catch(e=>{document.getElementById('health').textContent=e.message;});
+document.getElementById('form').addEventListener('submit',async e=>{e.preventDefault();const button=document.getElementById('submit');button.disabled=true;output.textContent='Analyzing…';try{const response=await fetch('/api/moderate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:document.getElementById('text').value,history:document.getElementById('history').value.split('\n').filter(t=>t.trim())})});const data=await response.json();if(!response.ok)throw new Error(data.detail||response.statusText);output.textContent=JSON.stringify(data,null,2);}catch(err){output.textContent=String(err);}finally{button.disabled=false;}});
+</script></body></html>

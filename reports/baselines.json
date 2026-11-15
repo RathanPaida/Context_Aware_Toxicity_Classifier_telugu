@@ -1,18 +1,77 @@
 {
-  "n_test": 4610,
-  "test_toxic_rate": 0.25553145336225597,
+  "n_test": 5585,
+  "test_toxic_rate": 0.279319606087735,
   "methods": {
     "lexicon_only": {
-      "f1": 0.023411371237458192,
-      "precision": 0.7777777777777778,
-      "recall": 0.011884550084889643
+      "f1": 0.022770398481973434,
+      "precision": 0.8571428571428571,
+      "recall": 0.011538461538461539
     },
     "tfidf_logreg": {
-      "f1": 0.6878154289834174,
-      "precision": 0.5977443609022557,
-      "recall": 0.8098471986417657,
-      "roc_auc": 0.8945013673366814,
-      "threshold": 0.45
+      "f1": 0.721030042918455,
+      "precision": 0.6199261992619927,
+      "recall": 0.8615384615384616,
+      "roc_auc": 0.9126204809683071,
+      "threshold": 0.4
+    },
+    "trained_model": {
+      "f1": 0.4306532663316583,
+      "precision": 0.3541322314049587,
+      "recall": 0.5493589743589744,
+      "roc_auc": 0.6037917662048097,
+      "threshold": 0.5,
+      "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\stage4_best"
     }
+  },
+  "context_ablation": {
+    "contrastive_flip_with_context": 0.8333333333333334,
+    "mean_prob_shift_toxic_minus_safe_parent": 0.49321666666666664,
+    "pairs_where_toxic_parent_raises_score": 6,
+    "n_pairs": 6,
+    "parent_bleed_mean_prob_increase": -0.14144166666666666,
+    "rows": [
+      {
+        "target": "Champesav po!",
+        "p_no_context": 0.4782,
+        "p_safe_parent": 0.1486,
+        "p_toxic_parent": 0.7307,
+        "flip_correct": true
+      },
+      {
+        "target": "Vesey inka",
+        "p_no_context": 0.7394,
+        "p_safe_parent": 0.1144,
+        "p_toxic_parent": 0.8135,
+        "flip_correct": true
+      },
+      {
+        "target": "Thokkestha andarni",
+        "p_no_context": 0.8064,
+        "p_safe_parent": 0.6968,
+        "p_toxic_parent": 0.7901,
+        "flip_correct": false
+      },
+      {
+        "target": "Ninnu vadalanu ra",
+        "p_no_context": 0.7007,
+        "p_safe_parent": 0.3776,
+        "p_toxic_parent": 0.709,
+        "flip_correct": true
+      },
+      {
+        "target": "Baddal baashingalu aipothayi",
+        "p_no_context": 0.8074,
+        "p_safe_parent": 0.0955,
+        "p_toxic_parent": 0.797,
+        "flip_correct": true
+      },
+      {
+        "target": "చంపేసావ్ పో!",
+        "p_no_context": 0.7796,
+        "p_safe_parent": 0.1367,
+        "p_toxic_parent": 0.6886,
+        "flip_correct": true
+      }
+    ]
   }
 }

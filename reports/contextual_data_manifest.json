@@ -1,0 +1,31 @@
+{
+  "examples": 78839,
+  "real_context_examples": 14598,
+  "cga_skipped_missing_ancestry": 2509,
+  "cga_skipped_empty_ancestry": 543,
+  "cga_skipped_invalid_ancestry": 177,
+  "splits": {
+    "train": 54960,
+    "val": 11893,
+    "test": 11986
+  },
+  "sources": [
+    {
+      "source": "cultural_safety_telugu",
+      "status": "loaded",
+      "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\cultural_safety_telugu.parquet"
+    },
+    {
+      "source": "dravidian_codemix_tamil",
+      "status": "loaded",
+      "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\dravidian_codemix.parquet"
+    }
+  ],
+  "source_counts": {
+    "cga_wiki": 22959,
+    "cultural_safety_telugu": 11961,
+    "dravidian_codemix_tamil": 43919
+  },
+  "split_policy": "New grouped splits; all shared message text and CGA articles stay in one split. Not the original benchmark splits.",
+  "task": "Binary target toxicity; CGA personal attacks and local toxicity labels are related but not identical constructs."
+}
