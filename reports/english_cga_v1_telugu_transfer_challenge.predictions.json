@@ -1,0 +1,920 @@
+[
+  {
+    "id": "custom_threads:te_deesc_01_2",
+    "group": "custom_threads:te_deesc_01",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.02915603990479174,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.0292111311275399,
+      "1": 0.02915603990479174,
+      "2": 0.02915603990479174,
+      "3": 0.02915603990479174,
+      "5": 0.02915603990479174,
+      "11": 0.02915603990479174
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_02_2",
+    "group": "custom_threads:te_deesc_02",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.04729598427421906,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.047315629592608,
+      "1": 0.04729598427421906,
+      "2": 0.04729598427421906,
+      "3": 0.04729598427421906,
+      "5": 0.04729598427421906,
+      "11": 0.04729598427421906
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_03_2",
+    "group": "custom_threads:te_deesc_03",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.040993690305305315,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.04100287644917578,
+      "1": 0.040993690305305315,
+      "2": 0.040993690305305315,
+      "3": 0.040993690305305315,
+      "5": 0.040993690305305315,
+      "11": 0.040993690305305315
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_04_2",
+    "group": "custom_threads:te_deesc_04",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03245432283956029,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.032614465968156536,
+      "1": 0.03245432283956029,
+      "2": 0.03245432283956029,
+      "3": 0.03245432283956029,
+      "5": 0.03245432283956029,
+      "11": 0.03245432283956029
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_05_2",
+    "group": "custom_threads:te_deesc_05",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03220104064320617,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03230402553680756,
+      "1": 0.03220104064320617,
+      "2": 0.03220104064320617,
+      "3": 0.03220104064320617,
+      "5": 0.03220104064320617,
+      "11": 0.03220104064320617
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_06_2",
+    "group": "custom_threads:te_deesc_06",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.031755641604161215,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.032968501130437804,
+      "1": 0.031755641604161215,
+      "2": 0.031755641604161215,
+      "3": 0.031755641604161215,
+      "5": 0.031755641604161215,
+      "11": 0.031755641604161215
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_07_2",
+    "group": "custom_threads:te_deesc_07",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.042225292245901366,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.0422854016675122,
+      "1": 0.042225292245901366,
+      "2": 0.042225292245901366,
+      "3": 0.042225292245901366,
+      "5": 0.042225292245901366,
+      "11": 0.042225292245901366
+    }
+  },
+  {
+    "id": "custom_threads:te_deesc_08_2",
+    "group": "custom_threads:te_deesc_08",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03135467638066325,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03136180907467201,
+      "1": 0.03135467638066325,
+      "2": 0.03135467638066325,
+      "3": 0.03135467638066325,
+      "5": 0.03135467638066325,
+      "11": 0.03135467638066325
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_champ_s2",
+    "group": "custom_threads:te_twin_champ_safe",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03886541264824163,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03912613640300523,
+      "1": 0.03886541264824163,
+      "2": 0.03886541264824163,
+      "3": 0.03886541264824163,
+      "5": 0.03886541264824163,
+      "11": 0.03886541264824163
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_champ_t2",
+    "group": "custom_threads:te_twin_champ_toxic",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.03902484855375778,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03912613640300523,
+      "1": 0.03902484855375778,
+      "2": 0.03902484855375778,
+      "3": 0.03902484855375778,
+      "5": 0.03902484855375778,
+      "11": 0.03902484855375778
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_champ_te_s2",
+    "group": "custom_threads:te_twin_champ_te_safe",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.2809214398054726,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.28090577868505784,
+      "1": 0.2809214398054726,
+      "2": 0.2809214398054726,
+      "3": 0.2809214398054726,
+      "5": 0.2809214398054726,
+      "11": 0.2809214398054726
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_champ_te_t2",
+    "group": "custom_threads:te_twin_champ_te_toxic",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.2809037074236519,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.28090577868505784,
+      "1": 0.2809037074236519,
+      "2": 0.2809037074236519,
+      "3": 0.2809037074236519,
+      "5": 0.2809037074236519,
+      "11": 0.2809037074236519
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_pani_s2",
+    "group": "custom_threads:te_twin_pani_safe",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.2290795237829075,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.2317815215398655,
+      "1": 0.2290795237829075,
+      "2": 0.2290795237829075,
+      "3": 0.2290795237829075,
+      "5": 0.2290795237829075,
+      "11": 0.2290795237829075
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_pani_t2",
+    "group": "custom_threads:te_twin_pani_toxic",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.22960987101095773,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.2317815215398655,
+      "1": 0.22960987101095773,
+      "2": 0.22960987101095773,
+      "3": 0.22960987101095773,
+      "5": 0.22960987101095773,
+      "11": 0.22960987101095773
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_pichi_s2",
+    "group": "custom_threads:te_twin_pichi_safe",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03929494113691352,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03901308287896417,
+      "1": 0.03929494113691352,
+      "2": 0.03929494113691352,
+      "3": 0.03929494113691352,
+      "5": 0.03929494113691352,
+      "11": 0.03929494113691352
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_pichi_t2",
+    "group": "custom_threads:te_twin_pichi_toxic",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.03904339277215503,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03901308287896417,
+      "1": 0.03904339277215503,
+      "2": 0.03904339277215503,
+      "3": 0.03904339277215503,
+      "5": 0.03904339277215503,
+      "11": 0.03904339277215503
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_pani_te_s2",
+    "group": "custom_threads:te_twin_pani_te_safe",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.16770356444403,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.1715178146748192,
+      "1": 0.16770356444403,
+      "2": 0.16770356444403,
+      "3": 0.16770356444403,
+      "5": 0.16770356444403,
+      "11": 0.16770356444403
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_pani_te_t2",
+    "group": "custom_threads:te_twin_pani_te_toxic",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.1679719641594536,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.1715178146748192,
+      "1": 0.1679719641594536,
+      "2": 0.1679719641594536,
+      "3": 0.1679719641594536,
+      "5": 0.1679719641594536,
+      "11": 0.1679719641594536
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_dengey_s2",
+    "group": "custom_threads:te_twin_dengey_safe",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.18555826975516337,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.18605790568999309,
+      "1": 0.18555826975516337,
+      "2": 0.18555826975516337,
+      "3": 0.18555826975516337,
+      "5": 0.18555826975516337,
+      "11": 0.18555826975516337
+    }
+  },
+  {
+    "id": "custom_threads:te_twin_dengey_t2",
+    "group": "custom_threads:te_twin_dengey_toxic",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.033789809881932274,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03370979507010354,
+      "1": 0.033789809881932274,
+      "2": 0.033789809881932274,
+      "3": 0.033789809881932274,
+      "5": 0.033789809881932274,
+      "11": 0.033789809881932274
+    }
+  },
+  {
+    "id": "custom_threads:te_quote_01_2",
+    "group": "custom_threads:te_quote_01",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.017594652680731262,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.01758577432441979,
+      "1": 0.017594652680731262,
+      "2": 0.017594652680731262,
+      "3": 0.017594652680731262,
+      "5": 0.017594652680731262,
+      "11": 0.017594652680731262
+    }
+  },
+  {
+    "id": "custom_threads:te_quote_02_2",
+    "group": "custom_threads:te_quote_02",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03241653663722273,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.032071578480875454,
+      "1": 0.03241653663722273,
+      "2": 0.03241653663722273,
+      "3": 0.03241653663722273,
+      "5": 0.03241653663722273,
+      "11": 0.03241653663722273
+    }
+  },
+  {
+    "id": "custom_threads:te_quote_03_2",
+    "group": "custom_threads:te_quote_03",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.12301323113724061,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.12264797387405701,
+      "1": 0.12301323113724061,
+      "2": 0.12301323113724061,
+      "3": 0.12301323113724061,
+      "5": 0.12301323113724061,
+      "11": 0.12301323113724061
+    }
+  },
+  {
+    "id": "custom_threads:te_quote_04_2",
+    "group": "custom_threads:te_quote_04",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.0337426877724898,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03368983707902552,
+      "1": 0.0337426877724898,
+      "2": 0.0337426877724898,
+      "3": 0.0337426877724898,
+      "5": 0.0337426877724898,
+      "11": 0.0337426877724898
+    }
+  },
+  {
+    "id": "custom_threads:te_meme_01_2",
+    "group": "custom_threads:te_meme_01",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.037367340833003526,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03737332411488414,
+      "1": 0.037367340833003526,
+      "2": 0.037367340833003526,
+      "3": 0.037367340833003526,
+      "5": 0.037367340833003526,
+      "11": 0.037367340833003526
+    }
+  },
+  {
+    "id": "custom_threads:te_meme_02_2",
+    "group": "custom_threads:te_meme_02",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.20617082124920655,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.2065035045740204,
+      "1": 0.20617082124920655,
+      "2": 0.20617082124920655,
+      "3": 0.20617082124920655,
+      "5": 0.20617082124920655,
+      "11": 0.20617082124920655
+    }
+  },
+  {
+    "id": "custom_threads:te_meme_03_2",
+    "group": "custom_threads:te_meme_03",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.031200755750580404,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03123053013329086,
+      "1": 0.031200755750580404,
+      "2": 0.031200755750580404,
+      "3": 0.031200755750580404,
+      "5": 0.031200755750580404,
+      "11": 0.031200755750580404
+    }
+  },
+  {
+    "id": "custom_threads:te_meme_04_2",
+    "group": "custom_threads:te_meme_04",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.04654917882516452,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.04655279142543145,
+      "1": 0.04654917882516452,
+      "2": 0.04654917882516452,
+      "3": 0.04654917882516452,
+      "5": 0.04654917882516452,
+      "11": 0.04654917882516452
+    }
+  },
+  {
+    "id": "custom_threads:te_meme_05_2",
+    "group": "custom_threads:te_meme_05",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.28830502390627233,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.2886088436818537,
+      "1": 0.28830502390627233,
+      "2": 0.28830502390627233,
+      "3": 0.28830502390627233,
+      "5": 0.28830502390627233,
+      "11": 0.28830502390627233
+    }
+  },
+  {
+    "id": "custom_threads:te_threat_01_2",
+    "group": "custom_threads:te_threat_01",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.04441461495726652,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.04432248154326625,
+      "1": 0.04441461495726652,
+      "2": 0.04441461495726652,
+      "3": 0.04441461495726652,
+      "5": 0.04441461495726652,
+      "11": 0.04441461495726652
+    }
+  },
+  {
+    "id": "custom_threads:te_threat_02_2",
+    "group": "custom_threads:te_threat_02",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.01566403722788984,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.015685284362899458,
+      "1": 0.01566403722788984,
+      "2": 0.01566403722788984,
+      "3": 0.01566403722788984,
+      "5": 0.01566403722788984,
+      "11": 0.01566403722788984
+    }
+  },
+  {
+    "id": "custom_threads:te_threat_03_2",
+    "group": "custom_threads:te_threat_03",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.03544681302964159,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.035579980981940706,
+      "1": 0.03544681302964159,
+      "2": 0.03544681302964159,
+      "3": 0.03544681302964159,
+      "5": 0.03544681302964159,
+      "11": 0.03544681302964159
+    }
+  },
+  {
+    "id": "custom_threads:te_threat_04_2",
+    "group": "custom_threads:te_threat_04",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.08162566197797128,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.08148841110750504,
+      "1": 0.08162566197797128,
+      "2": 0.08162566197797128,
+      "3": 0.08162566197797128,
+      "5": 0.08162566197797128,
+      "11": 0.08162566197797128
+    }
+  },
+  {
+    "id": "custom_threads:te_threat_05_2",
+    "group": "custom_threads:te_threat_05",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.037133889316470534,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03711730851501337,
+      "1": 0.037133889316470534,
+      "2": 0.037133889316470534,
+      "3": 0.037133889316470534,
+      "5": 0.037133889316470534,
+      "11": 0.037133889316470534
+    }
+  },
+  {
+    "id": "custom_threads:te_caste_s1_2",
+    "group": "custom_threads:te_caste_safe_01",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.1833150353186192,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.1806941445820393,
+      "1": 0.1833150353186192,
+      "2": 0.1833150353186192,
+      "3": 0.1833150353186192,
+      "5": 0.1833150353186192,
+      "11": 0.1833150353186192
+    }
+  },
+  {
+    "id": "custom_threads:te_caste_s2_2",
+    "group": "custom_threads:te_caste_safe_02",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03177556379410097,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.03177848708469545,
+      "1": 0.03177556379410097,
+      "2": 0.03177556379410097,
+      "3": 0.03177556379410097,
+      "5": 0.03177556379410097,
+      "11": 0.03177556379410097
+    }
+  },
+  {
+    "id": "custom_threads:te_caste_s3_2",
+    "group": "custom_threads:te_caste_safe_03",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03844243275673613,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.0384317716161862,
+      "1": 0.03844243275673613,
+      "2": 0.03844243275673613,
+      "3": 0.03844243275673613,
+      "5": 0.03844243275673613,
+      "11": 0.03844243275673613
+    }
+  },
+  {
+    "id": "custom_threads:te_caste_s4_2",
+    "group": "custom_threads:te_caste_safe_04",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.05203422827407189,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.05181939078255959,
+      "1": 0.05203422827407189,
+      "2": 0.05203422827407189,
+      "3": 0.05203422827407189,
+      "5": 0.05203422827407189,
+      "11": 0.05203422827407189
+    }
+  },
+  {
+    "id": "custom_threads:te_caste_t1_2",
+    "group": "custom_threads:te_caste_toxic_01",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.04091919299574072,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.040358537737144776,
+      "1": 0.04091919299574072,
+      "2": 0.04091919299574072,
+      "3": 0.04091919299574072,
+      "5": 0.04091919299574072,
+      "11": 0.04091919299574072
+    }
+  },
+  {
+    "id": "custom_threads:te_caste_t2_2",
+    "group": "custom_threads:te_caste_toxic_02",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.2712795391468651,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.27105533627554246,
+      "1": 0.2712795391468651,
+      "2": 0.2712795391468651,
+      "3": 0.2712795391468651,
+      "5": 0.2712795391468651,
+      "11": 0.2712795391468651
+    }
+  },
+  {
+    "id": "custom_threads:te_toxic_r01_2",
+    "group": "custom_threads:te_toxic_reply_01",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.21461986706171585,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.2151208739033754,
+      "1": 0.21461988196287704,
+      "2": 0.21461988196287704,
+      "3": 0.21461986706171585,
+      "5": 0.21461986706171585,
+      "11": 0.21461986706171585
+    }
+  },
+  {
+    "id": "custom_threads:te_toxic_r02_2",
+    "group": "custom_threads:te_toxic_reply_02",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.09817119339716542,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.09605237866056072,
+      "1": 0.09817119339716542,
+      "2": 0.09817119339716542,
+      "3": 0.09817119339716542,
+      "5": 0.09817119339716542,
+      "11": 0.09817119339716542
+    }
+  },
+  {
+    "id": "custom_threads:te_toxic_r03_2",
+    "group": "custom_threads:te_toxic_reply_03",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.28130848256632157,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.28130755869432755,
+      "1": 0.28130848256632157,
+      "2": 0.28130848256632157,
+      "3": 0.28130848256632157,
+      "5": 0.28130848256632157,
+      "11": 0.28130848256632157
+    }
+  },
+  {
+    "id": "custom_threads:te_toxic_r04_2",
+    "group": "custom_threads:te_toxic_reply_04",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.04193572035634537,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.04153988497906943,
+      "1": 0.04193572035634537,
+      "2": 0.04193572035634537,
+      "3": 0.04193572035634537,
+      "5": 0.04193572035634537,
+      "11": 0.04193572035634537
+    }
+  },
+  {
+    "id": "custom_threads:te_mt01_4",
+    "group": "custom_threads:te_multi_turn_01",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.06887204965453968,
+    "retained_ancestors": 3,
+    "available_ancestors": 3,
+    "scores_by_parent_budget": {
+      "0": 0.046557264606174084,
+      "1": 0.04662624766927585,
+      "2": 0.05271709730726108,
+      "3": 0.06887204965453968,
+      "5": 0.06887204965453968,
+      "11": 0.06887204965453968
+    }
+  },
+  {
+    "id": "custom_threads:te_mt02_4",
+    "group": "custom_threads:te_multi_turn_02",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.06140248985145759,
+    "retained_ancestors": 3,
+    "available_ancestors": 3,
+    "scores_by_parent_budget": {
+      "0": 0.059045372485411876,
+      "1": 0.058972412442085856,
+      "2": 0.05881998171214532,
+      "3": 0.06140248985145759,
+      "5": 0.06140248985145759,
+      "11": 0.06140248985145759
+    }
+  },
+  {
+    "id": "custom_threads:te_mt03_4",
+    "group": "custom_threads:te_multi_turn_03",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.1784533705437681,
+    "retained_ancestors": 3,
+    "available_ancestors": 3,
+    "scores_by_parent_budget": {
+      "0": 0.11009159645681588,
+      "1": 0.11182153558974472,
+      "2": 0.13653369954471795,
+      "3": 0.1784533705437681,
+      "5": 0.1784533705437681,
+      "11": 0.1784533705437681
+    }
+  },
+  {
+    "id": "custom_threads:te_mt04_4",
+    "group": "custom_threads:te_multi_turn_04",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03155474717431639,
+    "retained_ancestors": 3,
+    "available_ancestors": 3,
+    "scores_by_parent_budget": {
+      "0": 0.03153059358527821,
+      "1": 0.0315361009613232,
+      "2": 0.03149220361018956,
+      "3": 0.03155474717431639,
+      "5": 0.03155474717431639,
+      "11": 0.03155474717431639
+    }
+  },
+  {
+    "id": "custom_threads:te_mt05_4",
+    "group": "custom_threads:te_multi_turn_05",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.03581115473747013,
+    "retained_ancestors": 3,
+    "available_ancestors": 3,
+    "scores_by_parent_budget": {
+      "0": 0.02126892898916958,
+      "1": 0.02164318934768198,
+      "2": 0.024310567050573807,
+      "3": 0.03581115473747013,
+      "5": 0.03581115473747013,
+      "11": 0.03581115473747013
+    }
+  },
+  {
+    "id": "custom_threads:te_sarc_s1_2",
+    "group": "custom_threads:te_sarcasm_safe_01",
+    "source": "custom_threads",
+    "label": 0,
+    "has_context": true,
+    "score": 0.26771270040335776,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.2679487496978295,
+      "1": 0.26771270040335776,
+      "2": 0.26771270040335776,
+      "3": 0.26771270040335776,
+      "5": 0.26771270040335776,
+      "11": 0.26771270040335776
+    }
+  },
+  {
+    "id": "custom_threads:te_sarc_t1_2",
+    "group": "custom_threads:te_sarcasm_toxic_01",
+    "source": "custom_threads",
+    "label": 1,
+    "has_context": true,
+    "score": 0.06112119722606192,
+    "retained_ancestors": 1,
+    "available_ancestors": 1,
+    "scores_by_parent_budget": {
+      "0": 0.06105561535300265,
+      "1": 0.06112119722606192,
+      "2": 0.06112119722606192,
+      "3": 0.06112119722606192,
+      "5": 0.06112119722606192,
+      "11": 0.06112119722606192
+    }
+  }
+]

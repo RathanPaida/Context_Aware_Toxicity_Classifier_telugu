@@ -1,0 +1,190 @@
+{
+  "threshold": 0.9457253813743591,
+  "test": {
+    "precision": 0.6487455197132617,
+    "recall": 0.6605839416058394,
+    "n": 3577,
+    "positive_count": 274,
+    "f1": 0.6546112115732369,
+    "roc_auc": 0.9518276903765877,
+    "average_precision": 0.7321879342015708,
+    "confusion_matrix": [
+      [
+        3205,
+        98
+      ],
+      [
+        93,
+        181
+      ]
+    ]
+  },
+  "context_removed_ablation": {
+    "precision": 0.7092511013215859,
+    "recall": 0.5875912408759124,
+    "n": 3577,
+    "positive_count": 274,
+    "f1": 0.6427145708582834,
+    "roc_auc": 0.9489172638897175,
+    "average_precision": 0.7126142281005534,
+    "confusion_matrix": [
+      [
+        3237,
+        66
+      ],
+      [
+        113,
+        161
+      ]
+    ]
+  },
+  "mean_absolute_probability_change": 0.019456312716074897,
+  "has_context_training": true,
+  "by_source": {
+    "cga_wiki": {
+      "precision": 0.6487455197132617,
+      "recall": 0.6605839416058394,
+      "n": 3577,
+      "positive_count": 274,
+      "f1": 0.6546112115732369,
+      "roc_auc": 0.9518276903765877,
+      "average_precision": 0.7321879342015708,
+      "confusion_matrix": [
+        [
+          3205,
+          98
+        ],
+        [
+          93,
+          181
+        ]
+      ]
+    }
+  },
+  "contextual_test": {
+    "precision": 0.642512077294686,
+    "recall": 0.6785714285714286,
+    "n": 2282,
+    "positive_count": 196,
+    "f1": 0.6600496277915633,
+    "roc_auc": 0.9504471011798775,
+    "average_precision": 0.7420154825610802,
+    "confusion_matrix": [
+      [
+        2012,
+        74
+      ],
+      [
+        63,
+        133
+      ]
+    ]
+  },
+  "contextual_test_without_parents": {
+    "precision": 0.7290322580645161,
+    "recall": 0.576530612244898,
+    "n": 2282,
+    "positive_count": 196,
+    "f1": 0.6438746438746439,
+    "roc_auc": 0.9464016670906138,
+    "average_precision": 0.714218023758628,
+    "confusion_matrix": [
+      [
+        2044,
+        42
+      ],
+      [
+        83,
+        113
+      ]
+    ]
+  },
+  "validation_average_precision": 0.731482647145161,
+  "prepared_sha256": "df39ad6827c55019bced4f34d37c6dda054b871c32c5f445b8d7cf8a45d259b3",
+  "config": {
+    "paths": {
+      "raw": "data/raw/contextual",
+      "prepared": "data/processed/english_cga_v1.jsonl",
+      "embeddings": "data/cache/english_cga_v1_frozen.pt",
+      "checkpoint": "models/checkpoints/english_cga_v1_frozen",
+      "report": "reports/english_cga_v1_frozen.json",
+      "manifest": "reports/english_cga_v1_manifest.json"
+    },
+    "encoder": {
+      "name": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+      "revision": "bb783337859e3d7957de5ba82766ddea51e8fc3e",
+      "local_files_only": true,
+      "max_tokens": 128,
+      "batch_size": 8,
+      "progress_batches": 100
+    },
+    "model": {
+      "hidden_size": 192,
+      "heads": 4,
+      "layers": 2,
+      "feedforward_size": 384,
+      "dropout": 0.1,
+      "max_turns": 12
+    },
+    "training": {
+      "seed": 42,
+      "epochs": 30,
+      "batch_size": 64,
+      "encoder_lr": 3e-05,
+      "learning_rate": 0.0003,
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "patience": 5,
+      "device": "auto",
+      "cpu_threads": 4,
+      "fp16": true,
+      "gradient_accumulation_steps": 1,
+      "context_dropout": 0.0,
+      "require_cuda": false,
+      "gradient_checkpointing": true,
+      "progress_steps": 25
+    },
+    "data": {
+      "download_timeout_seconds": 60,
+      "download_chunk_bytes": 1048576,
+      "max_archive_bytes": 1073741824,
+      "validation_fraction": 0.15,
+      "test_fraction": 0.15,
+      "require_real_context": true,
+      "cga": {
+        "url": "https://zissou.infosci.cornell.edu/convokit/datasets/conversations-gone-awry-corpus/conversations-gone-awry-corpus.zip",
+        "archive": "cga-wiki.zip",
+        "directory": "cga-wiki",
+        "label_field": "comment_has_personal_attack"
+      },
+      "local_sources": [],
+      "custom_threads": "data/raw/custom_threads.jsonl",
+      "download_attempts": 3,
+      "download_retry_seconds": 2,
+      "include_custom_threads": false,
+      "expected_prepared_sha256": "df39ad6827c55019bced4f34d37c6dda054b871c32c5f445b8d7cf8a45d259b3",
+      "prepared_only": true,
+      "text_normalization": "nfc_controls_whitespace_v1",
+      "capture_ancestry_counts": true
+    },
+    "server": {
+      "host": "127.0.0.1",
+      "port": 7860,
+      "cors_origins": [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+      ]
+    },
+    "baseline": {
+      "max_features": 100000,
+      "ngram_range": [
+        3,
+        5
+      ],
+      "C": 1.0,
+      "max_iter": 1000,
+      "report": "reports/english_cga_v1_tfidf.json"
+    }
+  },
+  "notes": "Ablation removes context from the same model; it is not an independently trained baseline. Scores are not calibrated probabilities. Attention is not a causal explanation."
+}

@@ -67,5 +67,7 @@ def prediction_rows(examples, probabilities, without_parents=None):
     return [{ 'id': e['id'], 'group': e['group'], 'source': e['source'],
               'label': e['label'], 'has_context': len(e['texts']) > 1,
               'score': float(probabilities[i]),
+              'retained_ancestors': len(e['texts'])-1,
+              **({'available_ancestors': e['available_ancestors']} if 'available_ancestors' in e else {}),
               **({'isolated_score': float(without_parents[i])} if without_parents is not None else {})}
             for i, e in enumerate(examples)]

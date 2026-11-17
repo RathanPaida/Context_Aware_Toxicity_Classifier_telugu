@@ -37,6 +37,45 @@ def test_broken_parent_rejected():
         ancestor_chain(nodes, "a", 10)
 
 
+def test_english_prediction_exports_and_budget_sweep(tiny_config, tmp_path, monkeypatch):
+    from contextual.training import train
+    from contextual.target_only import train_target_only
+    from contextual.inference import Predictor
+    from contextual.context_sweep import score_budgets
+    from contextual.data import read_jsonl
+    cfg = tiny_config
+    download(cfg)
+    prepare(cfg)
+    report = train(cfg)
+    assert 'prepared_sha256' in report
+    assert location(cfg, 'report').with_suffix('.predictions.json').exists()
+    rows = [e for e in read_jsonl(location(cfg, 'prepared')) if e['split'] == 'test']
+    predictor = Predictor(location(cfg, 'checkpoint'), device='cpu')
+    scores = score_budgets(predictor, rows, [0, 1])
+    direct = [predictor.predict(e['texts'][-1], e['texts'][-2:-1])['toxicity_score'] for e in rows]
+    np.testing.assert_allclose(scores[1], direct, atol=1e-6)
+    from contextual.context_sweep import main as sweep_main
+    from contextual.evaluation import file_hash
+    from contextual.config import write_json
+    cfg['data']['expected_prepared_sha256'] = file_hash(location(cfg, 'prepared'))
+    config_path = tmp_path/'sweep_config.json'
+    output_path = tmp_path/'sweep.json'
+    write_json(config_path, cfg)
+    monkeypatch.setattr('sys.argv', ['context_sweep', '--config', str(config_path), '--output', str(output_path),
+                                   '--device', 'cpu', '--budgets', '0', '3',
+                                   '--reference-report', str(location(cfg, 'report'))])
+    sweep_main()
+    saved = json.loads(output_path.read_text())
+    assert saved['serving_parity']['decision_flips_at_fixed_threshold'] == 0
+    assert '3' in saved['contextual_budget_minus_zero_intervals']
+    cfg['paths']['checkpoint'] = str(location(cfg, 'checkpoint').parent/'target_only')
+    cfg['paths']['report'] = str(location(cfg, 'report').with_name('target_only.json'))
+    target_report = train_target_only(cfg)
+    assert 'prepared_sha256' in target_report
+    for suffix in ('.predictions.json', '.validation_predictions.json'):
+        assert location(cfg, 'report').with_suffix(suffix).exists()
+
+
 def test_incomplete_corpus_chains_are_skipped_without_inventing_context():
     cfg = load_config()
     records = [
@@ -372,6 +411,10 @@ def test_ensemble_roundtrip_and_neural_component(tiny_config, tmp_path):
     report = run_ensemble(cfg, output, location(cfg, 'report'))
     example = next(e for e in read_jsonl(location(cfg, 'prepared')) if e['split']=='test')
     predicted = EnsemblePredictor(output.with_suffix('.joblib')).predict(example['texts'][-1], example['texts'][:-1])
+    from contextual.context_sweep import score_budgets
+    selected_predictor = EnsemblePredictor(output.with_suffix('.joblib'))
+    sweep = score_budgets(selected_predictor, [example], [0, 1])
+    assert sweep[1][0] == pytest.approx(predicted['toxicity_score'], abs=1e-6)
     expected = json.loads(output.with_suffix('.predictions.json').read_text())[0]['score']
     assert predicted['toxicity_score'] == pytest.approx(expected, abs=1e-6)
     # Force a pure neural endpoint in this synthetic fixture to exercise the saved-weight checks and thread API.
@@ -380,6 +423,8 @@ def test_ensemble_roundtrip_and_neural_component(tiny_config, tmp_path):
     bundle['threshold'] = neural['threshold']
     joblib.dump(bundle, tmp_path/'neural_endpoint.joblib')
     ensemble = EnsemblePredictor(tmp_path/'neural_endpoint.joblib')
+    assert score_budgets(ensemble, [example], [0, 1])[1][0] == pytest.approx(
+        ensemble.predict(example['texts'][-1], example['texts'][:-1])['toxicity_score'], abs=1e-6)
     actual = ensemble.predict('hello\x00 please', ['attack'])
     reference = Predictor(location(cfg, 'checkpoint')).predict('hello please', ['attack'])
     assert actual['toxicity_score'] == pytest.approx(reference['toxicity_score'], abs=1e-6)

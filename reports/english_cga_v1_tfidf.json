@@ -1,0 +1,83 @@
+{
+  "threshold": 0.223936404444859,
+  "prepared_sha256": "df39ad6827c55019bced4f34d37c6dda054b871c32c5f445b8d7cf8a45d259b3",
+  "validation": {
+    "precision": 0.7886792452830189,
+    "recall": 0.7333333333333333,
+    "n": 3480,
+    "positive_count": 285,
+    "f1": 0.76,
+    "roc_auc": 0.9732421821376602,
+    "average_precision": 0.8303821060433759,
+    "confusion_matrix": [
+      [
+        3139,
+        56
+      ],
+      [
+        76,
+        209
+      ]
+    ]
+  },
+  "test": {
+    "precision": 0.7704918032786885,
+    "recall": 0.6861313868613139,
+    "n": 3577,
+    "positive_count": 274,
+    "f1": 0.7258687258687259,
+    "roc_auc": 0.9727332595229728,
+    "average_precision": 0.804885663564581,
+    "confusion_matrix": [
+      [
+        3247,
+        56
+      ],
+      [
+        86,
+        188
+      ]
+    ]
+  },
+  "by_source": {
+    "cga_wiki": {
+      "precision": 0.7704918032786885,
+      "recall": 0.6861313868613139,
+      "n": 3577,
+      "positive_count": 274,
+      "f1": 0.7258687258687259,
+      "roc_auc": 0.9727332595229728,
+      "average_precision": 0.804885663564581,
+      "confusion_matrix": [
+        [
+          3247,
+          56
+        ],
+        [
+          86,
+          188
+        ]
+      ]
+    }
+  },
+  "test_ids_sha256": "95e3c9ba405f6434e10bf30a98b436d74569292580f7451e360b7663450f62a2",
+  "contextual_test": {
+    "precision": 0.7965116279069767,
+    "recall": 0.6989795918367347,
+    "n": 2282,
+    "positive_count": 196,
+    "f1": 0.7445652173913043,
+    "roc_auc": 0.9772536051812863,
+    "average_precision": 0.8308434680048742,
+    "confusion_matrix": [
+      [
+        2051,
+        35
+      ],
+      [
+        59,
+        137
+      ]
+    ]
+  }
+}

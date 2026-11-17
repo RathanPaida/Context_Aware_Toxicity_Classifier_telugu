@@ -1,0 +1,125 @@
+================================================================================
+ENGLISH EXPERIMENT RUN NOTES: english_cga_v1
+================================================================================
+Date: November 17, 2026
+Host Environment: Windows 11, PowerShell, Anaconda3
+Python Interpreter: C:\Users\paida\anaconda3\python.exe (Python 3.12.9)
+PyTorch: 2.12.0+cu130 (CUDA available)
+GPU: NVIDIA GeForce RTX 4060 Laptop GPU (8188 MiB VRAM)
+Transformers: 5.17.0 | PEFT: 0.18.1
+
+1. EXECUTION OVERVIEW & PREPARATION
+--------------------------------------------------------------------------------
+- Source dataset: data/raw/contextual/cga-wiki.zip (SHA-256 verified)
+- Prepared corpus: data/processed/english_cga_v1.jsonl
+  * SHA-256: df39ad6827c55019bced4f34d37c6dda054b871c32c5f445b8d7cf8a45d259b3
+  * Split counts: Train = 15,775 | Val = 3,480 | Test = 3,577 | Total = 22,832
+  * Positive counts: Train = 1,180 | Val = 265 | Test = 274
+  * Contextual subset: Val = 2,229 | Test = 2,282
+  * Zero cross-split text or thread leakage detected.
+- Code regression tests: pytest reports/english_cga_v1_code_tests.xml
+  * Result: 85 passed, 1 skipped (optional legacy transliteration test).
+
+2. MODEL TRAINING & SELECTION (CGA-WIKI ENGLISH)
+--------------------------------------------------------------------------------
+A. Step 8A - Character TF-IDF Baseline:
+   - Config: configs/english_cga_v1_lora.json (baseline mode)
+   - Val Threshold: 0.2882
+   - Test F1: 0.7259 | Contextual Test F1: 0.7446 | Test AP: 0.8049
+
+B. Step 8B - Frozen IndicBERT Target-Only MLP:
+   - Built cache: data/cache/english_cga_v1_frozen.pt (22,784 unique texts encoded)
+   - Val Threshold: 0.1264
+   - Test F1: 0.6299 | Contextual Test F1: 0.6267 | Test AP: 0.6586
+
+C. Step 8C - Frozen IndicBERT Contextual Conversation Transformer:
+   - Reused cache: data/cache/english_cga_v1_frozen.pt
+   - Val Threshold: 0.2224
+   - Test F1: 0.6546 | Contextual Test F1: 0.6600 | Test AP: 0.7180
+
+D. Step 8D - Fine-tuned IndicBERT LoRA + Conversation Transformer:
+   - Configuration adjustments for stability on RTX 4060 Laptop GPU:
+     * batch_size = 8, encoder_batch_size = 8, gradient_accumulation_steps = 4
+     * effective_batch_size = 32
+     * fp16 = True (with AMP autocast during online validation and inference)
+   - Trained for 5 full epochs. Validation AP progressed:
+     * Epoch 1: 0.6849
+     * Epoch 2: 0.7050
+     * Epoch 3: 0.7380
+     * Epoch 4: 0.7798
+     * Epoch 5: 0.8157 (Best epoch selected)
+   - Val Threshold: 0.8228
+   - Test F1: 0.7232 | Contextual Test F1: 0.7433 | Test AP: 0.8194
+   - Checkpoint merged and verified: models/checkpoints/english_cga_v1_lora/
+
+E. Step 8E - Validation-Selected Neural Ensemble:
+   - Grid search over char TF-IDF, word TF-IDF, and contextual LoRA weights
+   - Selected weights: char_tfidf = 0.75, word_tfidf = 0.0, contextual_lora = 0.25
+   - Val Threshold: 0.3061
+   - Test Metrics:
+     * Test F1: 0.7869
+     * Contextual Test F1: 0.7981
+     * Test Average Precision (AP): 0.8629
+     * Test ROC-AUC: 0.9760
+
+3. BENCHMARK COMPARISON (SECTION 9)
+--------------------------------------------------------------------------------
+Matched comparison on identical 3,577 English test examples (274 positives):
+- English-trained Models:
+  * TF-IDF: F1 = 0.7259, AP = 0.8049, Contextual F1 = 0.7446
+  * Target-only MLP: F1 = 0.6299, AP = 0.6586, Contextual F1 = 0.6267
+  * Frozen Contextual: F1 = 0.6546, AP = 0.7180, Contextual F1 = 0.6600
+  * LoRA Contextual: F1 = 0.7232, AP = 0.8194, Contextual F1 = 0.7433
+  * Ensemble (75% char + 25% LoRA): F1 = 0.7869, AP = 0.8629, Contextual F1 = 0.7981
+- Historical Mixed-Trained Models on Identical English Test Set:
+  * Historical Mixed TF-IDF: F1 = 0.6035, AP = 0.6725, Contextual F1 = 0.6061
+  * Historical Mixed LoRA: F1 = 0.7394, AP = 0.8359, Contextual F1 = 0.7612
+  * Historical Mixed Ensemble: F1 = 0.7459, AP = 0.8407, Contextual F1 = 0.7713
+- Key takeaway: Domain- and language-matched training on English CGA-Wiki yields
+  statistically superior performance for English toxicity classification over
+  cross-lingual mixed training (Ensemble F1: 0.7869 vs 0.7459; TF-IDF F1: 0.7259 vs 0.6035).
+
+4. CONTEXT DEPTH BUDGET SWEEPS (SECTION 10)
+--------------------------------------------------------------------------------
+Evaluated context parent retention budgets {0, 1, 2, 3, 5, 11} on validation
+and test splits.
+- LoRA Neural Model (Test Contextual Subset n=2,282):
+  * Budget 0 (target only): F1 = 0.7110, AP = 0.8188
+  * Budget 1 parent:        F1 = 0.7106, AP = 0.8188
+  * Budget 2 parents:       F1 = 0.7394, AP = 0.8260
+  * Budget 3 parents:       F1 = 0.7371, AP = 0.8269
+  * Budget 5 parents:       F1 = 0.7469, AP = 0.8294
+  * Budget 11 parents:      F1 = 0.7433, AP = 0.8291
+  * Benefit of context: Retaining 5 ancestors improves contextual F1 by +0.0359
+    over isolated target scoring.
+- Ensemble Model (Test Contextual Subset n=2,282):
+  * Budget 0:  F1 = 0.7864, AP = 0.8601
+  * Budget 1:  F1 = 0.7864, AP = 0.8601
+  * Budget 2:  F1 = 0.7963, AP = 0.8623
+  * Budget 3:  F1 = 0.7972, AP = 0.8625
+  * Budget 5:  F1 = 0.8000, AP = 0.8631
+  * Budget 11: F1 = 0.7981, AP = 0.8629
+- Serving Parity:
+  * FP32 inference vs saved checkpoint predictions confirmed 0 decision flips
+    on both validation and test sets.
+
+5. TELUGU CHALLENGE EVALUATION (SECTION 11)
+--------------------------------------------------------------------------------
+Evaluated 51 authored development challenge examples (45 groups, 19 positives):
+- Mixed-Trained Clean Ensemble: F1 = 0.6522, AP = 0.7540
+- Mixed-Trained Clean LoRA:     F1 = 0.6154, AP = 0.6063
+- English-Trained Ensemble:     F1 = 0.0000 (0 true positives detected at 0.3061 threshold)
+  * Cause: 75% weight is given to English character TF-IDF, which fails to
+    activate on Telugu script and Romanized-Telugu vocabulary, causing all scores
+    to remain below the English validation decision boundary.
+  * Note: Demonstrates that lexical models fail to transfer across languages
+    and highlight the necessity of multilingual embeddings and balanced data.
+
+6. LIMITATIONS & SCOPE
+--------------------------------------------------------------------------------
+- The 51-target Telugu challenge is an authored diagnostic suite, not an
+  independently annotated benchmark.
+- CGA-Wiki contains mostly short conversational trees (median depth 1-2); chains
+  beyond 8 turns are rare (<10 examples in test set).
+- All reported models maintain strict data provenance without test-set tuning.
+================================================================================

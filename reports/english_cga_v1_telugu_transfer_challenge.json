@@ -1,0 +1,712 @@
+{
+  "config_path": "configs/english_cga_v1_ensemble.json",
+  "prepared_sha256": "df39ad6827c55019bced4f34d37c6dda054b871c32c5f445b8d7cf8a45d259b3",
+  "evaluated_sha256": "ffe5e24b2d49ec4e8f660a46f44563a9cbe9b2d009562e7d28a51ca3c9103e0d",
+  "population": "authored_development_challenge",
+  "threshold": 0.306118171793546,
+  "device": "cuda",
+  "precision": "FP32 serving-style, not the trainer CUDA FP16 evaluation",
+  "budgets": {
+    "0": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.6274671052631579,
+        "average_precision": 0.47408141090618516,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      "by_available_ancestors": {
+        "0": null,
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 46,
+          "positive_count": 18,
+          "f1": 0.0,
+          "roc_auc": 0.6081349206349207,
+          "average_precision": 0.47776317628725984,
+          "confusion_matrix": [
+            [
+              28,
+              0
+            ],
+            [
+              18,
+              0
+            ]
+          ]
+        },
+        "2": null,
+        "3": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 5,
+          "positive_count": 1,
+          "f1": 0.0,
+          "roc_auc": 1.0,
+          "average_precision": 1.0,
+          "confusion_matrix": [
+            [
+              4,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "4-7": null,
+        "8-11": null,
+        "12+": null,
+        "unknown": null
+      },
+      "by_source": {
+        "custom_threads": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 51,
+          "positive_count": 19,
+          "f1": 0.0,
+          "roc_auc": 0.6274671052631579,
+          "average_precision": 0.47408141090618516,
+          "confusion_matrix": [
+            [
+              32,
+              0
+            ],
+            [
+              19,
+              0
+            ]
+          ]
+        }
+      },
+      "contextual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.6274671052631579,
+        "average_precision": 0.47408141090618516,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      }
+    },
+    "1": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.6282894736842105,
+        "average_precision": 0.48032352405619316,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      "by_available_ancestors": {
+        "0": null,
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 46,
+          "positive_count": 18,
+          "f1": 0.0,
+          "roc_auc": 0.6091269841269841,
+          "average_precision": 0.4844569295327372,
+          "confusion_matrix": [
+            [
+              28,
+              0
+            ],
+            [
+              18,
+              0
+            ]
+          ]
+        },
+        "2": null,
+        "3": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 5,
+          "positive_count": 1,
+          "f1": 0.0,
+          "roc_auc": 1.0,
+          "average_precision": 1.0,
+          "confusion_matrix": [
+            [
+              4,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "4-7": null,
+        "8-11": null,
+        "12+": null,
+        "unknown": null
+      },
+      "by_source": {
+        "custom_threads": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 51,
+          "positive_count": 19,
+          "f1": 0.0,
+          "roc_auc": 0.6282894736842105,
+          "average_precision": 0.48032352405619316,
+          "confusion_matrix": [
+            [
+              32,
+              0
+            ],
+            [
+              19,
+              0
+            ]
+          ]
+        }
+      },
+      "contextual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.6282894736842105,
+        "average_precision": 0.48032352405619316,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      }
+    },
+    "2": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.6299342105263157,
+        "average_precision": 0.4818586117754913,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      "by_available_ancestors": {
+        "0": null,
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 46,
+          "positive_count": 18,
+          "f1": 0.0,
+          "roc_auc": 0.6091269841269841,
+          "average_precision": 0.4844569295327372,
+          "confusion_matrix": [
+            [
+              28,
+              0
+            ],
+            [
+              18,
+              0
+            ]
+          ]
+        },
+        "2": null,
+        "3": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 5,
+          "positive_count": 1,
+          "f1": 0.0,
+          "roc_auc": 1.0,
+          "average_precision": 1.0,
+          "confusion_matrix": [
+            [
+              4,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "4-7": null,
+        "8-11": null,
+        "12+": null,
+        "unknown": null
+      },
+      "by_source": {
+        "custom_threads": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 51,
+          "positive_count": 19,
+          "f1": 0.0,
+          "roc_auc": 0.6299342105263157,
+          "average_precision": 0.4818586117754913,
+          "confusion_matrix": [
+            [
+              32,
+              0
+            ],
+            [
+              19,
+              0
+            ]
+          ]
+        }
+      },
+      "contextual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.6299342105263157,
+        "average_precision": 0.4818586117754913,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      }
+    },
+    "3": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.625,
+        "average_precision": 0.47969920296788315,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      "by_available_ancestors": {
+        "0": null,
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 46,
+          "positive_count": 18,
+          "f1": 0.0,
+          "roc_auc": 0.6091269841269841,
+          "average_precision": 0.4844569295327372,
+          "confusion_matrix": [
+            [
+              28,
+              0
+            ],
+            [
+              18,
+              0
+            ]
+          ]
+        },
+        "2": null,
+        "3": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 5,
+          "positive_count": 1,
+          "f1": 0.0,
+          "roc_auc": 1.0,
+          "average_precision": 1.0,
+          "confusion_matrix": [
+            [
+              4,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "4-7": null,
+        "8-11": null,
+        "12+": null,
+        "unknown": null
+      },
+      "by_source": {
+        "custom_threads": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 51,
+          "positive_count": 19,
+          "f1": 0.0,
+          "roc_auc": 0.625,
+          "average_precision": 0.47969920296788315,
+          "confusion_matrix": [
+            [
+              32,
+              0
+            ],
+            [
+              19,
+              0
+            ]
+          ]
+        }
+      },
+      "contextual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.625,
+        "average_precision": 0.47969920296788315,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      }
+    },
+    "5": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.625,
+        "average_precision": 0.47969920296788315,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      "by_available_ancestors": {
+        "0": null,
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 46,
+          "positive_count": 18,
+          "f1": 0.0,
+          "roc_auc": 0.6091269841269841,
+          "average_precision": 0.4844569295327372,
+          "confusion_matrix": [
+            [
+              28,
+              0
+            ],
+            [
+              18,
+              0
+            ]
+          ]
+        },
+        "2": null,
+        "3": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 5,
+          "positive_count": 1,
+          "f1": 0.0,
+          "roc_auc": 1.0,
+          "average_precision": 1.0,
+          "confusion_matrix": [
+            [
+              4,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "4-7": null,
+        "8-11": null,
+        "12+": null,
+        "unknown": null
+      },
+      "by_source": {
+        "custom_threads": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 51,
+          "positive_count": 19,
+          "f1": 0.0,
+          "roc_auc": 0.625,
+          "average_precision": 0.47969920296788315,
+          "confusion_matrix": [
+            [
+              32,
+              0
+            ],
+            [
+              19,
+              0
+            ]
+          ]
+        }
+      },
+      "contextual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.625,
+        "average_precision": 0.47969920296788315,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      }
+    },
+    "11": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.625,
+        "average_precision": 0.47969920296788315,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      "by_available_ancestors": {
+        "0": null,
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 46,
+          "positive_count": 18,
+          "f1": 0.0,
+          "roc_auc": 0.6091269841269841,
+          "average_precision": 0.4844569295327372,
+          "confusion_matrix": [
+            [
+              28,
+              0
+            ],
+            [
+              18,
+              0
+            ]
+          ]
+        },
+        "2": null,
+        "3": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 5,
+          "positive_count": 1,
+          "f1": 0.0,
+          "roc_auc": 1.0,
+          "average_precision": 1.0,
+          "confusion_matrix": [
+            [
+              4,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "4-7": null,
+        "8-11": null,
+        "12+": null,
+        "unknown": null
+      },
+      "by_source": {
+        "custom_threads": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "n": 51,
+          "positive_count": 19,
+          "f1": 0.0,
+          "roc_auc": 0.625,
+          "average_precision": 0.47969920296788315,
+          "confusion_matrix": [
+            [
+              32,
+              0
+            ],
+            [
+              19,
+              0
+            ]
+          ]
+        }
+      },
+      "contextual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "n": 51,
+        "positive_count": 19,
+        "f1": 0.0,
+        "roc_auc": 0.625,
+        "average_precision": 0.47969920296788315,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      }
+    }
+  },
+  "seconds": 0.6719999999986612,
+  "notes": "Same fixed checkpoint/threshold. Missing old depth metadata stays unknown. Original-label context-removal stress test; no relabelling. Empty bins are null. Tiny/one-class bins cannot establish generalization.",
+  "contextual_budget_minus_zero_intervals": {
+    "1": {
+      "f1_difference": 0.0,
+      "percentile_95_interval": [
+        0.0,
+        0.0
+      ],
+      "groups": 45,
+      "examples": 51,
+      "resamples": 1000,
+      "seed": 2026
+    },
+    "2": {
+      "f1_difference": 0.0,
+      "percentile_95_interval": [
+        0.0,
+        0.0
+      ],
+      "groups": 45,
+      "examples": 51,
+      "resamples": 1000,
+      "seed": 2026
+    },
+    "3": {
+      "f1_difference": 0.0,
+      "percentile_95_interval": [
+        0.0,
+        0.0
+      ],
+      "groups": 45,
+      "examples": 51,
+      "resamples": 1000,
+      "seed": 2026
+    },
+    "5": {
+      "f1_difference": 0.0,
+      "percentile_95_interval": [
+        0.0,
+        0.0
+      ],
+      "groups": 45,
+      "examples": 51,
+      "resamples": 1000,
+      "seed": 2026
+    },
+    "11": {
+      "f1_difference": 0.0,
+      "percentile_95_interval": [
+        0.0,
+        0.0
+      ],
+      "groups": 45,
+      "examples": 51,
+      "resamples": 1000,
+      "seed": 2026
+    }
+  }
+}

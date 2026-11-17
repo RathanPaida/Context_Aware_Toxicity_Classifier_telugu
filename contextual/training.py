@@ -147,6 +147,10 @@ def evaluate(cfg):
     report["contextual_test"] = metrics(np.asarray(labels)[context_ids], probabilities[context_ids], predictor.threshold) if context_ids else None
     report["contextual_test_without_parents"] = metrics(np.asarray(labels)[context_ids], ablated[context_ids], predictor.threshold) if context_ids else None
     report["validation_average_precision"] = predictor.metadata.get("validation_average_precision")
+    report['prepared_sha256'] = predictor.metadata['prepared_sha256']
+    report['config'] = cfg
     report["notes"] = "Ablation removes context from the same model; it is not an independently trained baseline. Scores are not calibrated probabilities. Attention is not a causal explanation."
     write_json(location(cfg, "report"), report)
+    from .evaluation import prediction_rows
+    write_json(location(cfg, 'report').with_suffix('.predictions.json'), prediction_rows(test, probabilities, ablated))
     return report

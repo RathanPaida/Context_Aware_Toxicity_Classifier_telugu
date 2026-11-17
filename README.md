@@ -2,7 +2,9 @@
 
 This project predicts toxicity of a target reply using its actual parent chain. A pretrained IndicBERT encoder produces individual message vectors; a hierarchical Transformer learns contextual and conversation representations. The active pipeline is in `contextual/`. The older `src/` cascade is retained as historical work.
 
-Start with **[RUN_AND_REPORT.md](RUN_AND_REPORT.md)** for the complete current run order and what to send back after execution. Full training is left to the user.
+For the new English-only experiment, start with **[ENGLISH_EXPERIMENT_PLAN.md](ENGLISH_EXPERIMENT_PLAN.md)**: separate downloads, matched English model comparisons, ancestry-depth evaluation, Telugu limitations and the return-results ZIP. Full training is left to the user.
+
+The completed mixed-language run is reviewed in [POST_RUN_REVIEW.md](POST_RUN_REVIEW.md). [RUN_AND_REPORT.md](RUN_AND_REPORT.md) retains the earlier mixed-language reproduction steps.
 
 Read [SUBMISSION_REPORT.md](SUBMISSION_REPORT.md) for measured results and [SUBMISSION_HANDOFF.md](SUBMISSION_HANDOFF.md) for detailed setup, blocked steps, data downloads and submission instructions.
 

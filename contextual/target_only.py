@@ -152,6 +152,8 @@ def train_target_only(cfg):
 
     report = {
         "model_type": "target_only_neural_baseline",
+        "prepared_sha256": metadata['prepared_sha256'],
+        "config": cfg,
         "threshold": threshold,
         "validation_average_precision": best_score,
         "test": metrics(test_labels, test_probs, threshold),
@@ -171,17 +173,21 @@ def train_target_only(cfg):
 
     report_path = location(cfg, "report")
     write_json(report_path, report)
+    from .evaluation import prediction_rows
+    write_json(report_path.with_suffix('.predictions.json'), prediction_rows(test, test_probs))
+    write_json(report_path.with_suffix('.validation_predictions.json'), prediction_rows(split['val'], val_probs))
     print(f"Target-only neural baseline report written to {report_path}", flush=True)
 
     print("\n" + "=" * 60)
     print("TARGET-ONLY NEURAL BASELINE RESULTS")
     print("=" * 60)
     print(f"Validation AP: {best_score:.4f} | Optimal Threshold: {threshold:.4f}")
-    print(f"Test F1: {report['test']['f1']:.4f} | Test AP: {report['test']['average_precision']:.4f} | Test ROC-AUC: {report['test']['roc_auc']:.4f}")
+    display = lambda value: 'undefined (one class)' if value is None else f'{value:.4f}'
+    print(f"Test F1: {display(report['test']['f1'])} | Test AP: {display(report['test']['average_precision'])} | Test ROC-AUC: {display(report['test']['roc_auc'])}")
     if context_ids:
-        print(f"On Contextual Test Subset: F1: {report['contextual_test_subset']['f1']:.4f} | AP: {report['contextual_test_subset']['average_precision']:.4f}")
+        print(f"On Contextual Test Subset: F1: {display(report['contextual_test_subset']['f1'])} | AP: {display(report['contextual_test_subset']['average_precision'])}")
     for src, m in report["by_source"].items():
-        print(f"  {src}: F1={m['f1']:.4f}, AP={m['average_precision']:.4f}")
+        print(f"  {src}: F1={display(m['f1'])}, AP={display(m['average_precision'])}")
     print("=" * 60)
 
     return report

@@ -1,0 +1,127 @@
+{
+  "tag": "english_cga_v1",
+  "source": "cga_wiki",
+  "prepared_sha256": "df39ad6827c55019bced4f34d37c6dda054b871c32c5f445b8d7cf8a45d259b3",
+  "anchor_path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\contextual_clean_v1.jsonl",
+  "anchor_sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+  "split_policy": "Exact cleaned English subset, existing IDs/labels/texts/groups/splits preserved; raw source adds depth only.",
+  "max_turns_including_target": 12,
+  "examples": 22832,
+  "splits": {
+    "train": 15775,
+    "val": 3480,
+    "test": 3577
+  },
+  "depth_by_split": {
+    "test/0": {
+      "n": 1295,
+      "positive_count": 78,
+      "negative_count": 1217
+    },
+    "test/1": {
+      "n": 990,
+      "positive_count": 47,
+      "negative_count": 943
+    },
+    "test/2": {
+      "n": 577,
+      "positive_count": 37,
+      "negative_count": 540
+    },
+    "test/3": {
+      "n": 355,
+      "positive_count": 37,
+      "negative_count": 318
+    },
+    "test/4-7": {
+      "n": 356,
+      "positive_count": 73,
+      "negative_count": 283
+    },
+    "test/8-11": {
+      "n": 4,
+      "positive_count": 2,
+      "negative_count": 2
+    },
+    "train/0": {
+      "n": 5723,
+      "positive_count": 346,
+      "negative_count": 5377
+    },
+    "train/1": {
+      "n": 4501,
+      "positive_count": 236,
+      "negative_count": 4265
+    },
+    "train/2": {
+      "n": 2510,
+      "positive_count": 188,
+      "negative_count": 2322
+    },
+    "train/3": {
+      "n": 1440,
+      "positive_count": 148,
+      "negative_count": 1292
+    },
+    "train/4-7": {
+      "n": 1556,
+      "positive_count": 287,
+      "negative_count": 1269
+    },
+    "train/8-11": {
+      "n": 45,
+      "positive_count": 16,
+      "negative_count": 29
+    },
+    "val/0": {
+      "n": 1251,
+      "positive_count": 66,
+      "negative_count": 1185
+    },
+    "val/1": {
+      "n": 987,
+      "positive_count": 62,
+      "negative_count": 925
+    },
+    "val/2": {
+      "n": 531,
+      "positive_count": 46,
+      "negative_count": 485
+    },
+    "val/3": {
+      "n": 331,
+      "positive_count": 37,
+      "negative_count": 294
+    },
+    "val/4-7": {
+      "n": 374,
+      "positive_count": 71,
+      "negative_count": 303
+    },
+    "val/8-11": {
+      "n": 6,
+      "positive_count": 3,
+      "negative_count": 3
+    }
+  },
+  "max_available_ancestors": 10,
+  "window_truncated_examples": 0,
+  "raw_sha256": {
+    "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\contextual\\cga-wiki\\utterances.jsonl": "f9305896cb923d761b0f92ef60c25c91feebdd9384de373f153df6b3f5bda5d3",
+    "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\contextual\\cga-wiki\\conversations.json": "9764383802e8e98dfa50f8e36132d620490d96a8839fe9d1d702fc3047c9fabc",
+    "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\contextual\\cga-wiki\\provenance.json": "13a5b3e80b9a878b69eb8bf71b6679631007d9a942dc556c7ebaf933b4fa7b7c"
+  },
+  "raw_skips": {
+    "skipped_missing_ancestry": 2509,
+    "skipped_empty_ancestry": 543,
+    "skipped_invalid_ancestry": 177
+  },
+  "new_split_exclusions": {},
+  "training_started": false,
+  "configs": [
+    "configs/english_cga_v1_lora.json",
+    "configs/english_cga_v1_frozen.json",
+    "configs/english_cga_v1_target_only.json",
+    "configs/english_cga_v1_ensemble.json"
+  ]
+}

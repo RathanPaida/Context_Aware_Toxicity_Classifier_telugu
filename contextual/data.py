@@ -103,6 +103,8 @@ def download(cfg):
 
 def ancestor_chain(nodes, target_id, max_turns):
     """Only ancestors and target, never siblings or future descendants."""
+    if max_turns is not None and (not isinstance(max_turns, int) or max_turns < 1):
+        raise ValueError('max_turns must be positive, or None for a complete path')
     if target_id not in nodes:
         raise ValueError(f"Unknown target id: {target_id}")
     chain, seen = [], set()
@@ -121,7 +123,7 @@ def ancestor_chain(nodes, target_id, max_turns):
             raise EmptyMessageError(f"Empty message: {current}")
         chain.append(node)
         current = node.get("parent_id")
-    return list(reversed(chain[:max_turns]))
+    return list(reversed(chain if max_turns is None else chain[:max_turns]))
 
 
 def examples_from_nodes(records, cfg, source, *, skip_missing_parents=False, stats=None):
@@ -138,7 +140,10 @@ def examples_from_nodes(records, cfg, source, *, skip_missing_parents=False, sta
         if label not in (0, 1):
             raise ValueError(f"Expected binary target label in {source}")
         try:
-            chain = ancestor_chain(nodes, node["id"], cfg["model"]["max_turns"])
+            capture_depth = cfg['data'].get('capture_ancestry_counts', False)
+            chain = ancestor_chain(nodes, node["id"], None if capture_depth else cfg["model"]["max_turns"])
+            available_ancestors = len(chain) - 1
+            chain = chain[-cfg['model']['max_turns']:]
         except MissingParentError:
             if not skip_missing_parents:
                 raise
@@ -159,7 +164,10 @@ def examples_from_nodes(records, cfg, source, *, skip_missing_parents=False, sta
             continue
         examples.append({"id": f"{source}:{node['id']}", "group": f"{source}:{node['conversation_id']}",
                          "source": source, "texts": [n["text"] for n in chain],
-                         "message_ids": [n["id"] for n in chain], "label": int(label)})
+                         "message_ids": [n["id"] for n in chain], "label": int(label),
+                         **({'available_ancestors': available_ancestors,
+                             'retained_ancestors': len(chain)-1,
+                             'depth_provenance': 'validated_path_to_released_corpus_root'} if capture_depth else {})})
     return examples
 
 
