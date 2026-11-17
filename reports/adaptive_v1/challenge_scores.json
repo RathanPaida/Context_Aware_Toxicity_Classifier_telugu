@@ -1,0 +1,2136 @@
+{
+  "split": "challenge",
+  "population_sha256": "ffe5e24b2d49ec4e8f660a46f44563a9cbe9b2d009562e7d28a51ca3c9103e0d",
+  "experts": [
+    "english_ensemble",
+    "mixed_ensemble",
+    "mixed_neural"
+  ],
+  "identities": {
+    "english": {
+      "ensemble": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\english_cga_v1_ensemble.joblib",
+      "ensemble_sha256": "7382155644e6311c25e446b728841e22c939cd52495fc8cad72a0b5c2e83d6e6",
+      "checkpoint_files": {
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\english_cga_v1_lora\\metadata.json": "e86bf1107531b955caf7b9ce77625a0e3e3e88e69863d4096151420a2e6071cb",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\english_cga_v1_lora\\head.pt": "54c899895ee6e6abcd37d2c82382ba7c25204beff637364e7c27406a6ebcb548",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\english_cga_v1_lora\\encoder\\config.json": "cd080ddc8d0525e4186730a67f8612f2d74d81c614671428b184948e173ab4b8",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\english_cga_v1_lora\\encoder\\model.safetensors": "88e62d9389d98c0d035656b38a191067f4b67dac8873769182906fb9478bc207",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\english_cga_v1_lora\\encoder\\tokenizer.json": "6af22a5c4bc890322c365fcb77dd77c06cbb9b088ffa50db1892d5220313c495",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\english_cga_v1_lora\\encoder\\tokenizer_config.json": "0274c795262540a02441c2b239d0b0312b1361a360610225b3d661f972695a1b"
+      }
+    },
+    "mixed": {
+      "ensemble": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\clean_ensemble.joblib",
+      "ensemble_sha256": "eb4a2fbf4b9bfa02a77e20a7b2b3d25c67ae171acbb149b3d5d142c5ae563bf9",
+      "checkpoint_files": {
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora\\metadata.json": "bdc66a57210848d28d6d16d148154186617b65edc9473f3f8ed6fc5c82adce06",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora\\head.pt": "60a78a07891df43ae221ca2a1c387b35b9afea374743ac839e6b516b356256b6",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora\\encoder\\config.json": "cd080ddc8d0525e4186730a67f8612f2d74d81c614671428b184948e173ab4b8",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora\\encoder\\model.safetensors": "2cc7fbcfa1ef19f8d8997af4a75792065a4cf14c690996c699f8117382fe77dc",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora\\encoder\\tokenizer.json": "6af22a5c4bc890322c365fcb77dd77c06cbb9b088ffa50db1892d5220313c495",
+        "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora\\encoder\\tokenizer_config.json": "0274c795262540a02441c2b239d0b0312b1361a360610225b3d661f972695a1b"
+      }
+    }
+  },
+  "thresholds": {
+    "english_ensemble": 0.306118171793546,
+    "mixed_ensemble": 0.482697802797977,
+    "mixed_neural": 0.59521484375
+  },
+  "records": [
+    {
+      "id": "custom_threads:te_deesc_01_2",
+      "group": "custom_threads:te_deesc_01",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.02915603990479174,
+        0.5404332624490629,
+        0.6019035577774048
+      ],
+      "isolated_scores": [
+        0.0292111311275399,
+        0.5392891810949216,
+        0.5996153950691223
+      ],
+      "reversed_scores": [
+        0.02915603990479174,
+        0.5404332624490629,
+        0.6019035577774048
+      ],
+      "unrelated_scores": [
+        0.02915603990479174,
+        0.5404332624490629,
+        0.6019035577774048
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.036676907406483925,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.47896296712072084,
+          "word_score": 0.23108909803138147
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_02_2",
+      "group": "custom_threads:te_deesc_02",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.04729598427421906,
+        0.27292623042112596,
+        0.27090978622436523
+      ],
+      "isolated_scores": [
+        0.047315629592608,
+        0.2714937370920778,
+        0.2680447995662689
+      ],
+      "reversed_scores": [
+        0.04729598427421906,
+        0.27292623042112596,
+        0.27090978622436523
+      ],
+      "unrelated_scores": [
+        0.04729598427421906,
+        0.27292623042112596,
+        0.27090978622436523
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.05028807424316219,
+          "word_score": 0.04987935941684216
+        },
+        "mixed": {
+          "char_score": 0.27494267461788674,
+          "word_score": 0.20595661225132775
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_03_2",
+      "group": "custom_threads:te_deesc_03",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.040993690305305315,
+        0.4298417414574043,
+        0.46097332239151
+      ],
+      "isolated_scores": [
+        0.04100287644917578,
+        0.4335500742344276,
+        0.46838998794555664
+      ],
+      "reversed_scores": [
+        0.040993690305305315,
+        0.4298417414574043,
+        0.46097332239151
+      ],
+      "unrelated_scores": [
+        0.040993690305305315,
+        0.4298417414574043,
+        0.46097332239151
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.054515467854958206,
+          "word_score": 0.0673922106766208
+        },
+        "mixed": {
+          "char_score": 0.39871016052329855,
+          "word_score": 0.33186768359658136
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_04_2",
+      "group": "custom_threads:te_deesc_04",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03245432283956029,
+        0.41991616757710215,
+        0.4755578935146332
+      ],
+      "isolated_scores": [
+        0.032614465968156536,
+        0.4198518839677119,
+        0.47542932629585266
+      ],
+      "reversed_scores": [
+        0.03245432283956029,
+        0.41991616757710215,
+        0.4755578935146332
+      ],
+      "unrelated_scores": [
+        0.03245432283956029,
+        0.41991616757710215,
+        0.4755578935146332
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.36427444163957107,
+          "word_score": 0.25242482360344926
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_05_2",
+      "group": "custom_threads:te_deesc_05",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03220104064320617,
+        0.3667459202048577,
+        0.4869464039802551
+      ],
+      "isolated_scores": [
+        0.03230402553680756,
+        0.36558267595742117,
+        0.4846199154853821
+      ],
+      "reversed_scores": [
+        0.03220104064320617,
+        0.3667459202048577,
+        0.4869464039802551
+      ],
+      "unrelated_scores": [
+        0.03220104064320617,
+        0.3667459202048577,
+        0.4869464039802551
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.24654543642946028,
+          "word_score": 0.25093518911683593
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_06_2",
+      "group": "custom_threads:te_deesc_06",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.031755641604161215,
+        0.6130319889559834,
+        0.9255865812301636
+      ],
+      "isolated_scores": [
+        0.032968501130437804,
+        0.614874845363149,
+        0.9292722940444946
+      ],
+      "reversed_scores": [
+        0.031755641604161215,
+        0.6130319889559834,
+        0.9255865812301636
+      ],
+      "unrelated_scores": [
+        0.031755641604161215,
+        0.6130319889559834,
+        0.9255865812301636
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.03379366799983177,
+          "word_score": 0.057348780419216386
+        },
+        "mixed": {
+          "char_score": 0.3004773966818032,
+          "word_score": 0.21942480053573926
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_07_2",
+      "group": "custom_threads:te_deesc_07",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.042225292245901366,
+        0.4082387761158961,
+        0.6720436811447144
+      ],
+      "isolated_scores": [
+        0.0422854016675122,
+        0.41130829611253916,
+        0.6781827211380005
+      ],
+      "reversed_scores": [
+        0.042225292245901366,
+        0.4082387761158961,
+        0.6720436811447144
+      ],
+      "unrelated_scores": [
+        0.042225292245901366,
+        0.4082387761158961,
+        0.6720436811447144
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.0272715964851866,
+          "word_score": 0.054308920783800924
+        },
+        "mixed": {
+          "char_score": 0.1444338710870778,
+          "word_score": 0.23149713765942767
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_deesc_08_2",
+      "group": "custom_threads:te_deesc_08",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03135467638066325,
+        0.2430201208871981,
+        0.24480830132961273
+      ],
+      "isolated_scores": [
+        0.03136180907467201,
+        0.24547879013244117,
+        0.24972563982009888
+      ],
+      "reversed_scores": [
+        0.03135467638066325,
+        0.2430201208871981,
+        0.24480830132961273
+      ],
+      "unrelated_scores": [
+        0.03135467638066325,
+        0.2430201208871981,
+        0.24480830132961273
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.2412319404447835,
+          "word_score": 0.2567084512668556
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_champ_s2",
+      "group": "custom_threads:te_twin_champ_safe",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03886541264824163,
+        0.42157215236398626,
+        0.4675377905368805
+      ],
+      "isolated_scores": [
+        0.03912613640300523,
+        0.41851579009267736,
+        0.4614250659942627
+      ],
+      "reversed_scores": [
+        0.03886541264824163,
+        0.42157215236398626,
+        0.4675377905368805
+      ],
+      "unrelated_scores": [
+        0.03886541264824163,
+        0.42157215236398626,
+        0.4675377905368805
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04066986226468736,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.3756065141910921,
+          "word_score": 0.263238355283993
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_champ_t2",
+      "group": "custom_threads:te_twin_champ_toxic",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03902484855375778,
+        0.42189164816114355,
+        0.46817678213119507
+      ],
+      "isolated_scores": [
+        0.03912613640300523,
+        0.41851579009267736,
+        0.4614250659942627
+      ],
+      "reversed_scores": [
+        0.03902484855375778,
+        0.42189164816114355,
+        0.46817678213119507
+      ],
+      "unrelated_scores": [
+        0.03902484855375778,
+        0.42189164816114355,
+        0.46817678213119507
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04066986226468736,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.3756065141910921,
+          "word_score": 0.263238355283993
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_champ_te_s2",
+      "group": "custom_threads:te_twin_champ_te_safe",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.2809214398054726,
+        0.609601424960041,
+        0.8405727744102478
+      ],
+      "isolated_scores": [
+        0.28090577868505784,
+        0.6343282330311775,
+        0.8900263905525208
+      ],
+      "reversed_scores": [
+        0.2809214398054726,
+        0.609601424960041,
+        0.8405727744102478
+      ],
+      "unrelated_scores": [
+        0.2809214398054726,
+        0.609601424960041,
+        0.8405727744102478
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.3786300755098343,
+          "word_score": 0.263238355283993
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_champ_te_t2",
+      "group": "custom_threads:te_twin_champ_te_toxic",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.2809037074236519,
+        0.6006221342362403,
+        0.8226141929626465
+      ],
+      "isolated_scores": [
+        0.28090577868505784,
+        0.6343282330311775,
+        0.8900263905525208
+      ],
+      "reversed_scores": [
+        0.2809037074236519,
+        0.6006221342362403,
+        0.8226141929626465
+      ],
+      "unrelated_scores": [
+        0.2809037074236519,
+        0.6006221342362403,
+        0.8226141929626465
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.3786300755098343,
+          "word_score": 0.263238355283993
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_pani_s2",
+      "group": "custom_threads:te_twin_pani_safe",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.2290795237829075,
+        0.6857070059983037,
+        0.8733647465705872
+      ],
+      "isolated_scores": [
+        0.2317815215398655,
+        0.6903069944588445,
+        0.8825647234916687
+      ],
+      "reversed_scores": [
+        0.2290795237829075,
+        0.6857070059983037,
+        0.8733647465705872
+      ],
+      "unrelated_scores": [
+        0.2290795237829075,
+        0.6857070059983037,
+        0.8733647465705872
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.03343015127841443,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.4980492654260202,
+          "word_score": 0.2627900506417184
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_pani_t2",
+      "group": "custom_threads:te_twin_pani_toxic",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.22960987101095773,
+        0.6866670282093785,
+        0.8752847909927368
+      ],
+      "isolated_scores": [
+        0.2317815215398655,
+        0.6903069944588445,
+        0.8825647234916687
+      ],
+      "reversed_scores": [
+        0.22960987101095773,
+        0.6866670282093785,
+        0.8752847909927368
+      ],
+      "unrelated_scores": [
+        0.22960987101095773,
+        0.6866670282093785,
+        0.8752847909927368
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.03343015127841443,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.4980492654260202,
+          "word_score": 0.2627900506417184
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_pichi_s2",
+      "group": "custom_threads:te_twin_pichi_safe",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03929494113691352,
+        0.5019142561107314,
+        0.5316226482391357
+      ],
+      "isolated_scores": [
+        0.03901308287896417,
+        0.5017566018253005,
+        0.5313073396682739
+      ],
+      "reversed_scores": [
+        0.03929494113691352,
+        0.5019142561107314,
+        0.5316226482391357
+      ],
+      "unrelated_scores": [
+        0.03929494113691352,
+        0.5019142561107314,
+        0.5316226482391357
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04122484074324638,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.47220586398232695,
+          "word_score": 0.43446627031864254
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_pichi_t2",
+      "group": "custom_threads:te_twin_pichi_toxic",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03904339277215503,
+        0.5024675362258589,
+        0.5327292084693909
+      ],
+      "isolated_scores": [
+        0.03901308287896417,
+        0.5017566018253005,
+        0.5313073396682739
+      ],
+      "reversed_scores": [
+        0.03904339277215503,
+        0.5024675362258589,
+        0.5327292084693909
+      ],
+      "unrelated_scores": [
+        0.03904339277215503,
+        0.5024675362258589,
+        0.5327292084693909
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04122484074324638,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.47220586398232695,
+          "word_score": 0.43446627031864254
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_pani_te_s2",
+      "group": "custom_threads:te_twin_pani_te_safe",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.16770356444403,
+        0.4235205462405716,
+        0.6391849517822266
+      ],
+      "isolated_scores": [
+        0.1715178146748192,
+        0.4286378136107956,
+        0.6494194865226746
+      ],
+      "reversed_scores": [
+        0.16770356444403,
+        0.4235205462405716,
+        0.6391849517822266
+      ],
+      "unrelated_scores": [
+        0.16770356444403,
+        0.4235205462405716,
+        0.6391849517822266
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.20785614069891664,
+          "word_score": 0.33908631710942655
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_pani_te_t2",
+      "group": "custom_threads:te_twin_pani_te_toxic",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.1679719641594536,
+        0.4229761174151932,
+        0.6380960941314697
+      ],
+      "isolated_scores": [
+        0.1715178146748192,
+        0.4286378136107956,
+        0.6494194865226746
+      ],
+      "reversed_scores": [
+        0.1679719641594536,
+        0.4229761174151932,
+        0.6380960941314697
+      ],
+      "unrelated_scores": [
+        0.1679719641594536,
+        0.4229761174151932,
+        0.6380960941314697
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.20785614069891664,
+          "word_score": 0.33908631710942655
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_dengey_s2",
+      "group": "custom_threads:te_twin_dengey_safe",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.18555826975516337,
+        0.6766266458429016,
+        0.9157701134681702
+      ],
+      "isolated_scores": [
+        0.18605790568999309,
+        0.680788987199179,
+        0.9240947961807251
+      ],
+      "reversed_scores": [
+        0.18555826975516337,
+        0.6766266458429016,
+        0.9157701134681702
+      ],
+      "unrelated_scores": [
+        0.18555826975516337,
+        0.6766266458429016,
+        0.9157701134681702
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.06055956461180395,
+          "word_score": 0.06017380101630203
+        },
+        "mixed": {
+          "char_score": 0.43748317821763305,
+          "word_score": 0.6596701724025074
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_twin_dengey_t2",
+      "group": "custom_threads:te_twin_dengey_toxic",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.033789809881932274,
+        0.7499374431322161,
+        0.8539365530014038
+      ],
+      "isolated_scores": [
+        0.03370979507010354,
+        0.7550668996522967,
+        0.8641954660415649
+      ],
+      "reversed_scores": [
+        0.033789809881932274,
+        0.7499374431322161,
+        0.8539365530014038
+      ],
+      "unrelated_scores": [
+        0.033789809881932274,
+        0.7499374431322161,
+        0.8539365530014038
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.040925518727847915,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.6459383332630285,
+          "word_score": 0.18168264519842958
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_quote_01_2",
+      "group": "custom_threads:te_quote_01",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.017594652680731262,
+        0.17499948616032657,
+        0.22617802023887634
+      ],
+      "isolated_scores": [
+        0.01758577432441979,
+        0.19254451568131503,
+        0.26126807928085327
+      ],
+      "reversed_scores": [
+        0.017594652680731262,
+        0.17499948616032657,
+        0.22617802023887634
+      ],
+      "unrelated_scores": [
+        0.017594652680731262,
+        0.17499948616032657,
+        0.22617802023887634
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.022225058590440546,
+          "word_score": 0.03280585352916032
+        },
+        "mixed": {
+          "char_score": 0.1238209520817768,
+          "word_score": 0.07352401499252897
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_quote_02_2",
+      "group": "custom_threads:te_quote_02",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03241653663722273,
+        0.5302490999195111,
+        0.7283701300621033
+      ],
+      "isolated_scores": [
+        0.032071578480875454,
+        0.5355095972511303,
+        0.7388911247253418
+      ],
+      "reversed_scores": [
+        0.03241653663722273,
+        0.5302490999195111,
+        0.7283701300621033
+      ],
+      "unrelated_scores": [
+        0.03241653663722273,
+        0.5302490999195111,
+        0.7283701300621033
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.03108948863622343,
+          "word_score": 0.05513217653751405
+        },
+        "mixed": {
+          "char_score": 0.3321280697769188,
+          "word_score": 0.41445166650594184
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_quote_03_2",
+      "group": "custom_threads:te_quote_03",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.12301323113724061,
+        0.5958707321808602,
+        0.8795396089553833
+      ],
+      "isolated_scores": [
+        0.12264797387405701,
+        0.5975982834027077,
+        0.8829947113990784
+      ],
+      "reversed_scores": [
+        0.12301323113724061,
+        0.5958707321808602,
+        0.8795396089553833
+      ],
+      "unrelated_scores": [
+        0.12301323113724061,
+        0.5958707321808602,
+        0.8795396089553833
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.3122018554063371,
+          "word_score": 0.2822298157677906
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_quote_04_2",
+      "group": "custom_threads:te_quote_04",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.0337426877724898,
+        0.06087724276870623,
+        0.0152431670576334
+      ],
+      "isolated_scores": [
+        0.03368983707902552,
+        0.061368923346103575,
+        0.016226528212428093
+      ],
+      "reversed_scores": [
+        0.0337426877724898,
+        0.06087724276870623,
+        0.0152431670576334
+      ],
+      "unrelated_scores": [
+        0.0337426877724898,
+        0.06087724276870623,
+        0.0152431670576334
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041892345517247534,
+          "word_score": 0.0570561252645361
+        },
+        "mixed": {
+          "char_score": 0.10651131847977906,
+          "word_score": 0.1726599738217936
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_meme_01_2",
+      "group": "custom_threads:te_meme_01",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.037367340833003526,
+        0.3337271300664988,
+        0.24800634384155273
+      ],
+      "isolated_scores": [
+        0.03737332411488414,
+        0.32771746940527824,
+        0.23598702251911163
+      ],
+      "reversed_scores": [
+        0.037367340833003526,
+        0.3337271300664988,
+        0.24800634384155273
+      ],
+      "unrelated_scores": [
+        0.037367340833003526,
+        0.3337271300664988,
+        0.24800634384155273
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.049159512410013484,
+          "word_score": 0.05877377946267141
+        },
+        "mixed": {
+          "char_score": 0.4194479162914449,
+          "word_score": 0.0690352900587484
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_meme_02_2",
+      "group": "custom_threads:te_meme_02",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.20617082124920655,
+        0.3827541701640551,
+        0.6139714121818542
+      ],
+      "isolated_scores": [
+        0.2065035045740204,
+        0.3876328401412432,
+        0.6237287521362305
+      ],
+      "reversed_scores": [
+        0.20617082124920655,
+        0.3827541701640551,
+        0.6139714121818542
+      ],
+      "unrelated_scores": [
+        0.20617082124920655,
+        0.3827541701640551,
+        0.6139714121818542
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04836165118180337,
+          "word_score": 0.054632299946054605
+        },
+        "mixed": {
+          "char_score": 0.151536928146256,
+          "word_score": 0.13350213803386438
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_meme_03_2",
+      "group": "custom_threads:te_meme_03",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.031200755750580404,
+        0.595862638856298,
+        0.8158218860626221
+      ],
+      "isolated_scores": [
+        0.03123053013329086,
+        0.6007996915830436,
+        0.8256959915161133
+      ],
+      "reversed_scores": [
+        0.031200755750580404,
+        0.595862638856298,
+        0.8158218860626221
+      ],
+      "unrelated_scores": [
+        0.031200755750580404,
+        0.595862638856298,
+        0.8158218860626221
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.038187738681592906,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.37590339164997394,
+          "word_score": 0.33446187419677886
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_meme_04_2",
+      "group": "custom_threads:te_meme_04",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.04654917882516452,
+        0.3325505854792479,
+        0.3266511857509613
+      ],
+      "isolated_scores": [
+        0.04655279142543145,
+        0.3314758392281416,
+        0.3245016932487488
+      ],
+      "reversed_scores": [
+        0.04654917882516452,
+        0.3325505854792479,
+        0.3266511857509613
+      ],
+      "unrelated_scores": [
+        0.04654917882516452,
+        0.3325505854792479,
+        0.3266511857509613
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.3384499852075344,
+          "word_score": 0.3128614687501367
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_meme_05_2",
+      "group": "custom_threads:te_meme_05",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.28830502390627233,
+        0.6116075853098536,
+        0.8333942890167236
+      ],
+      "isolated_scores": [
+        0.2886088436818537,
+        0.6132741907824183,
+        0.836727499961853
+      ],
+      "reversed_scores": [
+        0.28830502390627233,
+        0.6116075853098536,
+        0.8333942890167236
+      ],
+      "unrelated_scores": [
+        0.28830502390627233,
+        0.6116075853098536,
+        0.8333942890167236
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.07639540513044156,
+          "word_score": 0.0957568270605687
+        },
+        "mixed": {
+          "char_score": 0.38982088160298356,
+          "word_score": 0.38524746357392575
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_threat_01_2",
+      "group": "custom_threads:te_threat_01",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.04441461495726652,
+        0.8710512699153433,
+        0.8107699751853943
+      ],
+      "isolated_scores": [
+        0.04432248154326625,
+        0.8765837432410727,
+        0.821834921836853
+      ],
+      "reversed_scores": [
+        0.04441461495726652,
+        0.8710512699153433,
+        0.8107699751853943
+      ],
+      "unrelated_scores": [
+        0.04441461495726652,
+        0.8710512699153433,
+        0.8107699751853943
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.05417799878427515,
+          "word_score": 0.057407725016432994
+        },
+        "mixed": {
+          "char_score": 0.9313325646452923,
+          "word_score": 0.6728217862879047
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_threat_02_2",
+      "group": "custom_threads:te_threat_02",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.01566403722788984,
+        0.5500994530516712,
+        0.8500688076019287
+      ],
+      "isolated_scores": [
+        0.015685284362899458,
+        0.5520662275153247,
+        0.8540023565292358
+      ],
+      "reversed_scores": [
+        0.01566403722788984,
+        0.5500994530516712,
+        0.8500688076019287
+      ],
+      "unrelated_scores": [
+        0.01566403722788984,
+        0.5500994530516712,
+        0.8500688076019287
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.020718835408213662,
+          "word_score": 0.03615467304524531
+        },
+        "mixed": {
+          "char_score": 0.2501300985014137,
+          "word_score": 0.19507712594682244
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_threat_03_2",
+      "group": "custom_threads:te_threat_03",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03544681302964159,
+        0.4819434673972508,
+        0.6810672283172607
+      ],
+      "isolated_scores": [
+        0.035579980981940706,
+        0.4883615465350529,
+        0.693903386592865
+      ],
+      "reversed_scores": [
+        0.03544681302964159,
+        0.4819434673972508,
+        0.6810672283172607
+      ],
+      "unrelated_scores": [
+        0.03544681302964159,
+        0.4819434673972508,
+        0.6810672283172607
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.28281970647724086,
+          "word_score": 0.24934253477022092
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_threat_04_2",
+      "group": "custom_threads:te_threat_04",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.08162566197797128,
+        0.5494306780296795,
+        0.6984276175498962
+      ],
+      "isolated_scores": [
+        0.08148841110750504,
+        0.551617453237199,
+        0.7028011679649353
+      ],
+      "reversed_scores": [
+        0.08162566197797128,
+        0.5494306780296795,
+        0.6984276175498962
+      ],
+      "unrelated_scores": [
+        0.08162566197797128,
+        0.5494306780296795,
+        0.6984276175498962
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.4004337385094627,
+          "word_score": 0.4283714196337365
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_threat_05_2",
+      "group": "custom_threads:te_threat_05",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.037133889316470534,
+        0.20852282153575574,
+        0.2318902611732483
+      ],
+      "isolated_scores": [
+        0.03711730851501337,
+        0.2147068332335249,
+        0.24425828456878662
+      ],
+      "reversed_scores": [
+        0.037133889316470534,
+        0.20852282153575574,
+        0.2318902611732483
+      ],
+      "unrelated_scores": [
+        0.037133889316470534,
+        0.20852282153575574,
+        0.2318902611732483
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04233644349734136,
+          "word_score": 0.07218025634167813
+        },
+        "mixed": {
+          "char_score": 0.1851553818982632,
+          "word_score": 0.1992750396881671
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_caste_s1_2",
+      "group": "custom_threads:te_caste_safe_01",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.1833150353186192,
+        0.39674628546326285,
+        0.6003895401954651
+      ],
+      "isolated_scores": [
+        0.1806941445820393,
+        0.4025934415110839,
+        0.6120838522911072
+      ],
+      "reversed_scores": [
+        0.1833150353186192,
+        0.39674628546326285,
+        0.6003895401954651
+      ],
+      "unrelated_scores": [
+        0.1833150353186192,
+        0.39674628546326285,
+        0.6003895401954651
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.03872316627407893,
+          "word_score": 0.06293949439563233
+        },
+        "mixed": {
+          "char_score": 0.1931030307310606,
+          "word_score": 0.1416728596566174
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_caste_s2_2",
+      "group": "custom_threads:te_caste_safe_02",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03177556379410097,
+        0.4405852493362792,
+        0.5506771206855774
+      ],
+      "isolated_scores": [
+        0.03177848708469545,
+        0.444055014522589,
+        0.557616651058197
+      ],
+      "reversed_scores": [
+        0.03177556379410097,
+        0.4405852493362792,
+        0.5506771206855774
+      ],
+      "unrelated_scores": [
+        0.03177556379410097,
+        0.4405852493362792,
+        0.5506771206855774
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.042284060801651126,
+          "word_score": 0.054408601467133416
+        },
+        "mixed": {
+          "char_score": 0.33049337798698103,
+          "word_score": 0.2495245674185182
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_caste_s3_2",
+      "group": "custom_threads:te_caste_safe_03",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.03844243275673613,
+        0.7942588883290084,
+        0.7515673637390137
+      ],
+      "isolated_scores": [
+        0.0384317716161862,
+        0.7970056491741927,
+        0.7570608854293823
+      ],
+      "reversed_scores": [
+        0.03844243275673613,
+        0.7942588883290084,
+        0.7515673637390137
+      ],
+      "unrelated_scores": [
+        0.03844243275673613,
+        0.7942588883290084,
+        0.7515673637390137
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.0502601949556609,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.8369504129190031,
+          "word_score": 0.23828226890839457
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_caste_s4_2",
+      "group": "custom_threads:te_caste_safe_04",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.05203422827407189,
+        0.35381274994305917,
+        0.5748702883720398
+      ],
+      "isolated_scores": [
+        0.05181939078255959,
+        0.35336908276967355,
+        0.5739829540252686
+      ],
+      "reversed_scores": [
+        0.05203422827407189,
+        0.35381274994305917,
+        0.5748702883720398
+      ],
+      "unrelated_scores": [
+        0.05203422827407189,
+        0.35381274994305917,
+        0.5748702883720398
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.1327552115140785,
+          "word_score": 0.21390545952783652
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_caste_t1_2",
+      "group": "custom_threads:te_caste_toxic_01",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.04091919299574072,
+        0.6352728957394249,
+        0.7540919780731201
+      ],
+      "isolated_scores": [
+        0.040358537737144776,
+        0.6413226777771599,
+        0.7661915421485901
+      ],
+      "reversed_scores": [
+        0.04091919299574072,
+        0.6352728957394249,
+        0.7540919780731201
+      ],
+      "unrelated_scores": [
+        0.04091919299574072,
+        0.6352728957394249,
+        0.7540919780731201
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04115992650868329,
+          "word_score": 0.06382233529405758
+        },
+        "mixed": {
+          "char_score": 0.5164538134057298,
+          "word_score": 0.1520346993302814
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_caste_t2_2",
+      "group": "custom_threads:te_caste_toxic_02",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.2712795391468651,
+        0.8625451149710182,
+        0.9608707427978516
+      ],
+      "isolated_scores": [
+        0.27105533627554246,
+        0.8660167875059608,
+        0.9678140878677368
+      ],
+      "reversed_scores": [
+        0.2712795391468651,
+        0.8625451149710182,
+        0.9608707427978516
+      ],
+      "unrelated_scores": [
+        0.2712795391468651,
+        0.8625451149710182,
+        0.9608707427978516
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.7642194871441846,
+          "word_score": 0.5838743376850678
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_toxic_r01_2",
+      "group": "custom_threads:te_toxic_reply_01",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.21461986706171585,
+        0.7401250120178362,
+        0.9226047992706299
+      ],
+      "isolated_scores": [
+        0.2151208739033754,
+        0.7428386922851702,
+        0.9280321598052979
+      ],
+      "reversed_scores": [
+        0.21461986706171585,
+        0.7401250120178362,
+        0.9226047992706299
+      ],
+      "unrelated_scores": [
+        0.21461986706171585,
+        0.7401250120178362,
+        0.9226047992706299
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.05289613148257669,
+          "word_score": 0.0859626990461886
+        },
+        "mixed": {
+          "char_score": 0.5576452247650425,
+          "word_score": 0.4752028992102037
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_toxic_r02_2",
+      "group": "custom_threads:te_toxic_reply_02",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.09817119339716542,
+        0.7852603602329793,
+        0.8314671516418457
+      ],
+      "isolated_scores": [
+        0.09605237866056072,
+        0.829992573253304,
+        0.9209315776824951
+      ],
+      "reversed_scores": [
+        0.09817119339716542,
+        0.7852603602329793,
+        0.8314671516418457
+      ],
+      "unrelated_scores": [
+        0.09817119339716542,
+        0.7852603602329793,
+        0.8314671516418457
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.046421334473452404,
+          "word_score": 0.04283231199359879
+        },
+        "mixed": {
+          "char_score": 0.7390535688241128,
+          "word_score": 0.40765854283930414
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_toxic_r03_2",
+      "group": "custom_threads:te_toxic_reply_03",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.28130848256632157,
+        0.7409709919743482,
+        0.9862995743751526
+      ],
+      "isolated_scores": [
+        0.28130755869432755,
+        0.7332931686692182,
+        0.9709439277648926
+      ],
+      "reversed_scores": [
+        0.28130848256632157,
+        0.7409709919743482,
+        0.9862995743751526
+      ],
+      "unrelated_scores": [
+        0.28130848256632157,
+        0.7409709919743482,
+        0.9862995743751526
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.49564240957354394,
+          "word_score": 0.3721846361728257
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_toxic_r04_2",
+      "group": "custom_threads:te_toxic_reply_04",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.04193572035634537,
+        0.6652286723801382,
+        0.9081864953041077
+      ],
+      "isolated_scores": [
+        0.04153988497906943,
+        0.684502013082195,
+        0.9467331767082214
+      ],
+      "reversed_scores": [
+        0.04193572035634537,
+        0.6652286723801382,
+        0.9081864953041077
+      ],
+      "unrelated_scores": [
+        0.04193572035634537,
+        0.6652286723801382,
+        0.9081864953041077
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04166028135291761,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.4222708494561687,
+          "word_score": 0.4611953018302312
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_mt01_4",
+      "group": "custom_threads:te_multi_turn_01",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 3,
+      "scores": [
+        0.06887204965453968,
+        0.40844616655987653,
+        0.7371504902839661
+      ],
+      "isolated_scores": [
+        0.046557264606174084,
+        0.3219606316534892,
+        0.5641794204711914
+      ],
+      "reversed_scores": [
+        0.06935342794161663,
+        0.4131656027285472,
+        0.7465893626213074
+      ],
+      "unrelated_scores": [
+        0.06887204965453968,
+        0.40844616655987653,
+        0.7371504902839661
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.03891949879463018,
+          "word_score": 0.03863102921801871
+        },
+        "mixed": {
+          "char_score": 0.07974184283578696,
+          "word_score": 0.14481823546906267
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_mt02_4",
+      "group": "custom_threads:te_multi_turn_02",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 3,
+      "scores": [
+        0.06140248985145759,
+        0.4793356039120459,
+        0.2939109802246094
+      ],
+      "isolated_scores": [
+        0.059045372485411876,
+        0.5125553288056158,
+        0.36035043001174927
+      ],
+      "reversed_scores": [
+        0.061274835328800195,
+        0.4802350529028677,
+        0.29570987820625305
+      ],
+      "unrelated_scores": [
+        0.06140248985145759,
+        0.4793356039120459,
+        0.2939109802246094
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.07355537756190395,
+          "word_score": 0.05265199158042453
+        },
+        "mixed": {
+          "char_score": 0.6647602275994824,
+          "word_score": 0.3400448445732739
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_mt03_4",
+      "group": "custom_threads:te_multi_turn_03",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 3,
+      "scores": [
+        0.1784533705437681,
+        0.8182709588025703,
+        0.7943879961967468
+      ],
+      "isolated_scores": [
+        0.11009159645681588,
+        0.8569106234525337,
+        0.8716673254966736
+      ],
+      "reversed_scores": [
+        0.1789580579722425,
+        0.818028487107624,
+        0.7939030528068542
+      ],
+      "unrelated_scores": [
+        0.1784533705437681,
+        0.8182709588025703,
+        0.7943879961967468
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.06833670485344208,
+          "word_score": 0.07733701912039537
+        },
+        "mixed": {
+          "char_score": 0.8421539214083938,
+          "word_score": 0.503422563733072
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_mt04_4",
+      "group": "custom_threads:te_multi_turn_04",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "telugu_script",
+      "has_context": true,
+      "available_ancestors": 3,
+      "scores": [
+        0.03155474717431639,
+        0.21746216843049493,
+        0.273537278175354
+      ],
+      "isolated_scores": [
+        0.03153059358527821,
+        0.19877646247069802,
+        0.2361658662557602
+      ],
+      "reversed_scores": [
+        0.031560340654043784,
+        0.21726563701550927,
+        0.2731442153453827
+      ],
+      "unrelated_scores": [
+        0.03155474717431639,
+        0.21746216843049493,
+        0.273537278175354
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.041754378847075405,
+          "word_score": 0.06044628802247985
+        },
+        "mixed": {
+          "char_score": 0.16138705868563583,
+          "word_score": 0.32255251830889464
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_mt05_4",
+      "group": "custom_threads:te_multi_turn_05",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 3,
+      "scores": [
+        0.03581115473747013,
+        0.4248970028262253,
+        0.8003723621368408
+      ],
+      "isolated_scores": [
+        0.02126892898916958,
+        0.33811380232382965,
+        0.6268059611320496
+      ],
+      "reversed_scores": [
+        0.036100358336565476,
+        0.4244173344473953,
+        0.7994130253791809
+      ],
+      "unrelated_scores": [
+        0.03581115473747013,
+        0.4248970028262253,
+        0.8003723621368408
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.012089275577859852,
+          "word_score": 0.029550838051426616
+        },
+        "mixed": {
+          "char_score": 0.049421643515609764,
+          "word_score": 0.12381730561585483
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_sarc_s1_2",
+      "group": "custom_threads:te_sarcasm_safe_01",
+      "source": "custom_threads",
+      "label": 0,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.26771270040335776,
+        0.5576244611553031,
+        0.9373632669448853
+      ],
+      "isolated_scores": [
+        0.2679487496978295,
+        0.559776904087432,
+        0.9416681528091431
+      ],
+      "reversed_scores": [
+        0.26771270040335776,
+        0.5576244611553031,
+        0.9373632669448853
+      ],
+      "unrelated_scores": [
+        0.26771270040335776,
+        0.5576244611553031,
+        0.9373632669448853
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.04921307568632924,
+          "word_score": 0.057574057423148445
+        },
+        "mixed": {
+          "char_score": 0.17788565536572085,
+          "word_score": 0.34427710758077706
+        }
+      }
+    },
+    {
+      "id": "custom_threads:te_sarc_t1_2",
+      "group": "custom_threads:te_sarcasm_toxic_01",
+      "source": "custom_threads",
+      "label": 1,
+      "split": "challenge",
+      "bucket": "latin_ambiguous",
+      "has_context": true,
+      "available_ancestors": 1,
+      "scores": [
+        0.06112119722606192,
+        0.8367999215990873,
+        0.9244166612625122
+      ],
+      "isolated_scores": [
+        0.06105561535300265,
+        0.8379122038752409,
+        0.9266412258148193
+      ],
+      "reversed_scores": [
+        0.06112119722606192,
+        0.8367999215990873,
+        0.9244166612625122
+      ],
+      "unrelated_scores": [
+        0.06112119722606192,
+        0.8367999215990873,
+        0.9244166612625122
+      ],
+      "unrelated_eligible": false,
+      "lexical_scores": {
+        "english": {
+          "char_score": 0.045501256727396786,
+          "word_score": 0.0583910965484895
+        },
+        "mixed": {
+          "char_score": 0.7491831819356624,
+          "word_score": 0.7330780310296794
+        }
+      }
+    }
+  ],
+  "device": "cuda",
+  "precision": "FP32",
+  "seconds": 13.96799999999348
+}

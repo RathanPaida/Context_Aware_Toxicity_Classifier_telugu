@@ -18,3 +18,6 @@ nbclient>=0.10,<1
 pytest>=8,<10
 peft>=0.7.0
 accelerate>=0.25.0
+
+# Frozen language detector for conservative model routing.
+langid==1.1.6

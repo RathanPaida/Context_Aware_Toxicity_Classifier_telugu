@@ -3,14 +3,22 @@
   "health": {
     "ready": true,
     "detail": null,
-    "model": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+    "model": "hybrid_adaptive_specialist",
     "topic_input": false,
-    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_no_cdropout",
+    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_contrast_lora",
     "device": "cpu",
-    "threshold": 0.635425865650177
+    "predictor_type": "HybridAdaptivePredictor",
+    "ensemble_artifact": null,
+    "router_artifact": null,
+    "adaptive_artifact": null,
+    "hybrid_artifact": "reports/adaptive_v1/policy.json",
+    "threshold": 0.5
   },
+  "config": "configs/demo_hybrid_v1.json",
+  "benchmark_report": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\adaptive_v1\\evaluation.json",
+  "benchmark_status": 200,
   "index_status": 200,
   "docs_status": 200,
   "prediction_status": 200,
-  "toxicity_score": 0.009613415226340294
+  "toxicity_score": 0.04857087403222263
 }

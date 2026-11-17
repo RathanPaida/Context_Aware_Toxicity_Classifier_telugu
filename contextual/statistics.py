@@ -45,6 +45,27 @@ def paired_f1_interval(labels, scores, reference_scores, groups, threshold, refe
             'groups': len(counts), 'examples': len(y), 'resamples': resamples, 'seed': seed}
 
 
+def paired_ap_interval(labels, scores, reference_scores, groups, resamples=1000, seed=2026):
+    """Threshold-independent paired AP difference, resampling connected groups."""
+    from sklearn.metrics import average_precision_score
+    y, a, b = np.asarray(labels), np.asarray(scores), np.asarray(reference_scores)
+    if resamples < 1 or not (len(y)==len(a)==len(b)==len(groups)) or set(y) != {0,1}:
+        raise ValueError('AP interval needs aligned rows, both classes, and positive resamples')
+    if not np.isfinite(a).all() or not np.isfinite(b).all():
+        raise ValueError('Nonfinite scores')
+    _, inverse = np.unique(groups,return_inverse=True)
+    n=int(inverse.max())+1
+    rng=np.random.default_rng(seed)
+    differences=[]
+    for _ in range(resamples):
+        weights=np.bincount(rng.integers(0,n,n),minlength=n)[inverse]
+        if not weights[y==0].sum() or not weights[y==1].sum(): continue
+        differences.append(average_precision_score(y,a,sample_weight=weights)-average_precision_score(y,b,sample_weight=weights))
+    return {'ap_difference':float(average_precision_score(y,a)-average_precision_score(y,b)),
+            'percentile_95_interval':np.quantile(differences,[.025,.975]).tolist() if differences else None,
+            'groups':n,'examples':len(y),'requested_resamples':resamples,'valid_resamples':len(differences),'seed':seed}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', default='configs/contextual_clean_lora.json')

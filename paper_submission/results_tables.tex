@@ -1,0 +1,180 @@
+% Auto-generated and verified tables for paper_submission/main.tex
+% All values derived from saved predictions and verified against reports/adaptive_v1/evaluation.json
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Dataset / Source & Language / Task & Train & Validation & Test & Total \\
+\midrule
+English CGA & Personal attack (Wiki) & 15,775 (1,221) & 3,480 (285) & 3,577 (274) & 22,832 \\
+Telugu safety & Cultural safety prompts & 8,370 (2,516) & 1,800 (534) & 1,787 (569) & 11,957 \\
+Tamil code-mixed & Offensiveness (social) & 30,433 (8,472) & 6,496 (1,740) & 6,514 (1,816) & 43,443 \\
+\midrule
+Combined pool & Multi-task mixture & 54,578 (12,209) & 11,776 (2,559) & 11,878 (2,659) & 78,232 \\
+\bottomrule
+\end{tabular}
+\caption{Cleaned dataset partition counts, with positive (toxic/abusive) counts shown in parentheses. Grouped conversation and shared-text splits prevent cross-split leakage.}\label{tab:data}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Model / Training Recipe & Threshold & Overall F1 & Contextual F1 & AP & Precision & Recall \\
+\midrule
+\multicolumn{7}{l}{\textit{English-Trained Models on English CGA Test ($n=3,577$)}} \\
+English char TF-IDF & 0.2239 & 0.7259 & 0.7446 & 0.8049 & 0.7705 & 0.6861 \\
+English frozen target-only MLP & 0.7648 & 0.6299 & 0.6267 & 0.6951 & 0.5673 & 0.7080 \\
+English frozen contextual Transformer & 0.9457 & 0.6546 & 0.6600 & 0.7322 & 0.6487 & 0.6606 \\
+English LoRA contextual Transformer & 0.8228 & 0.7232 & 0.7433 & 0.8194 & 0.7313 & 0.7153 \\
+\textbf{English ensemble (75\% char + 25\% LoRA)} & 0.3061 & \textbf{0.7869} & \textbf{0.7981} & \textbf{0.8629} & 0.7435 & 0.8358 \\
+\midrule
+\multicolumn{7}{l}{\textit{Historical Mixed-Language Models Evaluated on the Identical English Test Set}} \\
+Historical mixed TF-IDF & 0.3266 & 0.6035 & 0.6061 & 0.7007 & 0.7611 & 0.5000 \\
+Historical mixed LoRA Transformer & 0.5952 & 0.7394 & 0.7612 & 0.8059 & 0.7491 & 0.7299 \\
+Historical mixed ensemble & 0.4827 & 0.7459 & 0.7713 & 0.8404 & 0.8505 & 0.6642 \\
+\bottomrule
+\end{tabular}
+\caption{Matched evaluation on identical 3,577 English CGA holdout test targets (274 positives; 2,282 contextual targets with $\ge 1$ ancestors). All models evaluated using their respective validation-selected thresholds.}\label{tab:english_matched}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Population & English ens. & Mixed neural & Mixed ens. & Adaptive blend & Adaptive AP \\
+\midrule
+Combined test ($n=11,878$) & 0.1710 & 0.6947 & 0.7284 & 0.7299 & 0.8007 \\
+English CGA ($n=3,577$) & \textbf{0.7869} & 0.7394 & 0.7459 & 0.7650 & 0.8563 \\
+Telugu safety ($n=1,787$) & 0.0000 & 0.8336 & 0.8419 & \textbf{0.8498} & 0.9200 \\
+Tamil code-mixed ($n=6,514$) & 0.0311 & 0.6454 & \textbf{0.6883} & 0.6856 & 0.7371 \\
+\bottomrule
+\end{tabular}
+\caption{Positive-class F1 across expert baselines and the validation-selected adaptive policy, evaluated on the full 11,878 test set. The pure English ensemble collapses on Indic scripts, while adaptive script-conditioned blending balances specialized performance across sources.}\label{tab:main}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Source Population & Precision & Recall & F1 & AP & ROC-AUC & Confusion Matrix [TN, FP; FN, TP] \\
+\midrule
+English CGA ($n=3,577$) & 0.7636 & 0.7664 & 0.7650 & 0.8563 & 0.9789 & [3238, 65; 64, 210] \\
+Telugu safety ($n=1,787$) & 0.7789 & 0.9350 & 0.8498 & 0.9200 & 0.9645 & [1067, 151; 37, 532] \\
+Tamil code-mixed ($n=6,514$) & 0.6519 & 0.7230 & 0.6856 & 0.7371 & 0.8802 & [3997, 701; 503, 1313] \\
+\midrule
+Combined test ($n=11,878$) & 0.6915 & 0.7728 & 0.7299 & 0.8007 & 0.9320 & [8302, 917; 604, 2055] \\
+\bottomrule
+\end{tabular}
+\caption{Comprehensive performance breakdown of the selected adaptive policy (\texttt{script\_soft\_blend}) across all source populations on the held-out test split.}\label{tab:adaptive_details}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrr}
+\toprule
+Population & $\Delta$F1 (percentage points) & 95\% Group-Bootstrap Interval (pp) \\
+\midrule
+Combined test ($n=11,878$) & +0.144 & [-0.424, +0.744] \\
+English CGA ($n=3,577$) & +1.913 & [-0.956, +5.109] \\
+Telugu safety ($n=1,787$) & +0.790 & [-0.513, +2.048] \\
+Tamil code-mixed ($n=6,514$) & -0.264 & [-0.842, +0.348] \\
+\bottomrule
+\end{tabular}
+\caption{Paired F1 difference ($\text{Adaptive} - \text{Mixed Ensemble}$) with 1,000 paired connected-group bootstrap resamples (seed 2026). All intervals span zero, indicating that the overall point difference is not statistically significant.}\label{tab:delta}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Evaluation Condition & Eligible $n$ & Precision & Recall & F1 & AP & ROC-AUC \\
+\midrule
+Adaptive full context & 2,282 & 0.7536 & 0.8112 & 0.7813 & 0.8754 & 0.9782 \\
+Adaptive removed context & 2,282 & 0.8323 & 0.7092 & 0.7658 & 0.8560 & 0.9739 \\
+\midrule
+\multicolumn{7}{l}{\textit{Paired difference (Full Context $-$ Removed Context on $n=2,282$ targets):}} \\
+\multicolumn{7}{l}{$\Delta\text{F1} = +1.549\text{ pp}$, 95\% CI: $[-1.678, +4.979\text{ pp}]$ (interval crosses zero)} \\
+\multicolumn{7}{l}{$\Delta\text{AP} = +1.945\text{ pp}$, 95\% CI: $[+0.616, +3.132\text{ pp}]$ (strictly positive ranking gain)} \\
+\midrule
+\multicolumn{7}{l}{\textit{Counterfactual Stress Controls (Router held fixed to original input):}} \\
+True context (reversal-eligible) & 1,292 & 0.7764 & 0.8389 & 0.8065 & 0.9136 & 0.9845 \\
+Reversed ancestor order & 1,292 & 0.7812 & 0.8389 & 0.8091 & 0.9140 & 0.9845 \\
+\midrule
+True context (donor-eligible) & 2,253 & 0.7512 & 0.8075 & 0.7784 & 0.8728 & 0.9820 \\
+Unrelated training-source parents & 2,253 & 0.7525 & 0.8128 & 0.7815 & 0.8727 & 0.9821 \\
+\bottomrule
+\end{tabular}
+\caption{Context ablation and stress control diagnostics on English CGA contextual test targets. Context removal yields an exploratory ranking gain in AP, but the F1 difference interval includes zero, and shuffled/unrelated parent controls exhibit near-identical performance.}\label{tab:context_controls}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{rrrrr|lrrrr}
+\toprule
+\multicolumn{5}{c|}{\textbf{Parent Retention Budget Sweep ($n=3,577$)}} & \multicolumn{5}{c}{\textbf{Observed Natural Ancestry Depth Breakdown}} \\
+Budget & Overall F1 & Overall AP & Ctx F1 & Ctx AP & Depth Group & $n$ & Positives & F1 & AP \\
+\midrule
+0 parents & 0.7763 & 0.8605 & 0.7844 & 0.8794 & 0 ancestors & 9,596 & 2,463 & 0.7259 & 0.7943 \\
+1 parent  & 0.7786 & 0.8607 & 0.7876 & 0.8798 & 1 ancestor  & 990 & 47 & 0.7010 & 0.7426 \\
+2 parents & 0.7878 & 0.8620 & 0.8000 & 0.8815 & 2 ancestors & 577 & 37 & 0.7952 & 0.9286 \\
+3 parents & 0.7943 & 0.8628 & 0.8088 & 0.8823 & 3 ancestors & 355 & 37 & 0.7671 & 0.8995 \\
+5 parents & 0.7849 & 0.8629 & 0.7953 & 0.8831 & 4--7 ancestors & 356 & 73 & 0.8267 & 0.9184 \\
+11 parents & 0.7869 & 0.8629 & 0.7981 & 0.8832 & 8--11 ancestors & 4 & 2 & 1.0000 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\caption{Left: Fixed parent retention budgets on English CGA test targets. Right: Natural observed ancestry depth breakdown under the adaptive policy. The four deep examples ($8\text{--}11$ ancestors) are insufficient to claim long-history robustness.}\label{tab:budgets}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Model / Evaluated System & F1 & AP & Precision & Recall & FP & FN \\
+\midrule
+Mixed-language LoRA Transformer & 0.6154 & 0.6063 & 0.4848 & 0.8421 & 17 & 3 \\
+Mixed-language clean ensemble & \textbf{0.6522} & \textbf{0.7540} & \textbf{0.5556} & 0.7895 & 12 & 4 \\
+Pure English ensemble & 0.0000 & 0.4797 & 0.0000 & 0.0000 & 0 & 19 \\
+\textbf{Adaptive policy (\texttt{script\_soft\_blend})} & 0.6222 & 0.7515 & 0.5385 & 0.7368 & 12 & 5 \\
+\bottomrule
+\end{tabular}
+\caption{Authored Telugu/Romanized development challenge (51 targets, 19 positives). The English ensemble fails completely due to zero lexical activation, whereas the adaptive policy restores sensitivity without modifying trained weights.}\label{tab:challenge}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+Detected Script Group & English Ens. Weight & Mixed Ens. Weight & Mixed Neural Weight & Calibrated Threshold \\
+\midrule
+\texttt{latin\_ambiguous} & 0.2500 & 0.7500 & 0.0000 & 0.384322 \\
+\texttt{mixed\_script}    & 0.0000 & 0.2500 & 0.7500 & 0.484014 \\
+\texttt{tamil\_script}    & 0.0000 & 0.7500 & 0.2500 & 0.494095 \\
+\texttt{telugu\_script}   & 0.0000 & 1.0000 & 0.0000 & 0.558908 \\
+Fallback (Unknown script) & 0.0000 & 1.0000 & 0.0000 & 0.482698 \\
+\bottomrule
+\end{tabular}
+\caption{Frozen validation-selected policy weights and operating thresholds across detected script groups. Script detection serves as a safeguard against lexical failure, not a true language identifier.}\label{tab:policy}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{p{4.5cm}p{10.5cm}}
+\toprule
+Configuration Parameter & Verified Specification / Checkpoint Hash \\
+\midrule
+Base Neural Encoder & \texttt{ai4bharat/IndicBERTv2-MLM-Sam-TLM} (commit \texttt{bb783337859e3d7957de5ba82766ddea51e8fc3e}) \\
+LoRA Target Modules & Attention Query and Value projections ($r=8$, $\alpha=16$, dropout $0.1$) \\
+Conversation Transformer & 2 layers, 4 attention heads, $d_{\text{model}}=192$, $d_{\text{ff}}=384$, GELU activation, dropout $0.1$ \\
+Maximum Turns Retained & $T \le 12$ turns (up to 11 ancestors plus 1 target reply) \\
+Mixed Dataset Artifact & \texttt{data/processed/contextual\_clean\_v1.jsonl} (SHA-256: \texttt{368817cc6203...}) \\
+English Dataset Artifact & \texttt{data/processed/english\_cga\_v1.jsonl} (SHA-256: \texttt{df39ad6827c5...}) \\
+Execution Environment & Python 3.10.20, PyTorch 2.12.0+cu130, Transformers 5.17.0, PEFT 0.18.1 \\
+Hardware & NVIDIA GeForce RTX 4060 Laptop GPU (8,188 MiB VRAM), CUDA 13.0 \\
+Software Tests & 95 passed, 1 skipped in 42.69s (\texttt{reports/adaptive\_v1/tests.xml}) \\
+Serving Parity & FP32 serving predictor verified with 0 decision flips against trainer predictions \\
+\bottomrule
+\end{tabular}
+\caption{Reproducibility specifications, pinned model configurations, and cryptographic artifact hashes.}\label{tab:reproducibility}
+\end{table}

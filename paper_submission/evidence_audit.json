@@ -1,0 +1,904 @@
+{
+  "basis": "Current local archive and matching local source artifacts; no model inference or training.",
+  "archive": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\adaptive_v1_results_for_review.zip",
+  "archive_sha256": "aa618f2aa9a0b61efce7b432eb3f3f0a901cac8c62a051f5392e12e9965d6dce",
+  "checks": [
+    {
+      "check": "ZIP CRC",
+      "passed": true
+    },
+    {
+      "check": "Manifest ADAPTIVE_MODEL_PLAN.md",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes ADAPTIVE_MODEL_PLAN.md",
+      "passed": true
+    },
+    {
+      "check": "Manifest app\\server.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes app\\server.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest configs\\adaptive_experiment.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes configs\\adaptive_experiment.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest configs\\demo_adaptive_v1.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes configs\\demo_adaptive_v1.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\__init__.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\__init__.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\adapter_finetune.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\adapter_finetune.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\adaptive_experiment.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\adaptive_experiment.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\adaptive_inference.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\adaptive_inference.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\adaptive_policy.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\adaptive_policy.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\benchmark_compare.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\benchmark_compare.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\config.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\config.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\context_sweep.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\context_sweep.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\data.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\data.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\embeddings.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\embeddings.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\english_experiment.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\english_experiment.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\ensemble.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\ensemble.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\error_analysis.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\error_analysis.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\evaluation.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\evaluation.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\experiments.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\experiments.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\external_data.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\external_data.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\inference.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\inference.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\model.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\model.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\preflight.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\preflight.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\preprocessing.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\preprocessing.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\recheck.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\recheck.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\statistics.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\statistics.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\submission.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\submission.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\target_only.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\target_only.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest contextual\\training.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes contextual\\training.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest ENGLISH_POST_RUN_REVIEW.md",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes ENGLISH_POST_RUN_REVIEW.md",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_development_tests.xml",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_development_tests.xml",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\challenge_evaluation.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\challenge_evaluation.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\challenge_evaluation.predictions.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\challenge_evaluation.predictions.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\challenge_scores.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\challenge_scores.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\environment.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\environment.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\evaluate_challenge.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\evaluate_challenge.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\evaluate_test.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\evaluate_test.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\evaluation.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\evaluation.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\evaluation.predictions.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\evaluation.predictions.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\fit.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\fit.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\focused_tests.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\focused_tests.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\git_commit.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\git_commit.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\git_status.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\git_status.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\http.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\http.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\http_verification.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\http_verification.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\packages.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\packages.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\policy.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\policy.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\run_notes.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\run_notes.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\score_challenge.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\score_challenge.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\score_test.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\score_test.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\score_val.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\score_val.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\selection.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\selection.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\server.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\server.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\test_scores.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\test_scores.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\tests.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\tests.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\tests.xml",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\tests.xml",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\val_scores.json",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\val_scores.json",
+      "passed": true
+    },
+    {
+      "check": "Manifest reports\\adaptive_v1\\verified_summary.log",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes reports\\adaptive_v1\\verified_summary.log",
+      "passed": true
+    },
+    {
+      "check": "Manifest scripts\\collect_adaptive_results.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes scripts\\collect_adaptive_results.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest scripts\\generate_verified_summary.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes scripts\\generate_verified_summary.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest scripts\\verify_http.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes scripts\\verify_http.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest tests\\test_adaptive.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes tests\\test_adaptive.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest tests\\test_contextual.py",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes tests\\test_contextual.py",
+      "passed": true
+    },
+    {
+      "check": "Manifest VERIFIED_RESULTS.md",
+      "passed": true
+    },
+    {
+      "check": "Archive bytes VERIFIED_RESULTS.md",
+      "passed": true
+    },
+    {
+      "check": "Complete expected evidence",
+      "passed": true
+    },
+    {
+      "check": "Frozen validation score identity",
+      "passed": true
+    },
+    {
+      "check": "Prepared mixed identity",
+      "passed": true
+    },
+    {
+      "check": "Fit/check IDs disjoint",
+      "passed": true
+    },
+    {
+      "check": "test expert identities",
+      "passed": true
+    },
+    {
+      "check": "test f1",
+      "passed": true
+    },
+    {
+      "check": "test precision",
+      "passed": true
+    },
+    {
+      "check": "test recall",
+      "passed": true
+    },
+    {
+      "check": "test average_precision",
+      "passed": true
+    },
+    {
+      "check": "test confusion",
+      "passed": true
+    },
+    {
+      "check": "test prediction IDs",
+      "passed": true
+    },
+    {
+      "check": "test prediction parity",
+      "passed": true
+    },
+    {
+      "check": "test/cga_wiki f1",
+      "passed": true
+    },
+    {
+      "check": "test/cga_wiki precision",
+      "passed": true
+    },
+    {
+      "check": "test/cga_wiki recall",
+      "passed": true
+    },
+    {
+      "check": "test/cga_wiki average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/cga_wiki confusion",
+      "passed": true
+    },
+    {
+      "check": "test/cultural_safety_telugu f1",
+      "passed": true
+    },
+    {
+      "check": "test/cultural_safety_telugu precision",
+      "passed": true
+    },
+    {
+      "check": "test/cultural_safety_telugu recall",
+      "passed": true
+    },
+    {
+      "check": "test/cultural_safety_telugu average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/cultural_safety_telugu confusion",
+      "passed": true
+    },
+    {
+      "check": "test/dravidian_codemix_tamil f1",
+      "passed": true
+    },
+    {
+      "check": "test/dravidian_codemix_tamil precision",
+      "passed": true
+    },
+    {
+      "check": "test/dravidian_codemix_tamil recall",
+      "passed": true
+    },
+    {
+      "check": "test/dravidian_codemix_tamil average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/dravidian_codemix_tamil confusion",
+      "passed": true
+    },
+    {
+      "check": "test/english_ensemble f1",
+      "passed": true
+    },
+    {
+      "check": "test/english_ensemble precision",
+      "passed": true
+    },
+    {
+      "check": "test/english_ensemble recall",
+      "passed": true
+    },
+    {
+      "check": "test/english_ensemble average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/english_ensemble confusion",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_ensemble f1",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_ensemble precision",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_ensemble recall",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_ensemble average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_ensemble confusion",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_neural f1",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_neural precision",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_neural recall",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_neural average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/mixed_neural confusion",
+      "passed": true
+    },
+    {
+      "check": "test/context f1",
+      "passed": true
+    },
+    {
+      "check": "test/context precision",
+      "passed": true
+    },
+    {
+      "check": "test/context recall",
+      "passed": true
+    },
+    {
+      "check": "test/context average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/context confusion",
+      "passed": true
+    },
+    {
+      "check": "test/no-context f1",
+      "passed": true
+    },
+    {
+      "check": "test/no-context precision",
+      "passed": true
+    },
+    {
+      "check": "test/no-context recall",
+      "passed": true
+    },
+    {
+      "check": "test/no-context average_precision",
+      "passed": true
+    },
+    {
+      "check": "test/no-context confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge expert identities",
+      "passed": true
+    },
+    {
+      "check": "challenge f1",
+      "passed": true
+    },
+    {
+      "check": "challenge precision",
+      "passed": true
+    },
+    {
+      "check": "challenge recall",
+      "passed": true
+    },
+    {
+      "check": "challenge average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge prediction IDs",
+      "passed": true
+    },
+    {
+      "check": "challenge prediction parity",
+      "passed": true
+    },
+    {
+      "check": "challenge/custom_threads f1",
+      "passed": true
+    },
+    {
+      "check": "challenge/custom_threads precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/custom_threads recall",
+      "passed": true
+    },
+    {
+      "check": "challenge/custom_threads average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/custom_threads confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge/english_ensemble f1",
+      "passed": true
+    },
+    {
+      "check": "challenge/english_ensemble precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/english_ensemble recall",
+      "passed": true
+    },
+    {
+      "check": "challenge/english_ensemble average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/english_ensemble confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_ensemble f1",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_ensemble precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_ensemble recall",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_ensemble average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_ensemble confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_neural f1",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_neural precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_neural recall",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_neural average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/mixed_neural confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge/context f1",
+      "passed": true
+    },
+    {
+      "check": "challenge/context precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/context recall",
+      "passed": true
+    },
+    {
+      "check": "challenge/context average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/context confusion",
+      "passed": true
+    },
+    {
+      "check": "challenge/no-context f1",
+      "passed": true
+    },
+    {
+      "check": "challenge/no-context precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/no-context recall",
+      "passed": true
+    },
+    {
+      "check": "challenge/no-context average_precision",
+      "passed": true
+    },
+    {
+      "check": "challenge/no-context confusion",
+      "passed": true
+    },
+    {
+      "check": "Returned test suite",
+      "passed": true
+    },
+    {
+      "check": "Returned HTTP check",
+      "passed": true
+    }
+  ],
+  "tests": {
+    "tests": 96,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "recorded_scoring_seconds": {
+    "test": 14481.516000000003,
+    "challenge": 13.96799999999348,
+    "val": 350.890999999996
+  },
+  "timing_conflict": "run_notes.log says test ~362 seconds and challenge ~8 seconds; score JSON records test 14481.516 and challenge 13.968 seconds. Do not claim ~6 minute test scoring without reconciliation.",
+  "note": "Bootstrap intervals are retained from the verified, hashed reports; point metrics and policy/prediction parity were independently recomputed. Uploaded Library ZIP identity was not independently byte-compared."
+}

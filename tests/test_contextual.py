@@ -444,3 +444,57 @@ def test_group_bootstrap_and_connected_threads():
     interval = paired_f1_interval([0,1,0,1], [.1,.8,.2,.9], [.1,.8,.2,.9], ['a','a','b','b'], .5,.5, resamples=30)
     assert interval['f1_difference'] == 0
     assert interval['percentile_95_interval'] == [0.,0.]
+
+
+def test_adaptive_saved_experts_roundtrip(tiny_config,tmp_path):
+    from contextual.adapter_finetune import run_adapter_experiment
+    from contextual.ensemble import run_ensemble
+    from contextual.config import write_json
+    from contextual.evaluation import file_hash
+    from contextual.data import read_jsonl
+    from contextual.adaptive_experiment import export_scores,fit,evaluate
+    from contextual.adaptive_inference import AdaptivePredictor
+    cfg=tiny_config
+    cfg['adapter']={'enabled':True,'r':2,'lora_alpha':4,'lora_dropout':0,'target_modules':['query','value']}
+    cfg['training'].update(encoder_lr=.001,gradient_accumulation_steps=2,gradient_checkpointing=False,
+                           require_cuda=False,fp16=False,epochs=1)
+    download(cfg); prepare(cfg)
+    cfg['data']['expected_prepared_sha256']=file_hash(location(cfg,'prepared'))
+    run_adapter_experiment(cfg)
+    ensemble_path=tmp_path/'adaptive_expert.json'
+    run_ensemble(cfg,ensemble_path,location(cfg,'report'))
+    # Force a nonzero neural component so the diagnostic expert is available.
+    import joblib
+    bundle=joblib.load(ensemble_path.with_suffix('.joblib'))
+    bundle['weights']={'char_tfidf':.5,'word_tfidf':0.,'contextual_transformer':.5}
+    joblib.dump(bundle,ensemble_path.with_suffix('.joblib'))
+    cfg['paths']['ensemble']=str(ensemble_path.with_suffix('.joblib'))
+    config_path=tmp_path/'adaptive_expert_config.json'; write_json(config_path,cfg)
+    settings={'mixed_config':str(config_path),'english_config':str(config_path),
+              'scores_directory':str(tmp_path/'adaptive_scores'),'policy':str(tmp_path/'adaptive_policy.json'),
+              'report':str(tmp_path/'adaptive_evaluation.json'),'demo_config':str(tmp_path/'adaptive_demo.json')}
+    with pytest.raises(ValueError,match='Freeze'):
+        export_scores(settings,split='test')
+    export_scores(settings,split='val')
+    policy=fit(settings)
+    assert policy['policy']['name'] in {entry['policy']['name'] for entry in policy['leaderboard']}
+    export_scores(settings,split='test')
+    evaluated=evaluate(settings)
+    records=json.loads((tmp_path/'adaptive_evaluation.predictions.json').read_text())
+    example=next(e for e in read_jsonl(location(cfg,'prepared')) if e['id']==records[0]['id'])
+    result=AdaptivePredictor(settings['policy']).predict(example['texts'][-1],example['texts'][:-1])
+    assert result['toxicity_score']==pytest.approx(records[0]['score'],abs=1e-6)
+    assert evaluated['model_type']=='conservative_adaptive_experts'
+    assert result['language_identified'] is False
+    # Check serving parity for all three experts even if this fixture selects the baseline.
+    from contextual.adaptive_policy import margin_score
+    score_bundle=json.loads((tmp_path/'adaptive_scores/test_scores.json').read_text())
+    stored=next(r for r in score_bundle['records'] if r['id']==example['id'])
+    adaptive=AdaptivePredictor(settings['policy'])
+    weights=[.25,.25,.5]
+    adaptive.bundle['policy']['branches']['latin_ambiguous']={'weights':weights,'threshold':.4}
+    blended=adaptive.predict(example['texts'][-1],example['texts'][:-1])
+    for key,scores in [('toxicity_score','scores'),('isolated_score','isolated_scores')]:
+        expected=margin_score(sum(w*p for w,p in zip(weights,stored[scores])),.4)
+        assert blended[key]==pytest.approx(float(expected),abs=1e-6)
+    with pytest.raises(ValueError,match='already exists'): fit(settings)

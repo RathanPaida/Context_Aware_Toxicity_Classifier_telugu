@@ -1,0 +1,8 @@
+{
+  "mixed_config": "configs/demo_clean_ensemble.json",
+  "english_config": "configs/english_cga_v1_ensemble.json",
+  "scores_directory": "reports/adaptive_v1",
+  "policy": "reports/adaptive_v1/policy.json",
+  "report": "reports/adaptive_v1/evaluation.json",
+  "demo_config": "configs/demo_adaptive_v1.json"
+}

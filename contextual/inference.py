@@ -69,6 +69,15 @@ class Predictor:
 
 def create_predictor(cfg):
     """Select an explicit saved artifact; never substitute a model silently."""
+    if cfg['paths'].get('hybrid'):
+        from .hybrid_inference import HybridAdaptivePredictor
+        return HybridAdaptivePredictor(cfg['paths']['hybrid'], device=cfg['training']['device'])
+    if cfg['paths'].get('router'):
+        from .routed_inference import RoutedPredictor
+        return RoutedPredictor(cfg['paths']['router'], device=cfg['training']['device'])
+    if cfg['paths'].get('adaptive'):
+        from .adaptive_inference import AdaptivePredictor
+        return AdaptivePredictor(cfg['paths']['adaptive'],device=cfg['training']['device'])
     if cfg['paths'].get('ensemble'):
         from .ensemble import EnsemblePredictor
         return EnsemblePredictor(project_path(cfg['paths']['ensemble']), device=cfg['training']['device'])

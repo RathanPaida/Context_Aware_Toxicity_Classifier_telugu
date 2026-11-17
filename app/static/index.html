@@ -3,129 +3,885 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Indic Shield</title>
-  <meta name="description" content="Context-aware toxicity checker for Telugu, Romanized Telugu and code-mixed chat.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230f766e'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/static/style.css">
+  <title>Context-Aware Toxicity Engine | Multilingual Research Console</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #111726;
+      --surface-raised: #182032;
+      --border: #222c42;
+      --border-focus: #3b82f6;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --safe-bg: #064e3b;
+      --safe-border: #059669;
+      --safe-text: #34d399;
+      --toxic-bg: #7f1d1d;
+      --toxic-border: #dc2626;
+      --toxic-text: #f87171;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .badge-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .badge.active {
+      color: #38bdf8;
+      border-color: #0284c7;
+      background: rgba(2, 132, 199, 0.1);
+    }
+
+    /* Preset Scenarios */
+    .presets-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+
+    .presets-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .presets-header span {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .preset-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip-btn {
+      background: var(--surface-raised);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn:hover {
+      background: #1e293b;
+      border-color: #475569;
+      color: #ffffff;
+    }
+
+    .chip-btn .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .dot.safe { background: #10b981; }
+    .dot.toxic { background: #ef4444; }
+
+    /* Main Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* History & Target */
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .turn-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .turn-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 6px;
+      color: var(--text-dim);
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      min-width: 58px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .turn-row textarea {
+      flex: 1;
+      background: #0d131f;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 44px;
+    }
+
+    .turn-row textarea:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
+    .btn-remove {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 8px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-remove:hover {
+      color: #f87171;
+      border-color: #7f1d1d;
+    }
+
+    .btn-add {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      padding: 8px;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .btn-add:hover {
+      border-color: #475569;
+      color: #ffffff;
+    }
+
+    .target-box {
+      border: 1px solid #334155;
+      background: #0a0f1d;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 18px;
+    }
+
+    .target-box textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 64px;
+    }
+
+    .target-box textarea:focus {
+      outline: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      color: #ffffff;
+      border-color: #475569;
+    }
+
+    /* Output Panel */
+    .verdict-banner {
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--border);
+      background: var(--surface-raised);
+    }
+
+    .verdict-banner.safe {
+      background: var(--safe-bg);
+      border-color: var(--safe-border);
+      color: var(--safe-text);
+    }
+
+    .verdict-banner.toxic {
+      background: var(--toxic-bg);
+      border-color: var(--toxic-border);
+      color: var(--toxic-text);
+    }
+
+    .verdict-main h2 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .verdict-main p {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .score-large {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    /* Gauge Bar */
+    .gauge-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .gauge-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .gauge-bar {
+      position: relative;
+      height: 12px;
+      background: #1e293b;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .gauge-fill {
+      height: 100%;
+      width: 0%;
+      background: #0284c7;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .gauge-fill.toxic {
+      background: #ef4444;
+    }
+
+    .gauge-fill.safe {
+      background: #10b981;
+    }
+
+    .gauge-threshold-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: #ffffff;
+      opacity: 0.7;
+    }
+
+    /* Delta Analysis */
+    .delta-card {
+      background: #0c121e;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .delta-metric .num {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .delta-metric .label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Info Grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .meta-item {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .meta-item .label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .meta-item .val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #e2e8f0;
+      margin-top: 3px;
+    }
+
+    details {
+      background: #0a0e18;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: 600;
+      outline: none;
+    }
+
+    summary:hover {
+      color: #ffffff;
+    }
+
+    pre {
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #94a3b8;
+      overflow-x: auto;
+      max-height: 240px;
+    }
+  </style>
 </head>
 <body>
-<div class="shell">
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-name">Indic Shield</span>
-      <span class="brand-tag">Toxicity checker for Telugu &amp; code-mixed chat — it reads the earlier messages too</span>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-title">
+      <h1>Context-Aware Toxicity Engine</h1>
+      <p>Hierarchical Multilingual Architecture &middot; Target-Bypass Classification Head &middot; Conservative Expert Routing</p>
     </div>
-    <span id="status" class="status" data-state="warn">Connecting…</span>
+    <div class="badge-bar">
+      <span class="badge" id="status-badge">Checking engine&hellip;</span>
+      <span class="badge active" id="policy-badge">Policy: script_soft_blend</span>
+      <span class="badge" id="threshold-badge">Threshold: per selected model</span>
+      <a href="/docs" target="_blank" class="badge" style="text-decoration:none; color:#38bdf8;">API Docs &rarr;</a>
+    </div>
   </header>
 
-  <div id="banner" class="banner" hidden></div>
+  <!-- Quick Scenario Presets -->
+  <div class="presets-container">
+    <div class="presets-header">
+      <span>1-Click Test Scenarios (Demonstrating Context-Aware Decisions)</span>
+    </div>
+    <div class="preset-chips">
+      <button class="chip-btn" onclick="loadPreset(0)">
+        <span class="dot safe"></span>
+        <strong>Case 1:</strong> Counterspeech Defense (English)
+      </button>
+      <button class="chip-btn" onclick="loadPreset(1)">
+        <span class="dot toxic"></span>
+        <strong>Case 2:</strong> Direct Attack (English)
+      </button>
+      <button class="chip-btn" onclick="loadPreset(2)">
+        <span class="dot toxic"></span>
+        <strong>Case 3:</strong> Native Telugu Harassment (Telugu Script)
+      </button>
+      <button class="chip-btn" onclick="loadPreset(3)">
+        <span class="dot safe"></span>
+        <strong>Case 4:</strong> Calm Reply to Attack (Telugu Script)
+      </button>
+      <button class="chip-btn" onclick="loadPreset(4)">
+        <span class="dot toxic"></span>
+        <strong>Case 5:</strong> Romanized Telugu Abuse (Latin Script)
+      </button>
+      <button class="chip-btn" onclick="loadPreset(5)">
+        <span class="dot safe"></span>
+        <strong>Case 6:</strong> Quoted Abuse Report ("They said...")
+      </button>
+    </div>
+  </div>
 
-  <nav class="tabs" role="tablist" aria-label="Sections">
-    <button class="tab" role="tab" data-view="check" aria-selected="true">Check a message</button>
-    <button class="tab" role="tab" data-view="conversation" aria-selected="false">Conversation</button>
-    <button class="tab" role="tab" data-view="results" aria-selected="false">Results</button>
-    <button class="tab" role="tab" data-view="about" aria-selected="false">About</button>
-  </nav>
+  <!-- Main Grid -->
+  <div class="grid">
+    
+    <!-- Input Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>Conversation Thread Input</span>
+        <span style="font-size: 11px; color: var(--text-dim); font-weight: 400;">Oldest ancestors first</span>
+      </div>
 
-  <main>
-    <!-- ── Check a message ─────────────────────────────── -->
-    <section id="view-check" class="view" role="tabpanel">
-      <div class="grid-2">
-        <form id="check-form" class="panel" novalidate>
-          <div>
-            <h2>Check a message</h2>
-            <p class="hint">The same words can be friendly or threatening depending on what was said before, so add the earlier messages when you have them.</p>
-          </div>
+      <div class="field-label">
+        <span>Preceding Conversation Turns (Ancestors)</span>
+        <span id="turn-count" style="font-family: var(--font-mono); color: var(--text-dim);">1 ancestor</span>
+      </div>
 
-          <fieldset>
-            <legend>Earlier messages <span class="optional">optional · oldest first</span></legend>
-            <ol id="context-list" class="context-list"></ol>
-            <div><button type="button" id="add-context" class="btn btn-small">+ Add earlier message</button></div>
-          </fieldset>
+      <div id="timeline" class="timeline">
+        <!-- History turns rendered dynamically -->
+      </div>
 
-          <div class="field">
-            <label for="target">Message to check</label>
-            <textarea id="target" rows="3" placeholder="e.g. Champesav po!"></textarea>
-          </div>
+      <button type="button" class="btn-add" onclick="addTurn()">+ Add Preceding Turn</button>
 
-          <div class="field">
-            <label for="topic">Topic <span class="optional">optional</span></label>
-            <input id="topic" type="text" placeholder="e.g. Cricket, Politics, Movies">
-          </div>
+      <div class="field-label">
+        <span style="color: #ffffff;">Target Reply to Evaluate</span>
+        <span style="color: #38bdf8; font-size: 11px;">Classified in context</span>
+      </div>
 
-          <div class="actions">
-            <button type="submit" id="check-btn" class="btn btn-primary">Check message</button>
-            <label class="check"><input type="checkbox" id="compare" checked> Also check without the earlier messages</label>
-          </div>
+      <div class="target-box">
+        <textarea id="target-input" placeholder="Type or paste the reply message here..." rows="3"></textarea>
+      </div>
 
-          <div class="examples">
-            <label for="example-select">Or try an example:</label>
-            <select id="example-select"><option value="">Choose an example…</option></select>
-          </div>
-        </form>
+      <div class="actions">
+        <button id="analyze-btn" class="btn-primary" onclick="runAnalysis()">Analyze Target Reply</button>
+        <button class="btn-secondary" onclick="clearInputs()">Clear All</button>
+      </div>
+    </div>
 
-        <div id="check-result" aria-live="polite">
-          <div class="empty">The result will appear here.</div>
+    <!-- Output Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>Moderation &amp; Architectural Diagnostics</span>
+        <span id="exec-status" style="font-size: 11px; color: var(--text-dim);">Awaiting analysis</span>
+      </div>
+
+      <!-- Verdict Banner -->
+      <div id="verdict-banner" class="verdict-banner">
+        <div class="verdict-main">
+          <h2 id="verdict-text">Ready for Input</h2>
+          <p id="verdict-sub">Enter a thread or choose a scenario above to evaluate.</p>
+        </div>
+        <div class="score-large" id="verdict-score">&mdash;</div>
+      </div>
+
+      <!-- Gauge -->
+      <div class="gauge-wrapper">
+        <div class="gauge-header">
+          <span>Decision Score (not calibrated confidence)</span>
+          <span id="gauge-threshold-label">Threshold: per selected model</span>
+        </div>
+        <div class="gauge-bar">
+          <div id="gauge-fill" class="gauge-fill"></div>
+          <div class="gauge-threshold-line" title="0.50 Decision Boundary"></div>
         </div>
       </div>
-    </section>
 
-    <!-- ── Conversation ────────────────────────────────── -->
-    <section id="view-conversation" class="view" role="tabpanel" hidden>
-      <div class="grid-2">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Conversation</h2>
-            <div class="actions">
-              <select id="scenario-select" aria-label="Load an example conversation"><option value="">Load an example…</option></select>
-              <button type="button" id="clear-chat" class="btn btn-small">Clear</button>
-            </div>
-          </div>
-          <p class="hint">Every new message is checked together with the messages before it. Click a message to see why.</p>
-          <div id="chat" class="chat" aria-live="polite"></div>
-          <div id="expectation" class="expectation" hidden></div>
-          <form id="composer" class="composer">
-            <select id="speaker" aria-label="Who is speaking">
-              <option value="a">Person A</option>
-              <option value="b">Person B</option>
-            </select>
-            <input id="chat-input" type="text" placeholder="Type a message…" autocomplete="off" aria-label="Message">
-            <button type="submit" class="btn btn-primary">Send</button>
-          </form>
+      <!-- Context Influence Delta -->
+      <div class="delta-card">
+        <div class="delta-metric">
+          <div class="label">In Context</div>
+          <div class="num" id="metric-ctx">&mdash;</div>
         </div>
-        <div id="chat-result" aria-live="polite">
-          <div class="empty">Select a message to see its result.</div>
+        <div class="delta-metric">
+          <div class="label">In Isolation</div>
+          <div class="num" id="metric-iso">&mdash;</div>
+        </div>
+        <div class="delta-metric">
+          <div class="label">Context Impact (&Delta;)</div>
+          <div class="num" id="metric-delta">&mdash;</div>
         </div>
       </div>
-    </section>
 
-    <!-- ── Results ─────────────────────────────────────── -->
-    <section id="view-results" class="view" role="tabpanel" hidden>
-      <div id="results" class="stack"><div class="spinner">Loading…</div></div>
-    </section>
-
-    <!-- ── About ───────────────────────────────────────── -->
-    <section id="view-about" class="view" role="tabpanel" hidden>
-      <div class="panel about">
-        <h2>How it works</h2>
-        <ol>
-          <li><strong>Clean-up.</strong> Disguised spellings are undone (<code>l@nja</code> → <code>lanja</code>, <code>gooood</code> → <code>good</code>), links and @handles are removed.</li>
-          <li><strong>Word list.</strong> A message with a severe abusive word and no earlier messages is flagged straight away. Milder or ambiguous words are only noted.</li>
-          <li><strong>Model.</strong> Everything else is read by a fine-tuned IndicBERT model together with up to three earlier messages. It scores five kinds of harm: toxic, severe, identity attack, insult and threat.</li>
-          <li><strong>Decision.</strong> A message is flagged when its score passes a line tuned on validation data. Scores close to that line are marked <em>Needs review</em>.</li>
-        </ol>
-        <h2>Limits</h2>
-        <ul>
-          <li>The Telugu training data is small; Tamil code-mixed comments and translated prompts fill the gap. Expect mistakes on slang the model has not seen.</li>
-          <li>The highlighted words show where the model's attention went, which is a hint, not a proof of why it decided.</li>
-          <li>Use it to support a human moderator, not to replace one.</li>
-        </ul>
+      <!-- Diagnostic Grid -->
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="label">Detected Text Type</div>
+          <div class="val" id="meta-script">&mdash;</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">Selected Model / Expert Mixture</div>
+          <div class="val" id="meta-weights">&mdash;</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">Total Turns Evaluated</div>
+          <div class="val" id="meta-turns">&mdash;</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">Decision Threshold</div>
+          <div class="val" id="meta-bypass" style="color: #34d399;">&mdash;</div>
+        </div>
       </div>
-    </section>
-  </main>
+
+      <!-- Raw JSON Explorer -->
+      <details>
+        <summary>Inspect Complete Model Output Payload</summary>
+        <pre id="raw-json">// Raw response from /api/moderate will appear here</pre>
+      </details>
+    </div>
+
+  </div>
+
 </div>
 
-<script src="/static/app.js"></script>
+<script>
+  const PRESETS = [
+    {
+      title: "Case 1: Counterspeech Defense (English)",
+      history: ["Shut up you stupid idiot, stop vandalizing or I will destroy you."],
+      target: "I am following Wikipedia guidelines, please keep your comments civil."
+    },
+    {
+      title: "Case 2: Direct Personal Attack (English)",
+      history: ["Why are you editing this article?"],
+      target: "Shut up you stupid idiot, stop vandalizing or I will destroy you."
+    },
+    {
+      title: "Case 3: Native Telugu Harassment (Telugu Script)",
+      history: ["ఈ విషయం గురించి నీ అభిప్రాయం ఏమిటి?"],
+      target: "నువ్వు ఒక చెత్త మనిషివి, నీలాంటి వాళ్ళు బతకడం అనవసరం."
+    },
+    {
+      title: "Case 4: Calm Reply to Telugu Abuse (Telugu Script)",
+      history: ["నువ్వు ఒక చెత్త మనిషివి, నీలాంటి వాళ్ళు బతకడం అనవసరం."],
+      target: "మనం గౌరవప్రదంగా మాట్లాడదాం, ఇలాంటి పదాలు వాడకండి."
+    },
+    {
+      title: "Case 5: Romanized Telugu Code-Mixed Abuse",
+      history: ["e roju match chusava?"],
+      target: "waste kukkala unnav, nee moham chusuko ra lucha."
+    },
+    {
+      title: "Case 6: Quoted Abuse Report",
+      history: ["What exactly did the other player say to you?"],
+      target: "They said, “You are a useless idiot.” I reported the message because personal attacks are unacceptable."
+    }
+  ];
+
+  let currentHistory = ["Shut up you stupid idiot, stop vandalizing or I will destroy you."];
+
+  function renderTimeline() {
+    const container = document.getElementById("timeline");
+    container.innerHTML = "";
+    currentHistory.forEach((text, i) => {
+      const row = document.createElement("div");
+      row.className = "turn-row";
+      row.innerHTML = `
+        <div class="turn-tag">Turn ${i + 1}</div>
+        <textarea oninput="updateTurn(${i}, this.value)">${text}</textarea>
+        <button class="btn-remove" onclick="removeTurn(${i})" title="Remove turn">&times;</button>
+      `;
+      container.appendChild(row);
+    });
+    document.getElementById("turn-count").textContent = `${currentHistory.length} ancestor${currentHistory.length === 1 ? '' : 's'}`;
+  }
+
+  function addTurn() {
+    if (currentHistory.length >= 11) {
+      alert("Maximum window is 11 ancestors plus 1 target reply.");
+      return;
+    }
+    currentHistory.push("");
+    renderTimeline();
+  }
+
+  function removeTurn(index) {
+    currentHistory.splice(index, 1);
+    renderTimeline();
+  }
+
+  function updateTurn(index, val) {
+    currentHistory[index] = val;
+  }
+
+  function clearInputs() {
+    currentHistory = [];
+    renderTimeline();
+    document.getElementById("target-input").value = "";
+    resetOutput();
+  }
+
+  function loadPreset(idx) {
+    const p = PRESETS[idx];
+    currentHistory = [...p.history];
+    renderTimeline();
+    document.getElementById("target-input").value = p.target;
+    runAnalysis();
+  }
+
+  function resetOutput() {
+    const banner = document.getElementById("verdict-banner");
+    banner.className = "verdict-banner";
+    document.getElementById("verdict-text").textContent = "Ready for Input";
+    document.getElementById("verdict-sub").textContent = "Enter a thread or choose a scenario above to evaluate.";
+    document.getElementById("verdict-score").textContent = "—";
+    document.getElementById("gauge-fill").style.width = "0%";
+    document.getElementById("metric-ctx").textContent = "—";
+    document.getElementById("metric-iso").textContent = "—";
+    document.getElementById("metric-delta").textContent = "—";
+    document.getElementById("meta-script").textContent = "—";
+    document.getElementById("meta-weights").textContent = "—";
+    document.getElementById("meta-turns").textContent = "—";
+    document.getElementById("raw-json").textContent = "// Raw response from /api/moderate will appear here";
+  }
+
+  async function checkHealth() {
+    try {
+      const r = await fetch("/api/health");
+      const d = await r.json();
+      const badge = document.getElementById("status-badge");
+      if (d.ready) {
+        const modelName = d.predictor_type || d.model || "Unknown model";
+        badge.textContent = `Online (${(d.device || "unknown").toUpperCase()}) — ${modelName}`;
+        badge.title = `Artifact: ${d.router_artifact || d.adaptive_artifact || d.ensemble_artifact || d.checkpoint || "unknown"}`;
+        badge.style.borderColor = "#059669";
+        badge.style.color = "#34d399";
+      } else {
+        badge.textContent = d.detail || "Model offline";
+        badge.style.borderColor = "#dc2626";
+        badge.style.color = "#f87171";
+      }
+    } catch (e) {
+      document.getElementById("status-badge").textContent = "Connection failed";
+    }
+  }
+
+  async function runAnalysis() {
+    const targetText = document.getElementById("target-input").value.trim();
+    if (!targetText) {
+      alert("Please provide a target message to analyze.");
+      return;
+    }
+
+    const btn = document.getElementById("analyze-btn");
+    const statusText = document.getElementById("exec-status");
+    btn.disabled = true;
+    statusText.textContent = "Identifying text and scoring...";
+
+    const historyPayload = currentHistory.map(t => t.trim()).filter(Boolean);
+
+    try {
+      const resp = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: targetText, history: historyPayload })
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.detail || "Inference failed");
+
+      renderResults(data);
+      statusText.textContent = "Evaluation complete";
+    } catch (err) {
+      alert("Analysis error: " + err.message);
+      statusText.textContent = "Error occurred";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderResults(data) {
+    document.getElementById("meta-bypass").textContent = Number(data.threshold).toFixed(4);
+    document.getElementById("threshold-badge").textContent = `Threshold: ${Number(data.threshold).toFixed(4)}`;
+    document.getElementById("gauge-threshold-label").textContent = `Threshold: ${Number(data.threshold).toFixed(4)}`;
+    document.querySelector(".gauge-threshold-line").style.left = `${Number(data.threshold) * 100}%`;
+    document.querySelector(".gauge-threshold-line").title = "Selected model decision boundary";
+    const isToxic = data.is_toxic;
+    const score = data.toxicity_score;
+    const isoScore = data.isolated_score;
+    const delta = data.context_score_delta;
+
+    // Banner
+    const banner = document.getElementById("verdict-banner");
+    banner.className = `verdict-banner ${isToxic ? 'toxic' : 'safe'}`;
+    document.getElementById("verdict-text").textContent = isToxic ? "TOXIC / POLICY VIOLATION" : "NON-TOXIC (SAFE)";
+    document.getElementById("verdict-sub").textContent = isToxic 
+      ? "Target comment is classified as abusive/toxic in this conversation context."
+      : "Target comment is classified as respectful and non-violating.";
+    document.getElementById("verdict-score").textContent = score.toFixed(4);
+
+    // Gauge Bar
+    const pct = Math.min(Math.max(score * 100, 0), 100);
+    const fill = document.getElementById("gauge-fill");
+    fill.style.width = `${pct}%`;
+    fill.className = `gauge-fill ${isToxic ? 'toxic' : 'safe'}`;
+
+    // Delta metrics
+    document.getElementById("metric-ctx").textContent = score.toFixed(4);
+    document.getElementById("metric-iso").textContent = isoScore.toFixed(4);
+    
+    const deltaElem = document.getElementById("metric-delta");
+    const sign = delta > 0 ? "+" : "";
+    deltaElem.textContent = `${sign}${delta.toFixed(4)}`;
+    deltaElem.style.color = Math.abs(delta) < 0.001 ? "#94a3b8" : (delta > 0 ? "#f87171" : "#34d399");
+
+    // Meta items
+    if (data.engine_used === "contrast_reporting_specialist") {
+      document.getElementById("meta-script").textContent = "Quoted/Reported Discourse";
+      document.getElementById("meta-weights").textContent = "Specialist (Adapted LoRA)";
+    } else {
+      document.getElementById("meta-script").textContent = data.detected_text_type || data.script_bucket || "Standard";
+      if (data.selected_model) {
+        document.getElementById("meta-weights").textContent = data.selected_model;
+        document.getElementById("meta-weights").title = data.routing_reason || "";
+      } else if (data.expert_weights) {
+        const w = data.expert_weights;
+        document.getElementById("meta-weights").textContent = 
+          `En: ${(w.english_ensemble * 100).toFixed(0)}% | Mix: ${(w.mixed_ensemble * 100).toFixed(0)}% | Neural: ${(w.mixed_neural * 100).toFixed(0)}%`;
+      } else {
+        document.getElementById("meta-weights").textContent = "Single Expert";
+      }
+    }
+
+    document.getElementById("meta-turns").textContent = `${data.turns_used || (data.ancestors_omitted ? 'Truncated' : 1)} turns`;
+
+    // Raw JSON
+    document.getElementById("raw-json").textContent = JSON.stringify(data, null, 2);
+  }
+
+  // Initialize
+  renderTimeline();
+  document.getElementById("target-input").value = PRESETS[0].target;
+  checkHealth();
+</script>
+
 </body>
 </html>

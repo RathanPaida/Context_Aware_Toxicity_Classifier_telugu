@@ -2,11 +2,42 @@
 
 This project predicts toxicity of a target reply using its actual parent chain. A pretrained IndicBERT encoder produces individual message vectors; a hierarchical Transformer learns contextual and conversation representations. The active pipeline is in `contextual/`. The older `src/` cascade is retained as historical work.
 
-For the new English-only experiment, start with **[ENGLISH_EXPERIMENT_PLAN.md](ENGLISH_EXPERIMENT_PLAN.md)**: separate downloads, matched English model comparisons, ancestry-depth evaluation, Telugu limitations and the return-results ZIP. Full training is left to the user.
+The English-only experiment is complete. Read **[ENGLISH_POST_RUN_REVIEW.md](ENGLISH_POST_RUN_REVIEW.md)** for verified results and remaining submission checks. [ENGLISH_EXPERIMENT_PLAN.md](ENGLISH_EXPERIMENT_PLAN.md) contains the reproduction commands, downloads and data-expansion plan. Further production runs are left to the user.
 
 The completed mixed-language run is reviewed in [POST_RUN_REVIEW.md](POST_RUN_REVIEW.md). [RUN_AND_REPORT.md](RUN_AND_REPORT.md) retains the earlier mixed-language reproduction steps.
 
 Read [SUBMISSION_REPORT.md](SUBMISSION_REPORT.md) for measured results and [SUBMISSION_HANDOFF.md](SUBMISSION_HANDOFF.md) for detailed setup, blocked steps, data downloads and submission instructions.
+
+## Current language-routed demonstration
+
+Read [ROUTED_DEMO_GUIDE.md](ROUTED_DEMO_GUIDE.md). The server now defaults to `configs/demo_routed_v1.json` unless `TOXICITY_CONFIG` overrides it. Clear English goes to the English ensemble; Telugu/Tamil, possible transliteration and uncertain inputs go to the mixed ensemble. This new policy has no measured benchmark yet. Historical scores below do not evaluate it.
+
+```powershell
+python -m pip install langid==1.1.6
+$env:TOXICITY_CONFIG = "configs/demo_routed_v1.json"
+python app/server.py
+```
+
+## Historical adaptive demonstration
+
+The audited adaptive run uses `configs/demo_adaptive_v1.json`. Running the server without this explicit setting uses the historical single model, whose predictions are not the adaptive results.
+
+Stop the old server with Ctrl+C in its terminal, then run these commands in the same PowerShell terminal from the project root:
+
+```powershell
+$env:TOXICITY_CONFIG = "configs/demo_adaptive_v1.json"
+python app/server.py
+```
+
+In another terminal, verify the active model:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:7860/api/health | ConvertTo-Json
+```
+
+Expect `predictor_type: AdaptivePredictor` and `adaptive_artifact: reports/adaptive_v1/policy.json`. Refresh the page with Ctrl+F5. The status badge identifies the predictor; hover it to see its artifact. Enter only the final reply in the target field and each ancestor separately, oldest first. Do not paste example headings, expected labels or an entire conversation into the target field. Scores are not calibrated confidence percentages. Correct configuration does not guarantee correct classifications.
+
+The historical reproduction steps below retain their original configuration.
 
 ## Start here
 

@@ -1,0 +1,22 @@
+{
+  "method": "real uvicorn localhost HTTP",
+  "health": {
+    "ready": true,
+    "detail": null,
+    "model": "adaptive_experts",
+    "topic_input": false,
+    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora",
+    "device": "cpu",
+    "predictor_type": "AdaptivePredictor",
+    "ensemble_artifact": null,
+    "adaptive_artifact": "reports/adaptive_v1/policy.json",
+    "threshold": 0.5
+  },
+  "config": "configs/demo_adaptive_v1.json",
+  "benchmark_report": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\adaptive_v1\\evaluation.json",
+  "benchmark_status": 200,
+  "index_status": 200,
+  "docs_status": 200,
+  "prediction_status": 200,
+  "toxicity_score": 0.04857087403222263
+}

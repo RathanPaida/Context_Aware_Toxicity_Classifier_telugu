@@ -1,0 +1,200 @@
+{
+  "health": {
+    "ready": true,
+    "detail": null,
+    "model": "language_routed_ensembles",
+    "topic_input": false,
+    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora",
+    "device": "cpu",
+    "predictor_type": "RoutedPredictor",
+    "ensemble_artifact": null,
+    "router_artifact": "configs/language_router_v1.json",
+    "adaptive_artifact": null,
+    "threshold": null
+  },
+  "probes": [
+    {
+      "request": {
+        "text": "Thank you for your help.",
+        "history": []
+      },
+      "response": {
+        "is_toxic": false,
+        "toxicity_score": 0.19674524589645298,
+        "threshold": 0.482697802797977,
+        "isolated_score": 0.19674524589645298,
+        "context_score_delta": 0.0,
+        "turn_attention": [
+          1.0
+        ],
+        "turns_used": 1,
+        "ancestors_omitted": 0,
+        "has_context_training": true,
+        "component_scores": {
+          "char_tfidf": 0.38581716258485976,
+          "word_tfidf": 0.2387962626254423,
+          "contextual_transformer": 0.007673329208046198
+        },
+        "ensemble_weights": {
+          "char_tfidf": 0.5,
+          "word_tfidf": 0.0,
+          "contextual_transformer": 0.5
+        },
+        "attention_scope": "Neural component only; not a causal explanation of the ensemble",
+        "selected_expert": "mixed",
+        "target_language": {
+          "type": "uncertain_or_other_language",
+          "language_candidate": "en",
+          "detector_score": 0.4398554828733684,
+          "english_eligible": false
+        },
+        "history_languages": [],
+        "routing_reason": "Non-English, mixed, short or uncertain input; use mixed ensemble.",
+        "language_score_semantics": "Language-detector score is not validated confidence for this domain.",
+        "selected_model": "mixed_ensemble",
+        "routing_policy": "language_router_v1",
+        "selected_artifact": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\clean_ensemble.joblib",
+        "detected_text_type": "uncertain_or_other_language",
+        "score_semantics": "Selected ensemble score; not calibrated probability. Compare with its returned threshold.",
+        "routing_evaluation_status": "New demo policy; no benchmark improvement established."
+      }
+    },
+    {
+      "request": {
+        "text": "You are a useless idiot.",
+        "history": []
+      },
+      "response": {
+        "is_toxic": true,
+        "toxicity_score": 0.9912008197726103,
+        "threshold": 0.306118171793546,
+        "isolated_score": 0.9912008197726103,
+        "context_score_delta": 0.0,
+        "turn_attention": [
+          1.0
+        ],
+        "turns_used": 1,
+        "ancestors_omitted": 0,
+        "has_context_training": true,
+        "component_scores": {
+          "char_tfidf": 0.9882677596968137,
+          "word_tfidf": 0.8740523522417145,
+          "contextual_transformer": 1.0
+        },
+        "ensemble_weights": {
+          "char_tfidf": 0.75,
+          "word_tfidf": 0.0,
+          "contextual_transformer": 0.25
+        },
+        "attention_scope": "Neural component only; not a causal explanation of the ensemble",
+        "selected_expert": "english",
+        "target_language": {
+          "type": "english",
+          "language_candidate": "en",
+          "detector_score": 0.9912054980108831,
+          "english_eligible": true
+        },
+        "history_languages": [],
+        "routing_reason": "Target and all retained parents meet conservative English criteria.",
+        "language_score_semantics": "Language-detector score is not validated confidence for this domain.",
+        "selected_model": "english_ensemble",
+        "routing_policy": "language_router_v1",
+        "selected_artifact": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\english_cga_v1_ensemble.joblib",
+        "detected_text_type": "english",
+        "score_semantics": "Selected ensemble score; not calibrated probability. Compare with its returned threshold.",
+        "routing_evaluation_status": "New demo policy; no benchmark improvement established."
+      }
+    },
+    {
+      "request": {
+        "text": "Nannu ala pilavadam sari kaadu. Personal attacks aapi, pending tasks meeda focus cheddam.",
+        "history": []
+      },
+      "response": {
+        "is_toxic": true,
+        "toxicity_score": 0.7208228682817748,
+        "threshold": 0.482697802797977,
+        "isolated_score": 0.7208228682817748,
+        "context_score_delta": 0.0,
+        "turn_attention": [
+          1.0
+        ],
+        "turns_used": 1,
+        "ancestors_omitted": 0,
+        "has_context_training": true,
+        "component_scores": {
+          "char_tfidf": 0.6017798136356931,
+          "word_tfidf": 0.26809824738901616,
+          "contextual_transformer": 0.8398659229278564
+        },
+        "ensemble_weights": {
+          "char_tfidf": 0.5,
+          "word_tfidf": 0.0,
+          "contextual_transformer": 0.5
+        },
+        "attention_scope": "Neural component only; not a causal explanation of the ensemble",
+        "selected_expert": "mixed",
+        "target_language": {
+          "type": "possible_romanized_or_code_mixed",
+          "english_eligible": false,
+          "detector_score": null
+        },
+        "history_languages": [],
+        "routing_reason": "Non-English, mixed, short or uncertain input; use mixed ensemble.",
+        "language_score_semantics": "Language-detector score is not validated confidence for this domain.",
+        "selected_model": "mixed_ensemble",
+        "routing_policy": "language_router_v1",
+        "selected_artifact": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\clean_ensemble.joblib",
+        "detected_text_type": "possible_romanized_or_code_mixed",
+        "score_semantics": "Selected ensemble score; not calibrated probability. Compare with its returned threshold.",
+        "routing_evaluation_status": "New demo policy; no benchmark improvement established."
+      }
+    },
+    {
+      "request": {
+        "text": "\u0c2e\u0c40 \u0c38\u0c39\u0c3e\u0c2f\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c27\u0c28\u0c4d\u0c2f\u0c35\u0c3e\u0c26\u0c3e\u0c32\u0c41.",
+        "history": []
+      },
+      "response": {
+        "is_toxic": false,
+        "toxicity_score": 0.1292974009430865,
+        "threshold": 0.482697802797977,
+        "isolated_score": 0.1292974009430865,
+        "context_score_delta": 0.0,
+        "turn_attention": [
+          1.0
+        ],
+        "turns_used": 1,
+        "ancestors_omitted": 0,
+        "has_context_training": true,
+        "component_scores": {
+          "char_tfidf": 0.16455269442329004,
+          "word_tfidf": 0.16767395920674316,
+          "contextual_transformer": 0.094042107462883
+        },
+        "ensemble_weights": {
+          "char_tfidf": 0.5,
+          "word_tfidf": 0.0,
+          "contextual_transformer": 0.5
+        },
+        "attention_scope": "Neural component only; not a causal explanation of the ensemble",
+        "selected_expert": "mixed",
+        "target_language": {
+          "type": "telugu_script",
+          "english_eligible": false,
+          "detector_score": null
+        },
+        "history_languages": [],
+        "routing_reason": "Non-English, mixed, short or uncertain input; use mixed ensemble.",
+        "language_score_semantics": "Language-detector score is not validated confidence for this domain.",
+        "selected_model": "mixed_ensemble",
+        "routing_policy": "language_router_v1",
+        "selected_artifact": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\reports\\clean_ensemble.joblib",
+        "detected_text_type": "telugu_script",
+        "score_semantics": "Selected ensemble score; not calibrated probability. Compare with its returned threshold.",
+        "routing_evaluation_status": "New demo policy; no benchmark improvement established."
+      }
+    }
+  ],
+  "note": "Four illustrative API probes, not a benchmark or accuracy estimate."
+}

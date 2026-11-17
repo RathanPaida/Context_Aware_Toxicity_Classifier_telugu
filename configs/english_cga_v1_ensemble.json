@@ -4,7 +4,7 @@
     "prepared": "data/processed/english_cga_v1.jsonl",
     "embeddings": "data/cache/english_cga_v1_lora.pt",
     "checkpoint": "models/checkpoints/english_cga_v1_lora",
-    "report": "reports/english_cga_v1_lora.json",
+    "report": "reports/english_cga_v1_ensemble.json",
     "manifest": "reports/english_cga_v1_manifest.json",
     "ensemble": "reports/english_cga_v1_ensemble.joblib"
   },

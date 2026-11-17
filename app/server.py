@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from contextual.config import load_config, location
 from contextual.inference import create_predictor
 
-cfg = load_config(os.environ.get('TOXICITY_CONFIG', 'configs/demo.json'))
+cfg = load_config(os.environ.get('TOXICITY_CONFIG', 'configs/demo_routed_v1.json'))
 predictor = None
 startup_error = None
 
@@ -66,11 +66,14 @@ def require_model():
 @app.get("/api/health")
 def health():
     return {"ready": predictor is not None, "detail": startup_error,
-            "model": 'soft_vote_ensemble' if cfg['paths'].get('ensemble') else cfg["encoder"]["name"], "topic_input": False,
+            "model": 'hybrid_adaptive_specialist' if cfg['paths'].get('hybrid') else 'language_routed_ensembles' if cfg['paths'].get('router') else 'adaptive_experts' if cfg['paths'].get('adaptive') else 'soft_vote_ensemble' if cfg['paths'].get('ensemble') else cfg["encoder"]["name"], "topic_input": False,
             "checkpoint": str(location(cfg, 'checkpoint')),
             "device": predictor.runtime_device if predictor is not None else None,
             "predictor_type": type(predictor).__name__ if predictor is not None else None,
             "ensemble_artifact": cfg['paths'].get('ensemble'),
+            "router_artifact": cfg['paths'].get('router'),
+            "adaptive_artifact": cfg['paths'].get('adaptive'),
+            "hybrid_artifact": cfg['paths'].get('hybrid'),
             "threshold": predictor.threshold if predictor is not None else None}
 
 
@@ -101,7 +104,13 @@ def benchmarks():
 
 
 @app.get("/")
+@app.get("/index.html")
 def index():
+    return FileResponse(ROOT / "app" / "static" / "index.html")
+
+
+@app.get("/contextual.html")
+def contextual():
     return FileResponse(ROOT / "app" / "static" / "contextual.html")
 
 

@@ -1,4 +1,5 @@
 """Bounded localhost HTTP smoke check against the actual saved CPU demo model."""
+import argparse
 import json
 import os
 from pathlib import Path
@@ -11,14 +12,22 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from contextual.config import write_json
+from contextual.config import load_config, location, project_path, write_json
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--config', default='configs/demo.json')
+    parser.add_argument('--output', default='reports/submission_http_verification.json')
+    parser.add_argument('--startup-timeout', type=float, default=60)
+    args = parser.parse_args()
+    if args.startup_timeout <= 0:
+        parser.error('--startup-timeout must be positive')
+    cfg = load_config(args.config)
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
-    env = {**os.environ, 'TOXICITY_CONFIG': 'configs/demo.json'}
+    env = {**os.environ, 'TOXICITY_CONFIG': str(project_path(args.config))}
     log = ROOT / 'scratch/submission_http.log'
     log.parent.mkdir(exist_ok=True)
     with log.open('w', encoding='utf-8') as stream:
@@ -28,7 +37,7 @@ def main():
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
         try:
             base = f'http://127.0.0.1:{port}'
-            deadline = time.monotonic() + 60
+            deadline = time.monotonic() + args.startup_timeout
             health = None
             while time.monotonic() < deadline:
                 if process.poll() is not None:
@@ -42,17 +51,26 @@ def main():
                     pass
                 time.sleep(0.5)
             assert health and health['ready'], health or f'No server response; see {log}'
+            assert health['checkpoint'] == str(location(cfg, 'checkpoint')), health
+            assert health['ensemble_artifact'] == cfg['paths'].get('ensemble'), health
+            assert health['adaptive_artifact'] == cfg['paths'].get('adaptive'), health
             assert requests.get(base+'/', timeout=5).status_code == 200
             assert requests.get(base+'/docs', timeout=5).status_code == 200
             result = requests.post(base+'/api/moderate', json={'text': 'Thank you for explaining.',
                 'history': ['Let me explain.']}, timeout=30)
             assert result.status_code == 200, result.text
             assert 0 <= result.json()['toxicity_score'] <= 1
+            benchmark = requests.get(base+'/api/benchmarks', timeout=5)
+            expected_report = json.loads(location(cfg, 'report').read_text(encoding='utf-8'))
+            assert benchmark.status_code == 200 and benchmark.json() == expected_report, 'Displayed benchmark differs from selected report'
+            assert expected_report['threshold'] == health['threshold'], 'Displayed report and served model thresholds differ'
             receipt = {'method': 'real uvicorn localhost HTTP', 'health': health,
+                       'config': args.config, 'benchmark_report': str(location(cfg, 'report')),
+                       'benchmark_status': benchmark.status_code,
                        'index_status': 200, 'docs_status': 200,
                        'prediction_status': result.status_code,
                        'toxicity_score': result.json()['toxicity_score']}
-            write_json(ROOT / 'reports/submission_http_verification.json', receipt)
+            write_json(project_path(args.output), receipt)
             print(json.dumps(receipt, indent=2))
         finally:
             process.terminate()

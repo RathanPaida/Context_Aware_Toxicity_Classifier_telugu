@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="17.319" timestamp="2026-11-17T15:31:47.599037+05:30" hostname="JARVIS"><testcase classname="tests.test_adaptive" name="test_script_is_not_english_detector_and_considers_history" time="0.156" /><testcase classname="tests.test_adaptive" name="test_expert_caps_and_boundary_preservation" time="0.001" /><testcase classname="tests.test_adaptive" name="test_group_partition_and_selection_exclude_test_and_challenge" time="0.013" /><testcase classname="tests.test_adaptive" name="test_mixed_baseline_is_retained_when_alternatives_are_worse" time="0.482" /><testcase classname="tests.test_adaptive" name="test_unseen_script_falls_back_and_fixed_route_ablation" time="0.001" /><testcase classname="tests.test_adaptive" name="test_context_controls_do_not_replace_target_or_use_test_donors" time="0.003" /><testcase classname="tests.test_adaptive" name="test_ap_interval_identical_predictions" time="0.020" /><testcase classname="tests.test_adaptive" name="test_corrupted_scores_and_population_rejected" time="0.001" /><testcase classname="tests.test_contextual" name="test_adaptive_saved_experts_roundtrip" time="3.166"><failure message="AssertionError: assert 'mixed_global_[0.0, 1.0, 0.0]' == 'mixed_existing'&#10;  &#10;  - mixed_existing&#10;  + mixed_global_[0.0, 1.0, 0.0]">tiny_config = {'adapter': {'enabled': True, 'lora_alpha': 4, 'lora_dropout': 0, 'r': 2, ...}, 'baseline': {'C': 1.0, 'max_features':...fe-4c7c-a845-61269f011171}\\Temp\\pytest-of-paida\\pytest-0\\test_adaptive_saved_experts_ro0\\tiny_encoder', ...}, ...}
+tmp_path = WindowsPath('C:/Users/paida/AppData/Local/Packages/OpenAI.Codex_2p2nqsd0c76g0/AC/#!sandbox.{18cab003-09fe-4c7c-a845-61269f011171}/Temp/pytest-of-paida/pytest-0/test_adaptive_saved_experts_ro0')
+
+    def test_adaptive_saved_experts_roundtrip(tiny_config,tmp_path):
+        from contextual.adapter_finetune import run_adapter_experiment
+        from contextual.ensemble import run_ensemble
+        from contextual.config import write_json
+        from contextual.evaluation import file_hash
+        from contextual.data import read_jsonl
+        from contextual.adaptive_experiment import export_scores,fit,evaluate
+        from contextual.adaptive_inference import AdaptivePredictor
+        cfg=tiny_config
+        cfg['adapter']={'enabled':True,'r':2,'lora_alpha':4,'lora_dropout':0,'target_modules':['query','value']}
+        cfg['training'].update(encoder_lr=.001,gradient_accumulation_steps=2,gradient_checkpointing=False,
+                               require_cuda=False,fp16=False,epochs=1)
+        download(cfg); prepare(cfg)
+        cfg['data']['expected_prepared_sha256']=file_hash(location(cfg,'prepared'))
+        run_adapter_experiment(cfg)
+        ensemble_path=tmp_path/'adaptive_expert.json'
+        run_ensemble(cfg,ensemble_path,location(cfg,'report'))
+        # Force a nonzero neural component so the diagnostic expert is available.
+        import joblib
+        bundle=joblib.load(ensemble_path.with_suffix('.joblib'))
+        bundle['weights']={'char_tfidf':.5,'word_tfidf':0.,'contextual_transformer':.5}
+        joblib.dump(bundle,ensemble_path.with_suffix('.joblib'))
+        cfg['paths']['ensemble']=str(ensemble_path.with_suffix('.joblib'))
+        config_path=tmp_path/'adaptive_expert_config.json'; write_json(config_path,cfg)
+        settings={'mixed_config':str(config_path),'english_config':str(config_path),
+                  'scores_directory':str(tmp_path/'adaptive_scores'),'policy':str(tmp_path/'adaptive_policy.json'),
+                  'report':str(tmp_path/'adaptive_evaluation.json'),'demo_config':str(tmp_path/'adaptive_demo.json')}
+        with pytest.raises(ValueError,match='Freeze'):
+            export_scores(settings,split='test')
+        export_scores(settings,split='val')
+        policy=fit(settings)
+&gt;       assert policy['policy']['name']=='mixed_existing'
+E       AssertionError: assert 'mixed_global_[0.0, 1.0, 0.0]' == 'mixed_existing'
+E         
+E         - mixed_existing
+E         + mixed_global_[0.0, 1.0, 0.0]
+
+tests\test_contextual.py:480: AssertionError</failure></testcase></testsuite></testsuites>

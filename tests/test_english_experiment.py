@@ -86,3 +86,4 @@ def test_configs_are_separate_and_downloads_are_english_only():
         assert cfg['data']['expected_prepared_sha256'] == 'hash'
         assert cfg['data']['local_sources'] == []
     assert all(s['format'] == 'toxichat' for s in source_settings()['sources'])
+    assert configs['configs/english_fixture_ensemble.json']['paths']['report'] == 'reports/english_fixture_ensemble.json'

@@ -1,0 +1,60 @@
+{
+  "health": {
+    "ready": true,
+    "detail": null,
+    "model": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+    "topic_input": false,
+    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_no_cdropout",
+    "device": "cpu",
+    "predictor_type": "Predictor",
+    "ensemble_artifact": null,
+    "adaptive_artifact": null,
+    "threshold": 0.635425865650177
+  },
+  "note": "Diagnostic probes against the historical running model, not an adaptive evaluation. Romanized case is target-only, not the full conversation.",
+  "probes": [
+    {
+      "request": {
+        "id": "quoted_abuse",
+        "text": "They said, \"You are a useless idiot.\" I reported the message because personal attacks are unacceptable.",
+        "history": [
+          "What exactly did the other player say to you?"
+        ]
+      },
+      "response": {
+        "is_toxic": true,
+        "toxicity_score": 0.9955289959907532,
+        "threshold": 0.635425865650177,
+        "isolated_score": 0.995333731174469,
+        "context_score_delta": 0.0001952648162841797,
+        "turn_attention": [
+          0.5054994225502014,
+          0.4945005476474762
+        ],
+        "turns_used": 2,
+        "ancestors_omitted": 0,
+        "has_context_training": true
+      }
+    },
+    {
+      "request": {
+        "id": "romanized_calm_reply",
+        "text": "Nannu ala pilavadam sari kaadu. Personal attacks aapi, pending tasks meeda focus cheddam. Na report evening share chestanu.",
+        "history": []
+      },
+      "response": {
+        "is_toxic": true,
+        "toxicity_score": 0.8001095652580261,
+        "threshold": 0.635425865650177,
+        "isolated_score": 0.8001095652580261,
+        "context_score_delta": 0.0,
+        "turn_attention": [
+          1.0
+        ],
+        "turns_used": 1,
+        "ancestors_omitted": 0,
+        "has_context_training": true
+      }
+    }
+  ]
+}

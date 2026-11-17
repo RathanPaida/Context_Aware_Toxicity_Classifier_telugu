@@ -112,6 +112,7 @@ def make_configs(tag, digest, max_turns):
         configs[f'configs/{tag}_{kind}.json'] = cfg
     demo = copy.deepcopy(configs[f'configs/{tag}_lora.json'])
     demo['paths']['ensemble'] = f'reports/{tag}_ensemble.joblib'
+    demo['paths']['report'] = f'reports/{tag}_ensemble.json'
     demo['training']['device'] = 'cpu'
     configs[f'configs/{tag}_ensemble.json'] = demo
     return configs
