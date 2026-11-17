@@ -20,6 +20,8 @@ def main(argv=None):
         parser.print_help()
         return
     cfg = load_config(args.config)
+    if cfg['data'].get('external_sources') and (args.download or args.prepare or args.all):
+        raise ValueError('External data uses: python -m contextual.external_data --download --prepare. Then use --train.')
     if args.download or args.all:
         from contextual.data import download
         print(download(cfg))
@@ -27,14 +29,17 @@ def main(argv=None):
         from contextual.data import prepare
         print(json.dumps(prepare(cfg), indent=2))
     if args.train or args.all:
-        from contextual.training import train
+        if cfg.get('adapter', {}).get('enabled'):
+            from contextual.adapter_finetune import run_adapter_experiment as train
+        else:
+            from contextual.training import train
         print(json.dumps(train(cfg), indent=2))
     elif args.evaluate:
         from contextual.training import evaluate
         print(json.dumps(evaluate(cfg), indent=2))
     if args.predict is not None:
-        from contextual.inference import Predictor
-        print(json.dumps(Predictor(location(cfg, "checkpoint")).predict(args.predict, args.parent,
+        from contextual.inference import create_predictor
+        print(json.dumps(create_predictor(cfg).predict(args.predict, args.parent,
                          args.embeddings), ensure_ascii=False, indent=2))
 
 

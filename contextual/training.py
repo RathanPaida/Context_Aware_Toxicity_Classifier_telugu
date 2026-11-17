@@ -25,7 +25,9 @@ def fit_threshold(labels, probabilities):
 def metrics(labels, probabilities, threshold):
     pred = np.asarray(probabilities) >= threshold
     both = len(set(labels)) > 1
-    return {"n": len(labels), "positive_count": int(np.sum(labels)),
+    from sklearn.metrics import precision_score, recall_score
+    return {"precision": float(precision_score(labels, pred, zero_division=0)),
+            "recall": float(recall_score(labels, pred, zero_division=0)), "n": len(labels), "positive_count": int(np.sum(labels)),
             "f1": float(f1_score(labels, pred, zero_division=0)),
             "roc_auc": float(roc_auc_score(labels, probabilities)) if both else None,
             "average_precision": float(average_precision_score(labels, probabilities)) if both else None,
@@ -54,7 +56,10 @@ def train(cfg):
     if not 0 <= context_dropout <= 1:
         raise ValueError("context_dropout must be between zero and one")
     examples = read_jsonl(location(cfg, "prepared"))
-    split = {name: [e for e in examples if e["split"] == name] for name in ("train", "val", "test")}
+    from .evaluation import validate_splits, file_hash
+    if cfg['data'].get('expected_prepared_sha256') and file_hash(location(cfg, 'prepared')) != cfg['data']['expected_prepared_sha256']:
+        raise ValueError('Prepared data does not match the frozen experiment SHA-256')
+    split = validate_splits(examples)
     for name, rows in split.items():
         if {e["label"] for e in rows} != {0, 1}:
             raise ValueError(f"{name} requires both binary classes")

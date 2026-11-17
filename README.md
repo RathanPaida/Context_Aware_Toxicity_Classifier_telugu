@@ -1,87 +1,78 @@
 # Context-aware toxicity classifier
 
-The default pipeline embeds **each individual message**, then learns a representation of the **whole parent-to-child reply chain** with a hierarchical Transformer. It scores the target message using its own embedding, its contextual embedding, and the pooled conversation embedding. No conversation-type selector, lexicon bypass, topic-specific rule, or fabricated score is used in the active pipeline.
+This project predicts toxicity of a target reply using its actual parent chain. A pretrained IndicBERT encoder produces individual message vectors; a hierarchical Transformer learns contextual and conversation representations. The active pipeline is in `contextual/`. The older `src/` cascade is retained as historical work.
 
-## Run
+Start with **[RUN_AND_REPORT.md](RUN_AND_REPORT.md)** for the complete current run order and what to send back after execution. Full training is left to the user.
 
-Use Python 3.10 or later in the same environment as your notebook kernel:
+Read [SUBMISSION_REPORT.md](SUBMISSION_REPORT.md) for measured results and [SUBMISSION_HANDOFF.md](SUBMISSION_HANDOFF.md) for detailed setup, blocked steps, data downloads and submission instructions.
 
-```powershell
-python -m pip install -r requirements-contextual.txt
-python run_pipeline.py --all
-```
+## Start here
 
-Or open **[Context_Aware_Toxicity.ipynb](Context_Aware_Toxicity.ipynb)** in Jupyter and Run All. It imports the individual Python modules rather than duplicating them. Initial corpus/model download needs network access. A missing download stops with instructions; there is no silently substituted dataset. Full training can take substantial time depending on hardware and data size.
+Use the existing working Python environment, or install `requirements-contextual.txt` in a fresh environment. `requirements-tested.txt` records the tested versions; CUDA packages are platform dependent. A fresh Git clone does not include local model weights or raw datasets.
 
 ```powershell
-python run_pipeline.py --download
-python run_pipeline.py --prepare
-python run_pipeline.py --train
-python run_pipeline.py --evaluate
-python run_pipeline.py --predict "Your reply" --parent "Earlier parent message" --embeddings
+python -m pytest -q
+python scripts/verify_submission.py --live-kernel
+python scripts/verify_http.py
+python -m contextual.submission
+$env:TOXICITY_CONFIG = "configs/demo.json"
 python app/server.py
-python -m pytest tests/test_contextual.py -q
 ```
 
-Repeat `--parent` oldest to newest. The backend serves a web interface at the host/port configured in JSON (default http://127.0.0.1:7860); API documentation is at `/docs`. The optional Next frontend uses the same API (`cd frontend`, `npm install`, `npm run dev`). Neither UI asks whether the conversation is gaming, politics, or another category.
+Open http://127.0.0.1:7860 for the demo and `/docs` for the API. `/api/health` identifies the actual checkpoint and device. The default demo uses the existing historical no-context-dropout model on CPU; corrected LoRA v2 is not silently substituted or claimed trained. API scores are model outputs, not calibrated confidence.
 
-## Configuration and paths
+## Notebooks
 
-**[configs/contextual.json](configs/contextual.json)** owns model ID/revision, token budget, turn window, batch sizes, learning rate, split fractions, seed, download URL, size/time limits, server settings, and all data/output paths. Select another file with `--config` or `TOXICITY_CONFIG`. Relative paths resolve against the repository location, **not the current working directory**. A notebook launched outside the repository can use `TOXICITY_PROJECT_ROOT`.
+| Notebook | Default behavior |
+|---|---|
+| [Context_Aware_Toxicity.ipynb](Context_Aware_Toxicity.ipynb) | Review saved results, validate frozen data and run real checkpoint inference |
+| [Data_Downloads.ipynb](Data_Downloads.ipynb) | Separate verified CGA, ToxiChat and MACD download/preparation cells |
+| [LoRA_Fine_Tuning.ipynb](LoRA_Fine_Tuning.ipynb) | Review; training requires explicit opt-in and a working GPU |
+| `notebooks/Context_Aware_Toxicity_Completed_Run.ipynb` | Preserved historical run |
 
-There are no hard-coded predictions, category rules, machine-specific paths, or decision cutoffs in the new workflow. A runnable implementation still necessarily has configurable defaults and mathematical/structural constants (binary labels, tensor axes, arithmetic). The threshold is fitted from validation scores and stored in the checkpoint; hidden input width is inferred from the pretrained encoder.
+Earlier versions of all three notebooks passed live Jupyter-kernel execution. The main and LoRA notebooks have since been updated for the user-run workflow; their old outputs were cleared. Cell timings and actual-checkpoint ASGI API checks are in `reports/submission_verification.json`. A real localhost HTTP server also passed health, webpage, API documentation and prediction checks (`reports/submission_http_verification.json`). A visual browser demonstration remains a manual presentation check.
 
-| Artifact | Default path |
-| --- | --- |
-| Downloaded CGA archive and extracted corpus | `data/raw/contextual/` |
-| Prepared examples and fixed train/val/test membership | `data/processed/contextual.jsonl` |
-| Frozen individual-message embedding cache | `data/cache/contextual_embeddings.pt` |
-| Encoder, tokenizer, trained head, settings, threshold | `models/checkpoints/contextual/` |
-| Data counts and source manifest | `reports/contextual_data_manifest.json` |
-| Measured results and context-removal ablation | `reports/contextual_evaluation.json` |
+## Training and additional data
 
-The checkpoint bundles its encoder/tokenizer. Inference after training is local and does not depend on a remote model revision or the original working directory.
+The GPU recovered. The brief run was stopped on user request. To start the current cleaned-data experiment yourself:
 
-## Data
-
-The downloader obtains [Cornell CGA-WIKI](https://convokit.cornell.edu/documentation/awry.html), which contains authentic reply links and per-comment personal-attack labels. It excludes section headers and never uses a future conversation outcome as the current message label. Downloads are atomic and recorded with SHA-256 provenance. Preserve source attribution and review source terms for your intended use.
-
-Existing `data/processed/cultural_safety_telugu.parquet` and `dravidian_codemix.parquet` are reused if present, with their existing binary `toxic` labels. The latter is **Tamil**, not Telugu. These isolated comments supplement supervision; they cannot establish contextual Telugu performance. Their old split assignments are replaced by the new group-safe split, so scores are not comparable to old reports. Missing optional sources are recorded in the manifest. They are not silently downloaded, translated, or synthesized.
-
-For your own conversations, put JSONL at `data/raw/custom_threads.jsonl` (configurable):
-
-```json
-{"id":"m1","parent_id":null,"conversation_id":"t1","text":"First message","label":0}
-{"id":"m2","parent_id":"m1","conversation_id":"t1","text":"Reply to the first message","label":1}
+```powershell
+python -m contextual.adapter_finetune --config configs/contextual_clean_lora.json
 ```
 
-Labels above illustrate the schema only; annotate actual text correctly. `label` can be omitted for an unlabelled ancestor. IDs must be unique, every referenced parent must exist in the same conversation, and cycles are rejected. Provide enough independent conversations and both classes for train/validation/test. Only actual ancestors are used, never sibling branches or future children. Paragraphs remain intact as individual messages; long text uses all token chunks.
+The same command resumes the last completed epoch with matching configuration/data. The corrected implementation shares lossless chunk pooling across training/evaluation/inference, uses full validation and the full training pool, and verifies merged-model reload. It rejects unrelated existing checkpoints. No full v2 accuracy result exists until this run completes.
 
-## Python API
+Additional public data is isolated from the frozen benchmark:
+
+```powershell
+python -m contextual.external_data --download --prepare
+python -m contextual.experiments --config configs/contextual_external.json
+python -m contextual.adapter_finetune --config configs/contextual_external.json
+```
+
+The first two steps were executed; external neural training remains pending. There are 34,556 prepared examples, including 2,623 with parents. MACD Telugu examples are isolated comments. Source URLs, pinned revisions, label mappings and hashes are recorded. New grouped splits are not official benchmark splits. See the handoff for sources and attribution.
+
+## Inference
 
 ```python
 from contextual.config import load_config, location
 from contextual.inference import Predictor
-
-cfg = load_config()
-model = Predictor(location(cfg, "checkpoint"))
+cfg = load_config("configs/demo.json")
+model = Predictor(location(cfg, "checkpoint"), device="cpu")
 result = model.predict("Target reply", history=["Earlier parent"], include_embeddings=True)
-# result: individual_embeddings, contextual_embeddings, conversation_embedding,
-# toxicity_score, threshold, isolated_score, context_score_delta, turn_attention
 ```
 
-For branching threads use `model.predict_thread(messages, target_id)` with the same node schema. The HTTP equivalents are `POST /api/moderate` with `text`/`history`, and `POST /api/thread` with `messages`/`target_id`. A `topic` field is rejected. An absent model returns HTTP 503, never an untrained verdict.
+`history` is ordered oldest to newest. `predict_thread(messages, target_id)` follows only true ancestors, never sibling replies or future children. HTTP routes are `POST /api/moderate` and `POST /api/thread`. A topic field is rejected. Missing models return HTTP 503.
 
-## Architecture and evaluation limits
+Custom-thread JSONL uses `id`, `parent_id`, `conversation_id`, `text` and optional target `label` (0 safe, 1 toxic). Referenced ancestors must exist; duplicate IDs/cycles are rejected. Current configs exclude the authored challenge from training via `include_custom_threads: false`. Add new annotated training data only in a new version with new output paths.
 
-- **Token encoder:** configurable pretrained IndicBERT, frozen for cached embeddings. Mean pooling across every content-token chunk gives one vector per message. This is an MLM backbone, not a dedicated sentence-similarity encoder.
-- **Conversation encoder:** learned relative-to-window positions, multi-head Transformer layers, attention pooling over the root-to-target chain, and a target-specific classification head. The first retained message can be a truncated ancestor; omitted turn count is reported.
-- **Learning:** train-only class weighting, validation average precision for early stopping, validation F1 for threshold selection, then held-out test evaluation by source. Entire conversations, articles and groups sharing any message text stay in one split.
-- **Scope:** one binary target-toxicity output. CGA personal attacks, local offensiveness, and toxicity are related but different annotations. There are no unsupported threat/identity subtype scores or separate conversation-toxicity labels.
-- **Limitations:** semantic context is learned implicitly, not assigned a named domain. This does not guarantee sarcasm/banter understanding. Multilingual pretraining does not prove Telugu/code-mixed accuracy. Scores are not calibrated confidence estimates. Attention is not causal explanation. Full-context versus target-only ablation tests context sensitivity, not necessarily correctness.
+## Evidence and limits
 
-See [docs/CONTEXTUAL_REDESIGN.md](docs/CONTEXTUAL_REDESIGN.md) for the audit and implementation decisions.
+- Original benchmark: 78,839 examples; train/validation/test membership is checked against a fixed data hash.
+- Rerun TF-IDF remains strongest overall among measured original-benchmark models (F1 0.717).
+- Historical LoRA contextual F1 is 0.696 versus 0.665 with parents removed from the same model; historical selection/sampling limitations prevent strong architectural claims.
+- Authored Telugu challenge F1 is 0.596; independent Telugu conversation annotation and an untouched test set remain needed.
+- The report distinguishes English personal attacks, Tamil offensiveness and Telugu prompt safety. Scores from different data populations are not directly comparable.
+- Thresholds are selected on validation F1; attention is not causal explanation. No guarantee of sarcasm or banter understanding is made.
 
-## Existing work
-
-Your pre-existing modified notebook, evaluation module and reports were preserved. `src/`, the older Indic Shield notebook, and [docs/LEGACY_README.md](docs/LEGACY_README.md) describe the previous experimental cascade; they are **not imported by the new default pipeline**. Do not mix its checkpoints or metrics with the new model. The canonical notebook is `Context_Aware_Toxicity.ipynb` and canonical modules are in `contextual/`.
+All project-relative paths resolve against the repository. Choose configs with `--config` or `TOXICITY_CONFIG`. Use `TOXICITY_PROJECT_ROOT` when launching notebooks elsewhere. Download failures, hardware failures and mismatched data/configurations stop explicitly rather than producing invented outputs.

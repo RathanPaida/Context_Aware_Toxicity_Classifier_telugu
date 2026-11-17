@@ -1,0 +1,461 @@
+[
+  {
+    "id": "custom_challenge:te_deesc_01_2",
+    "group": "custom_challenge:te_deesc_01",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.609492838382721,
+    "isolated_score": 0.604141891002655
+  },
+  {
+    "id": "custom_challenge:te_deesc_02_2",
+    "group": "custom_challenge:te_deesc_02",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.22477154433727264,
+    "isolated_score": 0.22069452702999115
+  },
+  {
+    "id": "custom_challenge:te_deesc_03_2",
+    "group": "custom_challenge:te_deesc_03",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.4639705419540405,
+    "isolated_score": 0.49334269762039185
+  },
+  {
+    "id": "custom_challenge:te_deesc_04_2",
+    "group": "custom_challenge:te_deesc_04",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.3327926695346832,
+    "isolated_score": 0.35162580013275146
+  },
+  {
+    "id": "custom_challenge:te_deesc_05_2",
+    "group": "custom_challenge:te_deesc_05",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.38546082377433777,
+    "isolated_score": 0.3827899992465973
+  },
+  {
+    "id": "custom_challenge:te_deesc_06_2",
+    "group": "custom_challenge:te_deesc_06",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.9386778473854065,
+    "isolated_score": 0.9463278651237488
+  },
+  {
+    "id": "custom_challenge:te_deesc_07_2",
+    "group": "custom_challenge:te_deesc_07",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.8233499526977539,
+    "isolated_score": 0.834649384021759
+  },
+  {
+    "id": "custom_challenge:te_deesc_08_2",
+    "group": "custom_challenge:te_deesc_08",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.15033979713916779,
+    "isolated_score": 0.16109699010849
+  },
+  {
+    "id": "custom_challenge:te_twin_champ_s2",
+    "group": "custom_challenge:te_twin_champ_safe",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.39490532875061035,
+    "isolated_score": 0.4027732014656067
+  },
+  {
+    "id": "custom_challenge:te_twin_champ_t2",
+    "group": "custom_challenge:te_twin_champ_toxic",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.3977430760860443,
+    "isolated_score": 0.4027732014656067
+  },
+  {
+    "id": "custom_challenge:te_twin_champ_te_s2",
+    "group": "custom_challenge:te_twin_champ_te_safe",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.8673191666603088,
+    "isolated_score": 0.8673102259635925
+  },
+  {
+    "id": "custom_challenge:te_twin_champ_te_t2",
+    "group": "custom_challenge:te_twin_champ_te_toxic",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.8657936453819275,
+    "isolated_score": 0.8673102259635925
+  },
+  {
+    "id": "custom_challenge:te_twin_pani_s2",
+    "group": "custom_challenge:te_twin_pani_safe",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.934880793094635,
+    "isolated_score": 0.9395177364349365
+  },
+  {
+    "id": "custom_challenge:te_twin_pani_t2",
+    "group": "custom_challenge:te_twin_pani_toxic",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9339317679405212,
+    "isolated_score": 0.9395177364349365
+  },
+  {
+    "id": "custom_challenge:te_twin_pichi_s2",
+    "group": "custom_challenge:te_twin_pichi_safe",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.44417259097099304,
+    "isolated_score": 0.4397696256637573
+  },
+  {
+    "id": "custom_challenge:te_twin_pichi_t2",
+    "group": "custom_challenge:te_twin_pichi_toxic",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.450442910194397,
+    "isolated_score": 0.4397696256637573
+  },
+  {
+    "id": "custom_challenge:te_twin_pani_te_s2",
+    "group": "custom_challenge:te_twin_pani_te_safe",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.49470198154449463,
+    "isolated_score": 0.4907535910606384
+  },
+  {
+    "id": "custom_challenge:te_twin_pani_te_t2",
+    "group": "custom_challenge:te_twin_pani_te_toxic",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.49357834458351135,
+    "isolated_score": 0.4907535910606384
+  },
+  {
+    "id": "custom_challenge:te_twin_dengey_s2",
+    "group": "custom_challenge:te_twin_dengey_safe",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.9356976747512817,
+    "isolated_score": 0.9413872957229614
+  },
+  {
+    "id": "custom_challenge:te_twin_dengey_t2",
+    "group": "custom_challenge:te_twin_dengey_toxic",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.8629176616668701,
+    "isolated_score": 0.8685624003410339
+  },
+  {
+    "id": "custom_challenge:te_quote_01_2",
+    "group": "custom_challenge:te_quote_01",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.25206324458122253,
+    "isolated_score": 0.2911525070667267
+  },
+  {
+    "id": "custom_challenge:te_quote_02_2",
+    "group": "custom_challenge:te_quote_02",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.8505963087081909,
+    "isolated_score": 0.8832833170890808
+  },
+  {
+    "id": "custom_challenge:te_quote_03_2",
+    "group": "custom_challenge:te_quote_03",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.9163826704025269,
+    "isolated_score": 0.923173189163208
+  },
+  {
+    "id": "custom_challenge:te_quote_04_2",
+    "group": "custom_challenge:te_quote_04",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.034355249255895615,
+    "isolated_score": 0.047307390719652176
+  },
+  {
+    "id": "custom_challenge:te_meme_01_2",
+    "group": "custom_challenge:te_meme_01",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.20334362983703613,
+    "isolated_score": 0.19106993079185486
+  },
+  {
+    "id": "custom_challenge:te_meme_02_2",
+    "group": "custom_challenge:te_meme_02",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.5441120862960815,
+    "isolated_score": 0.5367828011512756
+  },
+  {
+    "id": "custom_challenge:te_meme_03_2",
+    "group": "custom_challenge:te_meme_03",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.8213045001029968,
+    "isolated_score": 0.8302998542785645
+  },
+  {
+    "id": "custom_challenge:te_meme_04_2",
+    "group": "custom_challenge:te_meme_04",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.2129405438899994,
+    "isolated_score": 0.2048817127943039
+  },
+  {
+    "id": "custom_challenge:te_meme_05_2",
+    "group": "custom_challenge:te_meme_05",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.8686641454696655,
+    "isolated_score": 0.8721708655357361
+  },
+  {
+    "id": "custom_challenge:te_threat_01_2",
+    "group": "custom_challenge:te_threat_01",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.7863319516181946,
+    "isolated_score": 0.7938290238380432
+  },
+  {
+    "id": "custom_challenge:te_threat_02_2",
+    "group": "custom_challenge:te_threat_02",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.7497377991676331,
+    "isolated_score": 0.7573423385620117
+  },
+  {
+    "id": "custom_challenge:te_threat_03_2",
+    "group": "custom_challenge:te_threat_03",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.6368927955627441,
+    "isolated_score": 0.642444372177124
+  },
+  {
+    "id": "custom_challenge:te_threat_04_2",
+    "group": "custom_challenge:te_threat_04",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.5989519953727722,
+    "isolated_score": 0.6069360971450806
+  },
+  {
+    "id": "custom_challenge:te_threat_05_2",
+    "group": "custom_challenge:te_threat_05",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.2691899240016937,
+    "isolated_score": 0.2693330943584442
+  },
+  {
+    "id": "custom_challenge:te_caste_s1_2",
+    "group": "custom_challenge:te_caste_safe_01",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.620750367641449,
+    "isolated_score": 0.6234205961227417
+  },
+  {
+    "id": "custom_challenge:te_caste_s2_2",
+    "group": "custom_challenge:te_caste_safe_02",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.5212672352790833,
+    "isolated_score": 0.5455094575881958
+  },
+  {
+    "id": "custom_challenge:te_caste_s3_2",
+    "group": "custom_challenge:te_caste_safe_03",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.6970654129981995,
+    "isolated_score": 0.7195097208023071
+  },
+  {
+    "id": "custom_challenge:te_caste_s4_2",
+    "group": "custom_challenge:te_caste_safe_04",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.4946913719177246,
+    "isolated_score": 0.4959094524383545
+  },
+  {
+    "id": "custom_challenge:te_caste_t1_2",
+    "group": "custom_challenge:te_caste_toxic_01",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.7654306888580322,
+    "isolated_score": 0.7738217115402222
+  },
+  {
+    "id": "custom_challenge:te_caste_t2_2",
+    "group": "custom_challenge:te_caste_toxic_02",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9534431099891663,
+    "isolated_score": 0.9558171629905701
+  },
+  {
+    "id": "custom_challenge:te_toxic_r01_2",
+    "group": "custom_challenge:te_toxic_reply_01",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9593477845191956,
+    "isolated_score": 0.962433397769928
+  },
+  {
+    "id": "custom_challenge:te_toxic_r02_2",
+    "group": "custom_challenge:te_toxic_reply_02",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9060521721839905,
+    "isolated_score": 0.9099283814430237
+  },
+  {
+    "id": "custom_challenge:te_toxic_r03_2",
+    "group": "custom_challenge:te_toxic_reply_03",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9928286671638489,
+    "isolated_score": 0.9926053285598755
+  },
+  {
+    "id": "custom_challenge:te_toxic_r04_2",
+    "group": "custom_challenge:te_toxic_reply_04",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9418911933898926,
+    "isolated_score": 0.9437854886054993
+  },
+  {
+    "id": "custom_challenge:te_mt01_4",
+    "group": "custom_challenge:te_multi_turn_01",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.6654523015022278,
+    "isolated_score": 0.6255781650543213
+  },
+  {
+    "id": "custom_challenge:te_mt02_4",
+    "group": "custom_challenge:te_multi_turn_02",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.5000823140144348,
+    "isolated_score": 0.47997602820396423
+  },
+  {
+    "id": "custom_challenge:te_mt03_4",
+    "group": "custom_challenge:te_multi_turn_03",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9109810590744019,
+    "isolated_score": 0.9027718901634216
+  },
+  {
+    "id": "custom_challenge:te_mt04_4",
+    "group": "custom_challenge:te_multi_turn_04",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.20171485841274261,
+    "isolated_score": 0.17396000027656555
+  },
+  {
+    "id": "custom_challenge:te_mt05_4",
+    "group": "custom_challenge:te_multi_turn_05",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.6465218663215637,
+    "isolated_score": 0.6132704019546509
+  },
+  {
+    "id": "custom_challenge:te_sarc_s1_2",
+    "group": "custom_challenge:te_sarcasm_safe_01",
+    "source": "custom_challenge",
+    "label": 0,
+    "has_context": true,
+    "score": 0.9612272381782532,
+    "isolated_score": 0.9629539847373962
+  },
+  {
+    "id": "custom_challenge:te_sarc_t1_2",
+    "group": "custom_challenge:te_sarcasm_toxic_01",
+    "source": "custom_challenge",
+    "label": 1,
+    "has_context": true,
+    "score": 0.9230095744132996,
+    "isolated_score": 0.9287518262863159
+  }
+]

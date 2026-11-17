@@ -1,0 +1,32 @@
+[
+  {
+    "source": "toxichat_human",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\toxichat_human\\train.jsonl",
+    "sha256": "806da95ba491888626a18c0324e9d6ec906450ba9fef92b54343ebf44e48682a"
+  },
+  {
+    "source": "toxichat_human",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\toxichat_human\\dev.jsonl",
+    "sha256": "591742cdf73b9fcae4f555cbccb5d49237b470172dd0fd07a4829cebc0060ace"
+  },
+  {
+    "source": "toxichat_human",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\toxichat_human\\test.jsonl",
+    "sha256": "13e67afb0806b1865d446ea3d730578d750d9be4127fdd872ef7cc903b52f9bb"
+  },
+  {
+    "source": "macd_telugu",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\macd_telugu\\telugu_train.csv",
+    "sha256": "cb6bb4e4574cdad1477aa8c2c030c133ecc8ec1b5411c73b98370cb599aa2a69"
+  },
+  {
+    "source": "macd_telugu",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\macd_telugu\\telugu_val.csv",
+    "sha256": "1553fbe42b32b66f2c535f14d2f763464cf54e1e06dfafc637612fe616429a18"
+  },
+  {
+    "source": "macd_telugu",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\macd_telugu\\telugu_test.csv",
+    "sha256": "626d4907c0282ec9ead25b5d0e1ea664dffaeeab9744d55c34f107e8cd931e5c"
+  }
+]

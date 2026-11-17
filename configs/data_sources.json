@@ -1,0 +1,65 @@
+{
+  "sources": [
+    {
+      "name": "toxichat_human",
+      "repository": "https://github.com/abaheti95/ToxiChat",
+      "revision": "c1ffebd76596481b26aab35074816641b076f992",
+      "format": "toxichat",
+      "label_map": {
+        "Safe": 0,
+        "Offensive": 1
+      },
+      "files": [
+        {
+          "split": "train",
+          "url": "https://raw.githubusercontent.com/abaheti95/ToxiChat/c1ffebd76596481b26aab35074816641b076f992/data/ToxiChat/train.jsonl",
+          "path": "data/raw/external/toxichat_human/train.jsonl"
+        },
+        {
+          "split": "val",
+          "url": "https://raw.githubusercontent.com/abaheti95/ToxiChat/c1ffebd76596481b26aab35074816641b076f992/data/ToxiChat/dev.jsonl",
+          "path": "data/raw/external/toxichat_human/dev.jsonl"
+        },
+        {
+          "split": "test",
+          "url": "https://raw.githubusercontent.com/abaheti95/ToxiChat/c1ffebd76596481b26aab35074816641b076f992/data/ToxiChat/test.jsonl",
+          "path": "data/raw/external/toxichat_human/test.jsonl"
+        }
+      ]
+    },
+    {
+      "name": "macd_telugu",
+      "repository": "https://github.com/ShareChatAI/MACD",
+      "revision": "41cba9bd44a70fabeb93fdaf1e75d80876b89666",
+      "format": "macd",
+      "label_map": {
+        "0": 1,
+        "1": 0
+      },
+      "files": [
+        {
+          "split": "train",
+          "url": "https://raw.githubusercontent.com/ShareChatAI/MACD/41cba9bd44a70fabeb93fdaf1e75d80876b89666/dataset/telugu_train.csv",
+          "path": "data/raw/external/macd_telugu/telugu_train.csv"
+        },
+        {
+          "split": "val",
+          "url": "https://raw.githubusercontent.com/ShareChatAI/MACD/41cba9bd44a70fabeb93fdaf1e75d80876b89666/dataset/telugu_val.csv",
+          "path": "data/raw/external/macd_telugu/telugu_val.csv"
+        },
+        {
+          "split": "test",
+          "url": "https://raw.githubusercontent.com/ShareChatAI/MACD/41cba9bd44a70fabeb93fdaf1e75d80876b89666/dataset/telugu_test.csv",
+          "path": "data/raw/external/macd_telugu/telugu_test.csv"
+        }
+      ]
+    }
+  ],
+  "timeout_seconds": 30,
+  "chunk_bytes": 1048576,
+  "max_file_bytes": 536870912,
+  "download_manifest": "reports/external_downloads.json",
+  "prepared": "data/processed/external_contextual.jsonl",
+  "manifest": "reports/external_data_manifest.json",
+  "training_config": "configs/contextual_external.json"
+}

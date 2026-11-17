@@ -250,13 +250,15 @@ def grouped_split(examples, cfg):
 
 
 def prepare(cfg):
+    if cfg['data'].get('prepared_only'):
+        raise ValueError('This is a cleaned dataset version. Run python -m contextual.preprocessing as described in RUN_AND_REPORT.md.')
     examples = []
     cga_stats = {}
     path = location(cfg, "raw") / cfg["data"]["cga"]["directory"] / "utterances.jsonl"
     if path.exists():
         examples.extend(load_cga(cfg, stats=cga_stats))
     custom = project_path(cfg["data"]["custom_threads"])
-    if custom.exists():
+    if custom.exists() and cfg["data"].get("include_custom_threads", True):
         examples.extend(examples_from_nodes(read_jsonl(custom), cfg, "custom_threads"))
     real_context_count = sum(len(e["texts"]) > 1 for e in examples)
     if cfg["data"]["require_real_context"] and not real_context_count:

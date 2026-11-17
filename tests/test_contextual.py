@@ -193,6 +193,7 @@ def test_notebook_run_all(tiny_config, tmp_path, monkeypatch):
     config_path = tmp_path / "notebook_config.json"
     config_path.write_text(json.dumps(tiny_config), encoding="utf-8")
     monkeypatch.setenv("TOXICITY_CONFIG", str(config_path))
+    monkeypatch.setenv("TOXICITY_RUN_TRAINING", "1")
     notebook = nbformat.read(ROOT / "Context_Aware_Toxicity.ipynb", as_version=4)
     nbformat.validate(notebook)
     monkeypatch.chdir(ROOT / "notebooks")
@@ -203,3 +204,198 @@ def test_notebook_run_all(tiny_config, tmp_path, monkeypatch):
         if cell.cell_type == "code":
             exec(compile(cell.source, f"notebook_cell_{i}", "exec"), namespace)
     assert namespace["thread_result"]["turns_used"] > 0
+
+
+def test_custom_threads_schema_and_contrastive_pairs():
+    from contextual.data import read_jsonl, examples_from_nodes
+    cfg = load_config()
+    custom_path = project_path(cfg["data"]["custom_threads"])
+    assert custom_path.exists(), f"Missing custom threads at {custom_path}"
+    records = read_jsonl(custom_path)
+    assert len(records) >= 50
+    examples = examples_from_nodes(records, cfg, "custom_threads", skip_missing_parents=False)
+    assert len(examples) >= 40
+    # Verify presence of multi-turn examples
+    multiturn = [e for e in examples if len(e["texts"]) > 1]
+    assert len(multiturn) >= 30
+    # Verify contrastive twins: identical target text with differing labels in different contexts
+    target_labels = {}
+    twins_found = False
+    for e in examples:
+        target = e["texts"][-1].strip().lower()
+        if target in target_labels and target_labels[target] != e["label"]:
+            twins_found = True
+            break
+        target_labels[target] = e["label"]
+    assert twins_found, "Custom threads must include contrastive twin pairs with context-dependent labels"
+
+
+def test_online_encoder_matches_saved_pooling_and_has_tail_gradient(tiny_config):
+    from contextual.embeddings import TextEncoder, encode_texts
+    encoder = TextEncoder(tiny_config)
+    encoder.model.requires_grad_(True)
+    text = 'hello ' * 24 + 'attack ' * 24
+    online = encode_texts(encoder.model, encoder.tokenizer, [text], encoder.device,
+                          encoder.max_tokens, tiny_config['encoder']['batch_size'])
+    torch.testing.assert_close(online.detach().cpu(), encoder.encode([text]))
+    online.square().sum().backward()
+    token = encoder.tokenizer.convert_tokens_to_ids('attack')
+    assert encoder.model.get_input_embeddings().weight.grad[token].abs().sum() > 0
+
+
+def test_cache_rejects_changed_encoder_weights(tiny_config):
+    from contextual.embeddings import TextEncoder, cached_embeddings
+    encoder = TextEncoder(tiny_config)
+    rows = [{'texts': ['hello']}]
+    original, _ = cached_embeddings(tiny_config, rows, encoder)
+    with torch.no_grad():
+        encoder.model.get_input_embeddings().weight[encoder.tokenizer.convert_tokens_to_ids('hello'), 0] += 2
+    changed, _ = cached_embeddings(tiny_config, rows, encoder)
+    assert not torch.allclose(original, changed)
+
+
+def test_lora_full_validation_save_reload_and_resume(tiny_config):
+    from contextual.adapter_finetune import run_adapter_experiment
+    cfg = tiny_config
+    cfg['adapter'] = {'enabled': True, 'r': 2, 'lora_alpha': 4, 'lora_dropout': 0,
+                      'target_modules': ['query', 'value']}
+    cfg['training'].update(encoder_lr=0.001, gradient_accumulation_steps=3,
+                           gradient_checkpointing=False, require_cuda=False, fp16=False)
+    download(cfg)
+    manifest = prepare(cfg)
+    report = run_adapter_experiment(cfg)
+    assert report['validation']['n'] == manifest['splits']['val']
+    assert report['training_examples'] == manifest['splits']['train']
+    assert report['checkpoint_reload_verified']
+    assert report['contextual_test']['n'] == report['contextual_test_without_parents']['n']
+    assert run_adapter_experiment(cfg)['test'] == report['test']
+
+
+def test_summary_uses_actual_context_subset():
+    from contextual.evaluation import summarize
+    rows = [{'id': 'a', 'source': 'cga', 'texts': ['root'], 'label': 0},
+            {'id': 'b', 'source': 'cga', 'texts': ['root', 'reply'], 'label': 1}]
+    report = summarize(rows, [0.9, 0.9], 0.5)
+    assert report['by_source']['cga']['n'] == 2
+    assert report['contextual_test']['n'] == 1
+    assert report['contextual_test']['confusion_matrix'] == [[0, 0], [0, 1]]
+
+
+def test_external_adapters_preserve_labels_and_human_ancestry(tmp_path):
+    from contextual.external_data import convert_source
+    toxichat = tmp_path / 'train.jsonl'
+    toxichat.write_text(json.dumps({'reddit_thread': [
+        {'turn_id': 1, 'text': 'a real parent', 'offense_label': 'Safe'},
+        {'turn_id': 2, 'text': 'a real reply', 'offense_label': 'Offensive'}],
+        'generated_reply': 'Must not enter the training data'})+'\n')
+    source = {'name': 'toxichat_human', 'format': 'toxichat',
+              'label_map': {'Safe': 0, 'Offensive': 1},
+              'files': [{'path': str(toxichat), 'split': 'train'}]}
+    examples = convert_source(source)
+    assert len(examples) == 2
+    assert examples[1]['texts'] == ['a real parent', 'a real reply']
+    assert examples[1]['label'] == 1
+    csv = tmp_path / 'telugu.csv'
+    csv.write_text('text,label\nabusive text,0\nsafe text,1\n')
+    rows = convert_source({'name': 'macd_telugu', 'format': 'macd',
+        'label_map': {'0': 1, '1': 0}, 'files': [{'path': str(csv), 'split': 'test'}]})
+    assert [r['label'] for r in rows] == [1, 0]
+    assert all(len(r['texts']) == 1 and r['original_split'] == 'test' for r in rows)
+
+
+def test_cli_routes_adapter_and_rejects_wrong_data_preparation(monkeypatch):
+    import run_pipeline
+    import contextual.adapter_finetune as adapter
+    calls = []
+    monkeypatch.setattr(adapter, 'run_adapter_experiment', lambda cfg: calls.append(cfg) or {})
+    run_pipeline.main(['--config', 'configs/contextual_lora_v2.json', '--train'])
+    assert len(calls) == 1 and calls[0]['adapter']['enabled']
+    with pytest.raises(ValueError, match='external_data'):
+        run_pipeline.main(['--config', 'configs/contextual_external.json', '--prepare'])
+
+
+def test_conservative_preprocessing_and_clean_version():
+    from contextual.preprocessing import normalize_text, clean_snapshot, audit
+    assert normalize_text('  NOT\x00 toxic\t🙂 e\u0301 ') == 'NOT toxic 🙂 é'
+    assert normalize_text('తెలుగు 👩\u200d💻') == 'తెలుగు 👩\u200d💻'
+    rows = [{'id': f'{s}{y}', 'group': f'{s}{y}', 'source': 'fixture', 'split': s,
+             'texts': [f'{s} unique message {y}'], 'label': y}
+            for s in ('train', 'val', 'test') for y in (0, 1)]
+    rows += [{**rows[0], 'id': 'duplicate'},
+             {'id': 'amb0', 'group': 'amb', 'source': 'fixture', 'split': 'train', 'texts': ['uncertain'], 'label': 0},
+             {'id': 'amb1', 'group': 'amb', 'source': 'fixture', 'split': 'train', 'texts': ['uncertain'], 'label': 1}]
+    cleaned, excluded = clean_snapshot(rows)
+    assert len(cleaned) == 6 and len(excluded) == 3
+    assert audit(cleaned)['normalized_shared_text_groups_crossing_splits'] == 0
+    assert rows[0]['texts'] == ['train unique message 0']
+
+
+def test_preprocessing_rejects_normalization_leakage():
+    from contextual.preprocessing import clean_snapshot
+    rows = [{'id': f'{s}{y}', 'group': f'{s}{y}', 'source': 'fixture', 'split': s,
+             'texts': [f'{s} text {y}'], 'label': y}
+            for s in ('train', 'val', 'test') for y in (0, 1)]
+    rows[0]['texts'] = ['é']
+    rows[2]['texts'] = ['e\u0301']
+    with pytest.raises(ValueError, match='crosses splits'):
+        clean_snapshot(rows)
+
+
+def test_ensemble_selection_and_prediction_alignment(tmp_path):
+    from contextual.ensemble import select_weights, aligned_predictions
+    selected, candidates = select_weights([0, 1, 0, 1], [[.1,.8],[.9,.2],[.2,.7],[.8,.3]], [1,1,1,1])
+    assert selected['weights'] == [1., 0.]
+    assert any(c['weights'] == [0., 1.] for c in candidates)
+    path = tmp_path/'pred.json'
+    path.write_text(json.dumps([{'id':'b','label':1,'score':.8},{'id':'a','label':0,'score':.2}]))
+    rows = [{'id':'a','label':0},{'id':'b','label':1}]
+    np.testing.assert_allclose(aligned_predictions(path, rows), [.2,.8])
+    with pytest.raises(ValueError, match='IDs'):
+        aligned_predictions(path, rows[:1])
+
+
+def test_ensemble_roundtrip_and_neural_component(tiny_config, tmp_path):
+    import joblib
+    from contextual.adapter_finetune import run_adapter_experiment
+    from contextual.ensemble import run_ensemble, EnsemblePredictor
+    from contextual.data import read_jsonl
+    from contextual.inference import Predictor
+    cfg = tiny_config
+    cfg['adapter'] = {'enabled': True, 'r': 2, 'lora_alpha': 4, 'lora_dropout': 0,
+                      'target_modules': ['query', 'value']}
+    cfg['training'].update(encoder_lr=.001, gradient_accumulation_steps=2,
+                          gradient_checkpointing=False, require_cuda=False, fp16=False, epochs=1)
+    cfg['data']['text_normalization'] = 'nfc_controls_whitespace_v1'
+    download(cfg); prepare(cfg)
+    neural = run_adapter_experiment(cfg)
+    output = tmp_path/'ensemble.json'
+    report = run_ensemble(cfg, output, location(cfg, 'report'))
+    example = next(e for e in read_jsonl(location(cfg, 'prepared')) if e['split']=='test')
+    predicted = EnsemblePredictor(output.with_suffix('.joblib')).predict(example['texts'][-1], example['texts'][:-1])
+    expected = json.loads(output.with_suffix('.predictions.json').read_text())[0]['score']
+    assert predicted['toxicity_score'] == pytest.approx(expected, abs=1e-6)
+    # Force a pure neural endpoint in this synthetic fixture to exercise the saved-weight checks and thread API.
+    bundle = joblib.load(output.with_suffix('.joblib'))
+    bundle['weights'] = {'char_tfidf':0., 'word_tfidf':0., 'contextual_transformer':1.}
+    bundle['threshold'] = neural['threshold']
+    joblib.dump(bundle, tmp_path/'neural_endpoint.joblib')
+    ensemble = EnsemblePredictor(tmp_path/'neural_endpoint.joblib')
+    actual = ensemble.predict('hello\x00 please', ['attack'])
+    reference = Predictor(location(cfg, 'checkpoint')).predict('hello please', ['attack'])
+    assert actual['toxicity_score'] == pytest.approx(reference['toxicity_score'], abs=1e-6)
+    threaded = ensemble.predict_thread([
+        {'id':'p','parent_id':None,'conversation_id':'x','text':'attack'},
+        {'id':'t','parent_id':'p','conversation_id':'x','text':'hello'}], 't')
+    assert threaded['message_ids'] == ['p','t']
+
+
+def test_group_bootstrap_and_connected_threads():
+    from contextual.statistics import paired_f1_interval, connected_groups
+    rows = [{'group':'a','texts':['shared','reply a']},
+            {'group':'b','texts':['shared','reply b']},
+            {'group':'c','texts':['independent']}]
+    groups = connected_groups(rows)
+    assert groups[0] == groups[1] and groups[0] != groups[2]
+    interval = paired_f1_interval([0,1,0,1], [.1,.8,.2,.9], [.1,.8,.2,.9], ['a','a','b','b'], .5,.5, resamples=30)
+    assert interval['f1_difference'] == 0
+    assert interval['percentile_95_interval'] == [0.,0.]

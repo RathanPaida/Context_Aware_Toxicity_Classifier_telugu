@@ -1,0 +1,107 @@
+{
+  "population": "curated_development_challenge_not_independent_test",
+  "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora",
+  "threshold": 0.59521484375,
+  "fresh_embeddings": true,
+  "test": {
+    "precision": 0.48484848484848486,
+    "recall": 0.8421052631578947,
+    "n": 51,
+    "positive_count": 19,
+    "f1": 0.6153846153846154,
+    "roc_auc": 0.7203947368421052,
+    "average_precision": 0.6063017206249706,
+    "confusion_matrix": [
+      [
+        15,
+        17
+      ],
+      [
+        3,
+        16
+      ]
+    ]
+  },
+  "by_source": {
+    "custom_challenge": {
+      "precision": 0.48484848484848486,
+      "recall": 0.8421052631578947,
+      "n": 51,
+      "positive_count": 19,
+      "f1": 0.6153846153846154,
+      "roc_auc": 0.7203947368421052,
+      "average_precision": 0.6063017206249706,
+      "confusion_matrix": [
+        [
+          15,
+          17
+        ],
+        [
+          3,
+          16
+        ]
+      ]
+    }
+  },
+  "test_ids_sha256": "2f061e014e61c22f5737a79c19ada60f9fd68738cb3ea6abbdd0d0b8eac1e453",
+  "contextual_test": {
+    "precision": 0.48484848484848486,
+    "recall": 0.8421052631578947,
+    "n": 51,
+    "positive_count": 19,
+    "f1": 0.6153846153846154,
+    "roc_auc": 0.7203947368421052,
+    "average_precision": 0.6063017206249706,
+    "confusion_matrix": [
+      [
+        15,
+        17
+      ],
+      [
+        3,
+        16
+      ]
+    ]
+  },
+  "context_removed_ablation": {
+    "precision": 0.5,
+    "recall": 0.8421052631578947,
+    "n": 51,
+    "positive_count": 19,
+    "f1": 0.6274509803921569,
+    "roc_auc": 0.747532894736842,
+    "average_precision": 0.65184967495339,
+    "confusion_matrix": [
+      [
+        16,
+        16
+      ],
+      [
+        3,
+        16
+      ]
+    ]
+  },
+  "contextual_test_without_parents": {
+    "precision": 0.5,
+    "recall": 0.8421052631578947,
+    "n": 51,
+    "positive_count": 19,
+    "f1": 0.6274509803921569,
+    "roc_auc": 0.747532894736842,
+    "average_precision": 0.65184967495339,
+    "confusion_matrix": [
+      [
+        16,
+        16
+      ],
+      [
+        3,
+        16
+      ]
+    ]
+  },
+  "mean_absolute_score_change": 0.021110272071525164,
+  "contextual_mean_absolute_score_change": 0.021110272071525164,
+  "examples_sharing_any_training_text": 0
+}

@@ -1,0 +1,121 @@
+{
+  "threshold": 0.3266393559746464,
+  "prepared_sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+  "validation": {
+    "precision": 0.6612740141557129,
+    "recall": 0.7667057444314185,
+    "n": 11776,
+    "positive_count": 2559,
+    "f1": 0.7100977198697068,
+    "roc_auc": 0.9213069127450793,
+    "average_precision": 0.774765685656419,
+    "confusion_matrix": [
+      [
+        8212,
+        1005
+      ],
+      [
+        597,
+        1962
+      ]
+    ]
+  },
+  "test": {
+    "precision": 0.6764998342724561,
+    "recall": 0.7675817976682964,
+    "n": 11878,
+    "positive_count": 2659,
+    "f1": 0.719168428470754,
+    "roc_auc": 0.9238481803424351,
+    "average_precision": 0.786495048900553,
+    "confusion_matrix": [
+      [
+        8243,
+        976
+      ],
+      [
+        618,
+        2041
+      ]
+    ]
+  },
+  "by_source": {
+    "cga_wiki": {
+      "precision": 0.7611111111111111,
+      "recall": 0.5,
+      "n": 3577,
+      "positive_count": 274,
+      "f1": 0.6035242290748899,
+      "roc_auc": 0.9475018286848275,
+      "average_precision": 0.7006739871634022,
+      "confusion_matrix": [
+        [
+          3260,
+          43
+        ],
+        [
+          137,
+          137
+        ]
+      ]
+    },
+    "cultural_safety_telugu": {
+      "precision": 0.7428571428571429,
+      "recall": 0.9595782073813708,
+      "n": 1787,
+      "positive_count": 569,
+      "f1": 0.8374233128834356,
+      "roc_auc": 0.9586850436192901,
+      "average_precision": 0.9076809357545663,
+      "confusion_matrix": [
+        [
+          1029,
+          189
+        ],
+        [
+          23,
+          546
+        ]
+      ]
+    },
+    "dravidian_codemix_tamil": {
+      "precision": 0.6460513796384396,
+      "recall": 0.7477973568281938,
+      "n": 6514,
+      "positive_count": 1816,
+      "f1": 0.6932108218478815,
+      "roc_auc": 0.8837673215521461,
+      "average_precision": 0.7535032260578531,
+      "confusion_matrix": [
+        [
+          3954,
+          744
+        ],
+        [
+          458,
+          1358
+        ]
+      ]
+    }
+  },
+  "test_ids_sha256": "fa34611c223aaa4610edb5f35e93aade2cc8486ec4c35f3ae899a513ebf2b55c",
+  "contextual_test": {
+    "precision": 0.746268656716418,
+    "recall": 0.5102040816326531,
+    "n": 2282,
+    "positive_count": 196,
+    "f1": 0.6060606060606061,
+    "roc_auc": 0.9518681393938209,
+    "average_precision": 0.7264858633347558,
+    "confusion_matrix": [
+      [
+        2052,
+        34
+      ],
+      [
+        96,
+        100
+      ]
+    ]
+  }
+}

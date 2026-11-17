@@ -1,0 +1,77 @@
+{
+  "paths": {
+    "raw": "data/raw/contextual",
+    "prepared": "data/processed/contextual.jsonl",
+    "embeddings": "data/cache/contextual_embeddings.pt",
+    "checkpoint": "models/checkpoints/target_only_neural",
+    "report": "reports/target_only_neural_evaluation.json",
+    "manifest": "reports/contextual_data_manifest.json"
+  },
+  "encoder": {
+    "name": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+    "revision": "bb783337859e3d7957de5ba82766ddea51e8fc3e",
+    "local_files_only": false,
+    "max_tokens": 128,
+    "batch_size": 8,
+    "progress_batches": 100
+  },
+  "model": {
+    "hidden_size": 192,
+    "heads": 4,
+    "layers": 2,
+    "feedforward_size": 384,
+    "dropout": 0.1,
+    "max_turns": 12
+  },
+  "training": {
+    "seed": 42,
+    "epochs": 30,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.01,
+    "gradient_clip": 1.0,
+    "patience": 5,
+    "device": "auto",
+    "cpu_threads": 4
+  },
+  "data": {
+    "download_timeout_seconds": 60,
+    "download_chunk_bytes": 1048576,
+    "max_archive_bytes": 1073741824,
+    "validation_fraction": 0.15,
+    "test_fraction": 0.15,
+    "require_real_context": true,
+    "cga": {
+      "url": "https://zissou.infosci.cornell.edu/convokit/datasets/conversations-gone-awry-corpus/conversations-gone-awry-corpus.zip",
+      "archive": "cga-wiki.zip",
+      "directory": "cga-wiki",
+      "label_field": "comment_has_personal_attack"
+    },
+    "local_sources": [
+      {
+        "path": "data/processed/cultural_safety_telugu.parquet",
+        "label": "toxic",
+        "source": "cultural_safety_telugu",
+        "optional": true
+      },
+      {
+        "path": "data/processed/dravidian_codemix.parquet",
+        "label": "toxic",
+        "source": "dravidian_codemix_tamil",
+        "optional": true
+      }
+    ],
+    "custom_threads": "data/raw/custom_threads.jsonl",
+    "download_attempts": 3,
+    "download_retry_seconds": 2,
+    "include_custom_threads": false
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 7860,
+    "cors_origins": [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000"
+    ]
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "threshold": 0.41126257180306525,
+  "prepared_sha256": "bec6f7cd2b16e2ceb9b8b83a7ebc099367bd4a3a65c5b1b7f58f18f7a04dc131",
+  "validation": {
+    "precision": 0.8695652173913043,
+    "recall": 0.8837579617834395,
+    "n": 5113,
+    "positive_count": 2512,
+    "f1": 0.876604146100691,
+    "roc_auc": 0.953246791410457,
+    "average_precision": 0.9574138588615202,
+    "confusion_matrix": [
+      [
+        2268,
+        333
+      ],
+      [
+        292,
+        2220
+      ]
+    ]
+  },
+  "test": {
+    "precision": 0.8763127187864644,
+    "recall": 0.8780202650038971,
+    "n": 5168,
+    "positive_count": 2566,
+    "f1": 0.877165660891571,
+    "roc_auc": 0.9543473513689031,
+    "average_precision": 0.9588949792635815,
+    "confusion_matrix": [
+      [
+        2284,
+        318
+      ],
+      [
+        313,
+        2253
+      ]
+    ]
+  },
+  "by_source": {
+    "macd_telugu": {
+      "precision": 0.8842668863261944,
+      "recall": 0.9105173876166243,
+      "n": 4520,
+      "positive_count": 2358,
+      "f1": 0.8972001671541997,
+      "roc_auc": 0.9636741574532424,
+      "average_precision": 0.9697376416241369,
+      "confusion_matrix": [
+        [
+          1881,
+          281
+        ],
+        [
+          211,
+          2147
+        ]
+      ]
+    },
+    "toxichat_human": {
+      "precision": 0.7412587412587412,
+      "recall": 0.5096153846153846,
+      "n": 648,
+      "positive_count": 208,
+      "f1": 0.603988603988604,
+      "roc_auc": 0.8470552884615384,
+      "average_precision": 0.720326467067801,
+      "confusion_matrix": [
+        [
+          403,
+          37
+        ],
+        [
+          102,
+          106
+        ]
+      ]
+    }
+  },
+  "test_ids_sha256": "b8c2a7e54931b283205a224729fe738c6e19116877a2f062c7b84c395bccb922",
+  "contextual_test": {
+    "precision": 0.7232142857142857,
+    "recall": 0.5294117647058824,
+    "n": 382,
+    "positive_count": 153,
+    "f1": 0.6113207547169811,
+    "roc_auc": 0.8021377401033193,
+    "average_precision": 0.7241867463192369,
+    "confusion_matrix": [
+      [
+        198,
+        31
+      ],
+      [
+        72,
+        81
+      ]
+    ]
+  }
+}

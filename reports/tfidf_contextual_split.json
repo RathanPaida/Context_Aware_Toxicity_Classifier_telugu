@@ -1,0 +1,91 @@
+{
+  "threshold": 0.31245735494820315,
+  "prepared_sha256": "de69b37150ecae47c1d74ef7017c289f6d6d22018b86041cc141792f9a58007f",
+  "validation": {
+    "n": 11893,
+    "positive_count": 2579,
+    "f1": 0.7136067593733497,
+    "roc_auc": 0.9220972851618717,
+    "average_precision": 0.7774421520971613,
+    "confusion_matrix": [
+      [
+        8239,
+        1075
+      ],
+      [
+        552,
+        2027
+      ]
+    ]
+  },
+  "test": {
+    "n": 11986,
+    "positive_count": 2669,
+    "f1": 0.7169616772641347,
+    "roc_auc": 0.924850564439168,
+    "average_precision": 0.7874025276030423,
+    "confusion_matrix": [
+      [
+        8253,
+        1064
+      ],
+      [
+        583,
+        2086
+      ]
+    ]
+  },
+  "by_source": {
+    "cga_wiki": {
+      "n": 3612,
+      "positive_count": 274,
+      "f1": 0.6214442013129103,
+      "roc_auc": 0.9498049446103921,
+      "average_precision": 0.7119158227137824,
+      "confusion_matrix": [
+        [
+          3297,
+          41
+        ],
+        [
+          132,
+          142
+        ]
+      ]
+    },
+    "cultural_safety_telugu": {
+      "n": 1787,
+      "positive_count": 569,
+      "f1": 0.84,
+      "roc_auc": 0.9591438902692767,
+      "average_precision": 0.9094924992053959,
+      "confusion_matrix": [
+        [
+          1033,
+          185
+        ],
+        [
+          23,
+          546
+        ]
+      ]
+    },
+    "dravidian_codemix_tamil": {
+      "n": 6587,
+      "positive_count": 1826,
+      "f1": 0.6883308714918759,
+      "roc_auc": 0.8850848775177469,
+      "average_precision": 0.7539995039223625,
+      "confusion_matrix": [
+        [
+          3923,
+          838
+        ],
+        [
+          428,
+          1398
+        ]
+      ]
+    }
+  }
+}

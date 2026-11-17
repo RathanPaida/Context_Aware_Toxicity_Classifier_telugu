@@ -1,0 +1,93 @@
+{
+  "model_type": "target_only_neural_baseline",
+  "threshold": 0.5730434656143188,
+  "validation_average_precision": 0.7443879853502529,
+  "test": {
+    "n": 11986,
+    "positive_count": 2669,
+    "f1": 0.6712903225806451,
+    "roc_auc": 0.904067539432566,
+    "average_precision": 0.7387139877348352,
+    "confusion_matrix": [
+      [
+        7867,
+        1450
+      ],
+      [
+        588,
+        2081
+      ]
+    ]
+  },
+  "by_source": {
+    "cga_wiki": {
+      "n": 3612,
+      "positive_count": 274,
+      "f1": 0.621160409556314,
+      "roc_auc": 0.9437105570449544,
+      "average_precision": 0.6957514951824958,
+      "confusion_matrix": [
+        [
+          3208,
+          130
+        ],
+        [
+          92,
+          182
+        ]
+      ]
+    },
+    "cultural_safety_telugu": {
+      "n": 1787,
+      "positive_count": 569,
+      "f1": 0.8383045525902669,
+      "roc_auc": 0.9620744485904174,
+      "average_precision": 0.9097996774203815,
+      "confusion_matrix": [
+        [
+          1047,
+          171
+        ],
+        [
+          35,
+          534
+        ]
+      ]
+    },
+    "dravidian_codemix_tamil": {
+      "n": 6587,
+      "positive_count": 1826,
+      "f1": 0.6290322580645161,
+      "roc_auc": 0.8358138977402421,
+      "average_precision": 0.6622444948314447,
+      "confusion_matrix": [
+        [
+          3612,
+          1149
+        ],
+        [
+          461,
+          1365
+        ]
+      ]
+    }
+  },
+  "notes": "Target-only neural baseline trained on identical splits and frozen embeddings as the contextual model, without conversation history.",
+  "contextual_test_subset": {
+    "n": 2291,
+    "positive_count": 196,
+    "f1": 0.616504854368932,
+    "roc_auc": 0.9399103794262335,
+    "average_precision": 0.6950081484074637,
+    "confusion_matrix": [
+      [
+        2006,
+        89
+      ],
+      [
+        69,
+        127
+      ]
+    ]
+  }
+}

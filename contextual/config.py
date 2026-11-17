@@ -16,6 +16,8 @@ def load_config(path=None):
     path = project_path(path or os.environ.get("TOXICITY_CONFIG", DEFAULT_CONFIG))
     cfg = json.loads(path.read_text(encoding="utf-8"))
     m, t, d = cfg["model"], cfg["training"], cfg["data"]
+    if d.get('text_normalization', 'none') not in ('none', 'nfc_controls_whitespace_v1'):
+        raise ValueError('Unknown text normalization policy')
     for key in ("hidden_size", "heads", "layers", "feedforward_size", "max_turns"):
         if not isinstance(m[key], int) or m[key] <= 0:
             raise ValueError(f"model.{key} must be a positive integer")

@@ -1,0 +1,622 @@
+{
+  "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_candidate",
+  "threshold": 0.7111710906028748,
+  "val_total": 11893,
+  "val_contextual": 2236,
+  "metrics_context": {
+    "n": 11893,
+    "positive_count": 2579,
+    "f1": 0.6818024263431542,
+    "roc_auc": 0.9083494117557921,
+    "average_precision": 0.741628792946321,
+    "confusion_matrix": [
+      [
+        8090,
+        1224
+      ],
+      [
+        612,
+        1967
+      ]
+    ]
+  },
+  "metrics_isolated": {
+    "n": 11893,
+    "positive_count": 2579,
+    "f1": 0.6801888442035321,
+    "roc_auc": 0.9072642899659569,
+    "average_precision": 0.7403506034334051,
+    "confusion_matrix": [
+      [
+        8119,
+        1195
+      ],
+      [
+        634,
+        1945
+      ]
+    ]
+  },
+  "errors": {
+    "false_positives": 1224,
+    "false_negatives": 612,
+    "true_positives": 1967,
+    "true_negatives": 8090
+  },
+  "context_impact": {
+    "context_harmed_total": 29,
+    "context_harmed_false_alarms": 29,
+    "context_harmed_missed_toxic": 0,
+    "context_helped_total": 22,
+    "context_helped_caught_toxic": 22,
+    "context_helped_suppressed_false_alarm": 0,
+    "parent_bleed_suspects": 0
+  },
+  "label_inconsistency": {
+    "inconsistent_target_texts": 15,
+    "total_conflicting_rows": 41
+  },
+  "sample_parent_bleed_false_alarms": [
+    {
+      "id": "cga_wiki:203892928.12582.12582",
+      "source": "cga_wiki",
+      "target_text": "Because you know damn well how you meant to say it. Also, these: , , . That's a pretty decent collection. '''''' ",
+      "parent_texts": [
+        "Hey, can you stop external_link] me? Ya, thanks. '''''' ",
+        "I saw your userpage. your userbox says you are agnostic. How is this an attack? "
+      ],
+      "label": 0,
+      "context_prob": 0.8342816233634949,
+      "isolated_prob": 0.6640855669975281,
+      "parent_prob": 0.04551094397902489,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:342156514.2867.2867",
+      "source": "cga_wiki",
+      "target_text": "I just put that tag on there. And will take it up. Trust me, it will pass the quacks-like-a-duck test with flying colours (just like before). Thanks for the heads up, ",
+      "parent_texts": [
+        "I noticed you created my user page without my knowledge. Do a external_link first and then accuse. i am complaining in the wiki_link of your habits of falsely accusing other new users as sock puppets. (  ) ",
+        "While I don't echo what Wardark said here, I do sort of agree that you shouldn't continue to accuse of sockpuppetry if you aren't going to take it to SPI. If you ''do'' take it to SPI, please let me know. "
+      ],
+      "label": 0,
+      "context_prob": 0.8373070955276489,
+      "isolated_prob": 0.6320587992668152,
+      "parent_prob": 0.05270826071500778,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:424709629.17372.17372",
+      "source": "cga_wiki",
+      "target_text": " Hmmm... Another different song. Bey is going all \"summery\" on the new record D  () ",
+      "parent_texts": [
+        "Hi Legolas. I know external_link is in no way reliable but what i hear is nothing but Beyonce's voice. check it yourself.   • :Is external_link reliable? If yes, i can use it to expand the composition section of \"Girls\".   • ",
+        "It doesnt work for me. ( — "
+      ],
+      "label": 0,
+      "context_prob": 0.7980907559394836,
+      "isolated_prob": 0.5224133729934692,
+      "parent_prob": 0.3653033375740051,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:292282650.4874.4874",
+      "source": "cga_wiki",
+      "target_text": "Your advice got me suspended.  See Request #30103.  Do you have any idea when I might get unsuspended? ",
+      "parent_texts": [
+        "The similar account had more than 10 edits and that is part of the criteria, correct? ",
+        "yes but common sense applies. the user had around 15 edits with most being to a talk page. It would have still been acceptable to make the account "
+      ],
+      "label": 0,
+      "context_prob": 0.8086745738983154,
+      "isolated_prob": 0.40041524171829224,
+      "parent_prob": 0.00021532685786951333,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:367670735.18529.18529",
+      "source": "cga_wiki",
+      "target_text": " That last comment isn't helpful, WMC, and you've been warned about that sort of thing before. ++: / ",
+      "parent_texts": [
+        "My phone is terrible for editing, so I would appreciate it if someone could remove the section header and indent appropriately. I meant that Cla. Seems to know about the topic's coverage on Wikipedia so he can probably judge the merits of my suggestion. ",
+        " Ah, now had you said that to begin with none of this discussion would have happened, and Cla wouldn't have had to pretend to understand any of the science "
+      ],
+      "label": 0,
+      "context_prob": 0.8502709269523621,
+      "isolated_prob": 0.621248722076416,
+      "parent_prob": 0.16269898414611816,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:416658373.1458.1458",
+      "source": "cga_wiki",
+      "target_text": "You're  with the typical results.  Consider this a final warning. ",
+      "parent_texts": [
+        "It goes without saying that calling me a  is an unacceptable wiki_link.  If you'd like to contribute to the discussion, at least try to pretend that you are an adult.  Further  from you will not be tolerated. ",
+        "Iz wonderz whatz futherz external_link willz resultz inz. - "
+      ],
+      "label": 0,
+      "context_prob": 0.8056756854057312,
+      "isolated_prob": 0.5100224018096924,
+      "parent_prob": 0.006715824827551842,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:396200772.5844.5844",
+      "source": "cga_wiki",
+      "target_text": "I see, gone from your talk page. ;)  '''''' ",
+      "parent_texts": [
+        ". FYI. Seems to be a common occurrence over there. Cheers,  '''''' ",
+        "Perhaps if you look up instead of at your own navel you will see where it is gone. "
+      ],
+      "label": 0,
+      "context_prob": 0.8323772549629211,
+      "isolated_prob": 0.674509584903717,
+      "parent_prob": 0.4287603497505188,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:64943265.2706.2706",
+      "source": "cga_wiki",
+      "target_text": "It wasn't inappropriate, you vandalized a operations process on Wikipedia.  You're abusing the vandalism tags, as for one, there was no vandalism, and as for two, you can't immediately leap to the final stage tag.  - ",
+      "parent_texts": [
+        "Please refrain from vandalising my user page and not even signing your tags. "
+      ],
+      "label": 0,
+      "context_prob": 0.7327194213867188,
+      "isolated_prob": 0.7098970413208008,
+      "parent_prob": 0.18949396908283234,
+      "turns": 2,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:225399011.1152.1152",
+      "source": "cga_wiki",
+      "target_text": "I'm, too. I claim it - end of discussion. Seriously, provide reliable sources - anyone can claim such nonsense. ''' ''' ",
+      "parent_texts": [
+        "I have put some refereneces about the origin of the Hunza. The Prince MIR said himselv thet they are Macedonians, so there are two texts about their visit in Macedonia and there is one video. Do not remove it. Regards! :He is prince, not some guys from EAST or SOUTH. ",
+        "Thet republic is MACEDONIA. The Prince itself said thet! Reliable enough. "
+      ],
+      "label": 0,
+      "context_prob": 0.8118311166763306,
+      "isolated_prob": 0.41826245188713074,
+      "parent_prob": 0.02248731069266796,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:373132692.23972.23972",
+      "source": "cga_wiki",
+      "target_text": "Look, I recognise that I'm being ticked off by the headmaster, but I've never laid claim to being important here on wikipedia. On the contrary, I recognise that it'll do just fine without me. Or you. Or Newyorkbrad. In the meantime, I'll continue to do what I can, or whatever takes my fancy, but I will ''not'' stand for bullying on my talk page, from ''anyone'', whatever the price. Have you ever seen me clamouring for another editor to be blocked, or threatening them on their usertalk pages? ",
+      "parent_texts": [
+        "Is it allowed to call people trolls at ArbCom? I've been blocked for less; I was once blocked for using the word ... well, you know the rest. lol: ",
+        "It helps if the comment is true. -) ",
+        "I'll come out and say what others are hinting at but not quite saying (I assume he's watching this page, given his post above); I think he needs a proper break away from Wikipedia for an absolute minimum of a couple of weeks. He's acting like someone who genuinely thinks the place will fall apart without him and we should all be grateful to have him here, and he needs to be away for long enough to see that ''nobody's'' presence or absence makes any significant difference. It's a lesson some learn quicker than others, and if he's telling the truth about that \"twelve hours a day, seven days a week\" that's not a hobby, that's a disorder. – :::PS. I'll also add to you (Malleus) that you really do need to take on board what NYB is saying there. Regardless of who's in the wrong this time, there ''is'' a reason the Civility Police watch you. Remember that rant of mine a few months ago about why the civility policy doesn't work because of cultural differences? It cuts both ways; yes, west-coast Americans are generally hypersensitive about things which wouldn't even register on the radar in Bolton, Boston or Brisbane, but ''you know that''. There's no point antagonising people for no reason, if there's an easy way to reword whatever you were about to say that won't offend them. (To take a comment from that Joseph Merrick discussion above, \"retarded\" is an absolutely standard term in the US, but we don't use it on Wikipedia because it has offensive connotations in Britain.) Giano said long ago that the best way to approach Wikipedia is to assume everyone is 14 years old, and it's good advice; try not to say anything you wouldn't say to a 14 year old whom you don't know very well. – ",
+        "Perhaps unsurprisingly, I don't entirely agree with Newyorkbrad's assessment, although I'm certainly not about to call him \"a corrupt SOB\". In fact I don't recall ever having called another editor corrupt; what I have said repeatedly is that I believe the ''system'' to be corrupt, and that's not about to change until the system does. And to label me as \"consistently uncollaborative\" is a joke beyond mere words. Besides, I've come to accept it as inevitable that those who either can't or won't look beyond the ends of their noses to see what's really wrong with this place will inevitably succeed sooner or later in driving me away. I can't do anything about that. ",
+        "Meh. There can be a difference between being seen as standing up for what you believe in, and dog in the manger. I'm no great fan of NYB but his heart's in the right place, and most importantly he's one of those who understands what he is and isn't good at. What he ''is'' good at is reading the undercurrents of popular opinion. The point he and I are both trying to make is that you not understanding why people get offended (or understanding but not changing) can be seen by some not as integrity, but as the same kind of \"I'm so important everyone else has to change to accommodate me\" thinking that Rod's guilty of. People looking at this from the outside aren't necessarily familiar with the background; if they're not familiar with the background (and let's face it, who the hell reads wiki_link?) it looks like two people being as bad as each other. – "
+      ],
+      "label": 0,
+      "context_prob": 0.8029419779777527,
+      "isolated_prob": 0.47145015001296997,
+      "parent_prob": 0.2012784481048584,
+      "turns": 6,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:71220671.4774.4774",
+      "source": "cga_wiki",
+      "target_text": " Ho-hum! I think you've hit the timber fixing on the bonce...\n:::I've always been known as someone who calls a spade a manually-operated soil-turning implement!!\n:::",
+      "parent_texts": [
+        " Hi all project members.  Apart from the one major contributor, can anyone see any particular reason why this talk page cannot be rationalised to contain just the pertinent information regarding the 'real' CFR (the section named 'Title', only, I think!)??  The rest makes pretty boring reading.  If there are (admin) objections regarding preservation of archives, etc, the text could be moved to the most relevant talk page...  Thoughts?",
+        " To be clear, let's remove FelixCheng's mainly irrelevant ramblings? Yes, let's. But the correct procedure is to archive the page. I suggest we archive everything up to the end of this conversation, so we start with a fresh talk page. I'm happy to do that unless there are objections. I'll also drop Felix a note asking him to refrain from posting to this page unless he has substantive comments about the article to make."
+      ],
+      "label": 0,
+      "context_prob": 0.8992775678634644,
+      "isolated_prob": 0.5927648544311523,
+      "parent_prob": 0.0038338294252753258,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:257028372.1124.1124",
+      "source": "cga_wiki",
+      "target_text": " Sorry, Shaun you didn't own me. You must not be able to read very well, though you were drunk yesterday when we talked. I know rumors aren't allowed without a reliable source, I'm just saying that it was once rumored to be Amazing Red. That is why we need a source. Now, talk to you later Timmy.",
+      "parent_texts": [
+        " 100% with you on Christian, the way it's noted on the roster now is exactly the way it should stay, and anything different will be incorrect.\nI'll poke around the Observer and the Torch to see if there's something there I can reference to put the Kaz/Suicide thing to bed.\nThe Kaz/Suicide thing is one of deals where you know who it is, you just gotta prove it.",
+        " True, I agree it is probably Kaz but Kaz is still injured and the last time I looked there was the possiblity that Suicide could be Amazing Red."
+      ],
+      "label": 0,
+      "context_prob": 0.859291136264801,
+      "isolated_prob": 0.5614702701568604,
+      "parent_prob": 0.0012924541952088475,
+      "turns": 3,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:462017763.1642.1642",
+      "source": "cga_wiki",
+      "target_text": " You only mention capitalization registers for companies, but fail to show why Wikipedia, in contrast to what you posted, \"does not go by funny spellings or whatever.\" It clearly does go by funny spellings and favors companies because they're not so flighty. Regardless of your bias against bands, Wikipedia is inconsistent in it's policy as you have so eloquently demonstrated! Thank you.",
+      "parent_texts": [
+        " No I didn't. It clearly says why company brands have a lowercase letter on some of their titles and why band names aren't written Lik3thiS •"
+      ],
+      "label": 0,
+      "context_prob": 0.7133866548538208,
+      "isolated_prob": 0.6874737739562988,
+      "parent_prob": 0.00018527571228332818,
+      "turns": 2,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:342353031.29892.29892",
+      "source": "cga_wiki",
+      "target_text": " I dont care about his religious beliefs, only the TRUTH! ",
+      "parent_texts": [
+        "I came here as the BBC article about the ad controversy  mentions his \"trademark biblical references painted underneath his eyes\".  There's nothing about them in the Wiki article.  Can anyone expand? What is the ref? Why does he do it?  How long has he been doing it for? Thanks  ",
+        "Surprising that that's not mentioned in the article – Tebow is pretty well-known for his biblical eyeblacks. I might get around to adding it to the article, but either way, this would be a good place to start, to find sources and info about it. Regards, ''''''",
+        "He has had \"3:16\" written on his eyeblacks in reference to John 3:16 and he has also had \"Phil 4:13\" in reference to Phillipian 4:13. I think it was removed a little while ago for some lame reason. '''''' '''''' ",
+        "That's true; the article could definitely use more on Tebow's public religious stands. I'll do this later if nobody gets to it first...  "
+      ],
+      "label": 0,
+      "context_prob": 0.8293653726577759,
+      "isolated_prob": 0.67020183801651,
+      "parent_prob": 0.0005290524568408728,
+      "turns": 5,
+      "likely_parent_bleed": false
+    },
+    {
+      "id": "cga_wiki:671632282.37792.37792",
+      "source": "cga_wiki",
+      "target_text": "I have to say... the man has chutzpah after line after line of his book is revealed to be taken from multiple authors, and ''especially'' after he previously called out plagiarism by authors he didn't like. \"Plagiarism = stealing the phala (reward) without earning it with karma/tapasya. Only fools say that such tamas is good for Hinduism\" - November 2014; \"Plagiarism is nothing to do with history. Pls see dictionary. It is cheating and theft.\" November 2014 But I digress, as this is not relevant. He has been accused of plagiarism. It is in the news and it is kind of a huge deal. another article about his plagiarism and how plagiarism is a huge problem in Indian academia on all sides of the political aisle.  ",
+      "parent_texts": [
+        "In July 2015, historian Richard Fox Young posted a series of extracts from Malhotra's books ''Breaking India'' and ''Indra's Net'' revealing that Malhotra had apparently plagiarized material from various books, particularly Andrew Nicholson's book ''Unifying Hinduism'', which had been published by Columbia University Press in 2014. Malhotra responded by stating that the western method of giving references was not a requirement for Indian scholars. According to Malhotra:  ",
+        "I had also added .  ",
+        "These are Rajiv Malhotra's 2 official responses HERE and HERE."
+      ],
+      "label": 0,
+      "context_prob": 0.7212133407592773,
+      "isolated_prob": 0.6764394640922546,
+      "parent_prob": 0.05263197049498558,
+      "turns": 4,
+      "likely_parent_bleed": false
+    }
+  ],
+  "sample_context_helped": [
+    {
+      "id": "cga_wiki:289936369.5528.5528",
+      "source": "cga_wiki",
+      "target_text": "Thanks for the solid advice wiki_link. \"Being right about an issue does not mean you're not being a dick! Dicks can be right — but they're still dicks; if there's something in what they say that is worth hearing, it goes unheard, because no one likes listening to dicks. It doesn't matter how right they are.\"wiki_link ",
+      "parent_texts": [
+        "Did you even read the article? Or did you see a blank page?wiki_link ",
+        "Yes I did read the article. And nothing there convinced me that this person is particularly notable. Btw  As a general rule, you should not create articles on youself or other people closely connected with you. See wiki_link for details. "
+      ],
+      "label": 1,
+      "context_prob": 0.764124870300293,
+      "isolated_prob": 0.3928152024745941
+    },
+    {
+      "id": "cga_wiki:581672564.549.549",
+      "source": "cga_wiki",
+      "target_text": "And you are wasting my time as well as yours which might be better spent fixing the problem on the page in the first place. Now fuck off away from my talk page and don't come back.   • ",
+      "parent_texts": [
+        "The article is not unreferenced; please be more careful in future. Regards, ",
+        "I disagree. Cheers.   • ",
+        "You are wrong. Cheers. "
+      ],
+      "label": 1,
+      "context_prob": 0.7164561152458191,
+      "isolated_prob": 0.644448459148407
+    },
+    {
+      "id": "cga_wiki:321827010.39343.39343",
+      "source": "cga_wiki",
+      "target_text": " It is hard to tell if you're being deliberately stupid or just stupid. This is a \"battle\" because you ahve blindly reverted my edits. Your offer of \"working with me\" on articles which are of no interest to me is incomprehensible - and since my experience of you is simple blind reverting, I am unable to understand why you should think working with you would be pleasant ",
+      "parent_texts": [
+        "Please stop removing other people's comments from wiki_link. If you do so again, I will be forced to take this to a different forum. Also, \"as before\" is not a sufficient edit summary, since you've not provided any policy-based reason for the removal in the first place. *Why are you treating this like a battle, WMC? I've approached you in a polite manner, and even offered to work with you, when you asked about what I was doing that might be termed useful. You reverted me with a seemingly angry edit summary. I'm really not certain why you seem so angry about all of this. "
+      ],
+      "label": 1,
+      "context_prob": 0.7186752557754517,
+      "isolated_prob": 0.701970636844635
+    },
+    {
+      "id": "cga_wiki:416913727.13482.13482",
+      "source": "cga_wiki",
+      "target_text": "And it surely doesn't matter if you disagree either. I can be the biggest ass hole and keep adding this category because numerous of books spot that she was a JW point blank. I came here and wanting to discuss this as a civilized individual but coming at me \"it doesn't matter whether you agree\" - is completely wrong, if more people disagree with that rule then the rule wouldn't stand a chance to be there any more and you can't do anything about it ha! ",
+      "parent_texts": [
+        "Although I didn't add this category back because of Jeffro77's complains about it. However, your edit summary states that her father objected the blood transfusions. The doctors at Memorial Hospital did perform a BT without her or her father's consent. Secondly, her father later announced that he didn't want them to perform a BT on her which her father had said in an interview for TV Y Novelas magazine. Just to let you know, ",
+        "This has been covered previously. Selena's father objected to the blood transfusion ''after the event'', but it is irrelevant to the scope of whether Selena was herself notable as a JW. ",
+        "Then I would disagree that she is ''not'' notable as a JW, although she was raised as a JW until she later perform acts that aren't JW-like, for example: her choice of clothing. I only brought this up for others to know. ",
+        "It doesn't matter whether you ''agree''. What matters is whether there are sources supporting your opinion that ''her activities as a JW are notable''. There are not. Anyone interested can read the other lengthy threads already present at this page. "
+      ],
+      "label": 1,
+      "context_prob": 0.762660562992096,
+      "isolated_prob": 0.43864598870277405
+    },
+    {
+      "id": "cga_wiki:204089855.3276.3278",
+      "source": "cga_wiki",
+      "target_text": " That is a downright lie, unless you're talking about recently (which I wouldn't know as I no longer argue about those stupid things), but I know there was a consensus made (that the majority of editors follow, incl. admins) to not change genre delimiters as it only incites edit wars.  Those pages were fine until you came along and decided to change their delimiters for no reason. They've been like that for months.  I just wanna keep the peace and keep the delimiters the same on all pages (whether they be comma breaks or line breaks). You'' are threatening that peace.  Idk where you were the last time the genre delimiter edit war was in full swing, but it was horrible and I don't wanna go back to those days!!  It was total fucking chaos. Everybody was so busy warring that less and less actual editing got done.",
+      "parent_texts": [
+        " Please stop changing genre delimiters. Consensus is to leave them the way they are now.  Changing them incites edit warring.  I could just as easliy cite wiki_link and put them back to line breaks.  So citing wiki_link for genre delimiters changes nothing. Please stop.  Thank you.",
+        " I have read through all of the dialogue from the music project. There are almost 20 regular editors and use comma delimiters as their standard spacing and 2 regular editors who were involved in an edit war over the matter and have both received blocks from Wikipedia administration because of their negative contributions. I will go with the consensus of the credible editors and not the others."
+      ],
+      "label": 1,
+      "context_prob": 0.8017828464508057,
+      "isolated_prob": 0.4918570816516876
+    },
+    {
+      "id": "cga_wiki:518641626.67968.67968",
+      "source": "cga_wiki",
+      "target_text": "Of course it's a fan site. that's where most information comes from. It has been around for many years. There are hundreds of sites like it with the SAME INFO. These type of sites are used ALL OVER wikipedia., and don't try to tell me they aren't I have seen them linked to on many wikipedia articles. I don't need to review anything. I know you are just a fucking mod tryign to get off on this shit.",
+      "parent_texts": [
+        "This section is completely uncited. There may well be sources in the External links or References section that discuss this, but that simply means that a proper footnote should be added at the start of this section. Not every value needs to be cited, but this information is too specific to not have SOMETHING indicating where this came from. If a reliable source cannot be found, I would propose that this be removed. For now, the tag will suffice, to give users time to find the information.  ''''''",
+        "Tag is not needed. You said yourself \"External links or References section that discuss this\". Nuff said.  ",
+        " \nRef added, IDK how to do tags so have at it.   ",
+        "You left out the key points ... there '''may be''' such information. Then again, there may '''not''' be, as well. Without a footnote to the appropriate external link or source, we have no way of knowing. I checked the source you added (by the way, posting argumentative statements in the article isn't exactly helping) and it appears to be self-published, which would not qualify as a reliable source. Please place your suggested information here until this matter is fully resolved.  ''''''",
+        "The site is not self published. You just refused to tag it. It is a GOOGLE SEARCH RESULT. What the hell makes you think it is self published?  ",
+        "This appears to be a fan-site. Almost anyone can publish a website very easily, and publish anything they'd like. However, for an encyclopedia, we need more than that. I would suggest that you review this section and this section to see why such sites cannot be used as sources for information in Wikipedia. As a pledge of good-faith, here is how this would be formatted if it were a legitimate source:\n{{cite web|url=http://www.bigfloridacountry.com/monorail.htm|title=Walt Disney World Monorail System|author=Unknown|work=bigfloridacountry.com|accessdate=2012-10-19}}\n''''''"
+      ],
+      "label": 1,
+      "context_prob": 0.767815351486206,
+      "isolated_prob": 0.5272555947303772
+    },
+    {
+      "id": "cga_wiki:562343970.19305.19305",
+      "source": "cga_wiki",
+      "target_text": "Thanks PBS.\nAnd so, as the sun sets in the west, another article is screwed up by the ignorant Samblob.  ",
+      "parent_texts": [
+        "I have altered the short citations to use the standard  templates, and taken care of the times newspaper short citations. I have removed the excess parameters (blanks and things like double links to the same book, and access dates for books). I think keeping the long citations on one line is useful for those editing using small screen devices.\nThe change to the date from \"May 1929\" to \"June 1928\" I presume is supported by the current post inline cation, and so I presume we can put that one to bed (or Eddaido does your source say \"May 1929\" in which case we need to note that the sources differ).\nSamBlob I suggest you propose here what if anything you think should be added or taken away to the text to remove the need for the other quote in a citation.   ",
+        "Over to you Eddaido.   "
+      ],
+      "label": 1,
+      "context_prob": 0.8447589874267578,
+      "isolated_prob": 0.4578755497932434
+    },
+    {
+      "id": "cga_wiki:823369735.15000.15000",
+      "source": "cga_wiki",
+      "target_text": "For election articles done well you should look at UK 2017 and France 2017 for example that have outstanding result tables. I don't see you trying to \"clean\" those up, why is that I wonder. Maybe you understand that your version is plainly crap compared to the better ones.  ",
+      "parent_texts": [
+        "Let's use this version of the election table instead of the version created here as the aforementioned is the standardised version using Template:Election table as basis. The latter is less informative and is uglier in both code and appearance.  "
+      ],
+      "label": 1,
+      "context_prob": 0.7223606705665588,
+      "isolated_prob": 0.7086871862411499
+    },
+    {
+      "id": "cga_wiki:745722534.29154.29154",
+      "source": "cga_wiki",
+      "target_text": "I find it very damaging, and personally offensive and aggressive that editors here claim alternative medicine does not work, including chiropractics, when I personally had chronic back pain for a decade and classic medical doctors couldn't find the cause of it, and one chiropractor helped me out. I would personally punch anyone advising me against chiropractors and telling me I should only go 'mainstream' route. This whole article is a piece of crap.  ",
+      "parent_texts": [
+        "The article clearly says that alternative medicine has been proven not to work.. This is a very blanket statement as there are so many different types .. Most of the very few tests that have been done have been done very badly without actually following the systems practiced.. It could be said that some alternative medicines have '''not been proven''' to work but this is not the same as saying they have '''been proven not to''' work.. The tests used in the drug industry are hugely expensive and used to indicate drug effectiveness.. They do not spend the money on the alternative medicines..  — Preceding unsigned comment added by   •   ",
+        "Read the rest of the sentence''', the part after the comma'''.  ��"
+      ],
+      "label": 1,
+      "context_prob": 0.7198740243911743,
+      "isolated_prob": 0.30241015553474426
+    },
+    {
+      "id": "cga_wiki:776741190.4592.4592",
+      "source": "cga_wiki",
+      "target_text": "I have no interest in playing games with you. Let me lay this out for you, because you don't seem to understand. '''You wish to add''' something to an article. Specifically, you wish to add to this article that there is a link between syndicalism and fascism. That proposed addition has been challenged. '''That addition will not be made''' until you produce a reliable source that shows you're not pulling this alleged connection out of your ass. Do you understand? —  /",
+      "parent_texts": [
+        "There needs to be a mention of Syndicalism's link to Fascist thought and Fascist Economics. It seems odd that we have an article called \"National syndicalism\" (see https://en.wikipedia.org/wiki/National_syndicalism), yet make no mention of it on the main Syndicalism page.  ",
+        "Surely after edit-warring for so long you can provide a reliable source—'''not''' a link to a Wikipedia article—that makes the connection between syndicalism and fascism. —  /",
+        "So is that a suggestion to deleting  https://en.wikipedia.org/wiki/National_syndicalism?  ",
+        "Is that what I wrote? It's a simple summary of the Wikipolicy that appears above the edit box: ''\"Encyclopedic content must be verifiable.\"'' If you don't provide a reliable source to support your proposed addition to the article, it's not verifiable and it won't be added. Is that plain enough for you, or would you like me to type more slowly? —  /",
+        "It's called being consistent, I don't need to provide word for word sources to ensure consistency between various wiki articles. Unless of course you believe that consistency is only important so long as it doesn't interfere with your preconditioned political beliefs.  "
+      ],
+      "label": 1,
+      "context_prob": 0.7363572716712952,
+      "isolated_prob": 0.4089052677154541
+    }
+  ],
+  "sample_inconsistent_labels": [
+    {
+      "fingerprint": "fb6d4376432f365748558381afa81147d21783a55b802ee285221cb6a73d87e8",
+      "text": "நாடகக் காதல்.....  குடும்பத்தோட பொண்ணு வீட்டுக்கு போய், வசதி வாய்ப்பை பார்த்து எவ்ளோ பணம் தேறும்,  நகை தேரும்,  சொத்து  பத்து தேறும்னு கணக்கு போட்டு கல்யானம் பண்ணி, ரெண்டு நாளோ மூனு நாளோ பார்த்தவன்/வ கூட அன்னிக்கி நைட்டே படுக்கறதுக்கு  பேரு தான் நாடகக் காதல்.",
+      "occurrences": 2,
+      "labels": [
+        0,
+        1
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:48",
+        "dravidian_codemix_tamil:18660"
+      ]
+    },
+    {
+      "fingerprint": "291a024b9e65f205a15124c7429dd1126df53b935cc488a205127ade75dc075b",
+      "text": "marana theri otha savunga da ali pans",
+      "occurrences": 2,
+      "labels": [
+        0,
+        1
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:2924",
+        "dravidian_codemix_tamil:30806"
+      ]
+    },
+    {
+      "fingerprint": "5d5259635f3ad5d585d2eafd46067723666fe486664c6e91e51036b064438c19",
+      "text": "அவன் கட்டினாலும் அவள வேல தான் வாங்க போறான் ,நீ உன் ஜாதியில பாத்து கட்டினாலும் அவனும் அவள சம்பளம் இல்லாத வேலைக்காரியா, புள்ள பெக்குற மிஷினாதான் பாக்க போறான்.  அதுக்கு எங்க போனும்னு அவளே முடிவு பண்ணிட்டு போகட்டுமே நாயே.  நீ யோக்கியனா இருந்தா எந்த ஆணையும் நம்பி வாழாம சொந்த கால்ல நிக்க சொல்லி குடு.  அவளுக்கு வேணும்னா கல்யாணம் பண்ணட்டும்.",
+      "occurrences": 2,
+      "labels": [
+        0,
+        1
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:4063",
+        "dravidian_codemix_tamil:24742"
+      ]
+    },
+    {
+      "fingerprint": "5873c7c36073bea3721d23eaf163c16db7f08df616202377d23719587fc82cf2",
+      "text": "Graphics sari illa nu solrathukune oru gang suthum parunga",
+      "occurrences": 8,
+      "labels": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        1
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:5620",
+        "dravidian_codemix_tamil:7660",
+        "dravidian_codemix_tamil:12576",
+        "dravidian_codemix_tamil:29192",
+        "dravidian_codemix_tamil:30836",
+        "dravidian_codemix_tamil:33777",
+        "dravidian_codemix_tamil:38915",
+        "dravidian_codemix_tamil:40855"
+      ]
+    },
+    {
+      "fingerprint": "2ec7c8a8eee600a5b0de49d8e86ebfd82b2d754f95295e71546ff6e9343c552a",
+      "text": "Adchi Oda vidu ellarayum orama nadandhu varareda enga thala veerama thala bloods hit like her",
+      "occurrences": 6,
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:6345",
+        "dravidian_codemix_tamil:22986",
+        "dravidian_codemix_tamil:26772",
+        "dravidian_codemix_tamil:30296",
+        "dravidian_codemix_tamil:33731",
+        "dravidian_codemix_tamil:41059"
+      ]
+    },
+    {
+      "fingerprint": "be36693376a6bcd36727686d9f004153e2e75d592647adafca541ffa7d667520",
+      "text": "சீட்டிங் சீட்டாஸ்&ஓசிசோறு கைய்ஸ்: நாங்கள் நாடககாதல் கட்டபஞ்சாயத்துகள் செய்யவில்லை ஆதீ :",
+      "occurrences": 2,
+      "labels": [
+        1,
+        0
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:7588",
+        "dravidian_codemix_tamil:8114"
+      ]
+    },
+    {
+      "fingerprint": "09018511952c06ea4ff4cdcfc0ad27b36e0a44f5d14a062b17414f778f660c22",
+      "text": "⊂_     (•_•) F  <⌒ A /   B  // U   _ L // O  // U (( S ||. |   ⌒) | |) /  )L__ (___",
+      "occurrences": 2,
+      "labels": [
+        1,
+        0
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:11748",
+        "dravidian_codemix_tamil:29935"
+      ]
+    },
+    {
+      "fingerprint": "4ccd210aaaf0aef5cedc29d69a472ff456c60d37d0a1ffdab443eb939f4ddfbf",
+      "text": "Dai  nee vijay ajith padam paathu tha sirikanunum avasimaye ila  theatre ku vanthu un padatha paathu kevalama sirichitu porom iru 🤬",
+      "occurrences": 2,
+      "labels": [
+        1,
+        0
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:12266",
+        "dravidian_codemix_tamil:34728"
+      ]
+    },
+    {
+      "fingerprint": "f4b97ecfbacf2b061605c8fa8480b1148f409ac5ec360272b0de0be776fbd747",
+      "text": "நீங்க சொன்ன ஒவ்வொரு  வார்த்தையும் இந்த சலுகையில வாழுர  Bc -30% MBC -20% Oc -10%  Sc-15% ScA--3% St-1%    நாயகள செருப்பால அடிச்சா மாதிரி இருந்துச்சு நண்பா   ( உங்களுக்கு எப்போ தான் டா அறிவு இங்கிறது ஊருகா அளவுக்காச்சும் வளர போகுது 🤦)",
+      "occurrences": 2,
+      "labels": [
+        0,
+        1
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:12679",
+        "dravidian_codemix_tamil:32453"
+      ]
+    },
+    {
+      "fingerprint": "13f091f3b65f052f7eb1c9acf737f41620bdbf60cec600aab27078cf4f4b8b95",
+      "text": "Thalaivaaaaaaaaaaa   Alludhu style.u...Maassss......   Vaera evanavadhu irundhaa Apadiyae vodi poiduu..   Rajinified",
+      "occurrences": 2,
+      "labels": [
+        1,
+        0
+      ],
+      "sources": [
+        "dravidian_codemix_tamil",
+        "dravidian_codemix_tamil"
+      ],
+      "ids": [
+        "dravidian_codemix_tamil:13748",
+        "dravidian_codemix_tamil:40811"
+      ]
+    }
+  ]
+}

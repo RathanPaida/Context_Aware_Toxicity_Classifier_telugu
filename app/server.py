@@ -1,5 +1,6 @@
 """API for the hierarchical model; no domain selector or lexical overrides."""
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -12,9 +13,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 from contextual.config import load_config, location
-from contextual.inference import Predictor
+from contextual.inference import create_predictor
 
-cfg = load_config()
+cfg = load_config(os.environ.get('TOXICITY_CONFIG', 'configs/demo.json'))
 predictor = None
 startup_error = None
 
@@ -23,7 +24,7 @@ startup_error = None
 async def lifespan(app):
     global predictor, startup_error
     try:
-        predictor = Predictor(location(cfg, "checkpoint"))
+        predictor = create_predictor(cfg)
     except (OSError, ValueError, RuntimeError) as exc:
         startup_error = str(exc)
     yield
@@ -65,7 +66,12 @@ def require_model():
 @app.get("/api/health")
 def health():
     return {"ready": predictor is not None, "detail": startup_error,
-            "model": cfg["encoder"]["name"], "topic_input": False}
+            "model": 'soft_vote_ensemble' if cfg['paths'].get('ensemble') else cfg["encoder"]["name"], "topic_input": False,
+            "checkpoint": str(location(cfg, 'checkpoint')),
+            "device": predictor.runtime_device if predictor is not None else None,
+            "predictor_type": type(predictor).__name__ if predictor is not None else None,
+            "ensemble_artifact": cfg['paths'].get('ensemble'),
+            "threshold": predictor.threshold if predictor is not None else None}
 
 
 @app.post("/api/moderate")

@@ -1,0 +1,171 @@
+{
+  "archive_sha256": "17d01ceaed7be4e3ae137e68785d42eede578a7c1b1cd6768edff4f968fee431",
+  "prepared_sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+  "evidence_hash_mismatches": [],
+  "splits": {
+    "train": 54578,
+    "val": 11776,
+    "test": 11878
+  },
+  "metrics": {
+    "clean_tfidf": {
+      "recomputed_metrics_match": true,
+      "test": {
+        "precision": 0.6764998342724561,
+        "recall": 0.7675817976682964,
+        "n": 11878,
+        "positive_count": 2659,
+        "f1": 0.719168428470754,
+        "roc_auc": 0.9238481803424351,
+        "average_precision": 0.786495048900553,
+        "confusion_matrix": [
+          [
+            8243,
+            976
+          ],
+          [
+            618,
+            2041
+          ]
+        ]
+      },
+      "contextual_test": {
+        "precision": 0.746268656716418,
+        "recall": 0.5102040816326531,
+        "n": 2282,
+        "positive_count": 196,
+        "f1": 0.6060606060606061,
+        "roc_auc": 0.9518681393938209,
+        "average_precision": 0.7264858633347558,
+        "confusion_matrix": [
+          [
+            2052,
+            34
+          ],
+          [
+            96,
+            100
+          ]
+        ]
+      }
+    },
+    "contextual_clean_lora_evaluation": {
+      "recomputed_metrics_match": true,
+      "test": {
+        "precision": 0.6367052928280614,
+        "recall": 0.7645731477999248,
+        "n": 11878,
+        "positive_count": 2659,
+        "f1": 0.6948051948051948,
+        "roc_auc": 0.9144286488150668,
+        "average_precision": 0.7584137361556336,
+        "confusion_matrix": [
+          [
+            8059,
+            1160
+          ],
+          [
+            626,
+            2033
+          ]
+        ]
+      },
+      "contextual_test": {
+        "precision": 0.7427184466019418,
+        "recall": 0.7806122448979592,
+        "n": 2282,
+        "positive_count": 196,
+        "f1": 0.7611940298507462,
+        "roc_auc": 0.9669076643121295,
+        "average_precision": 0.8212520730277887,
+        "confusion_matrix": [
+          [
+            2033,
+            53
+          ],
+          [
+            43,
+            153
+          ]
+        ]
+      }
+    },
+    "clean_ensemble": {
+      "recomputed_metrics_match": true,
+      "test": {
+        "precision": 0.6947476125511596,
+        "recall": 0.7660774727341105,
+        "n": 11878,
+        "positive_count": 2659,
+        "f1": 0.7286710785190484,
+        "roc_auc": 0.9316505095331636,
+        "average_precision": 0.8040955492012491,
+        "confusion_matrix": [
+          [
+            8324,
+            895
+          ],
+          [
+            622,
+            2037
+          ]
+        ]
+      },
+      "contextual_test": {
+        "precision": 0.8383233532934131,
+        "recall": 0.7142857142857143,
+        "n": 2282,
+        "positive_count": 196,
+        "f1": 0.7713498622589532,
+        "roc_auc": 0.9789167824368481,
+        "average_precision": 0.8602540740182653,
+        "confusion_matrix": [
+          [
+            2059,
+            27
+          ],
+          [
+            56,
+            140
+          ]
+        ]
+      }
+    }
+  },
+  "additional_intervals": {
+    "ensemble_vs_tfidf_overall": {
+      "f1_difference": 0.009502650048294425,
+      "percentile_95_interval": [
+        -0.0008929679912473118,
+        0.018327439259981825
+      ],
+      "groups": 8882,
+      "examples": 11878,
+      "resamples": 1000,
+      "seed": 2026
+    },
+    "ensemble_vs_tfidf_contextual": {
+      "f1_difference": 0.1652892561983471,
+      "percentile_95_interval": [
+        0.10660988902963842,
+        0.2223874095104221
+      ],
+      "groups": 540,
+      "examples": 2282,
+      "resamples": 1000,
+      "seed": 2026
+    },
+    "ensemble_context_benefit": {
+      "f1_difference": 0.056198347107437985,
+      "percentile_95_interval": [
+        0.02183256618027666,
+        0.09191965568034852
+      ],
+      "groups": 540,
+      "examples": 2282,
+      "resamples": 1000,
+      "seed": 2026
+    }
+  },
+  "evaluation_only": "Recomputed stored predictions; no model inference or training."
+}

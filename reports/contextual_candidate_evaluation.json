@@ -1,0 +1,128 @@
+{
+  "threshold": 0.7111710906028748,
+  "test": {
+    "n": 11986,
+    "positive_count": 2669,
+    "f1": 0.6664384733869587,
+    "roc_auc": 0.8986991351977773,
+    "average_precision": 0.7218085005638953,
+    "confusion_matrix": [
+      [
+        8090,
+        1227
+      ],
+      [
+        722,
+        1947
+      ]
+    ]
+  },
+  "context_removed_ablation": {
+    "n": 11986,
+    "positive_count": 2669,
+    "f1": 0.6681645350846872,
+    "roc_auc": 0.8990594108120404,
+    "average_precision": 0.7226026761140285,
+    "confusion_matrix": [
+      [
+        8133,
+        1184
+      ],
+      [
+        736,
+        1933
+      ]
+    ]
+  },
+  "mean_absolute_probability_change": 0.0066072446579137425,
+  "has_context_training": true,
+  "by_source": {
+    "cga_wiki": {
+      "n": 3612,
+      "positive_count": 274,
+      "f1": 0.6120996441281139,
+      "roc_auc": 0.9419152602415013,
+      "average_precision": 0.6974185225825574,
+      "confusion_matrix": [
+        [
+          3222,
+          116
+        ],
+        [
+          102,
+          172
+        ]
+      ]
+    },
+    "cultural_safety_telugu": {
+      "n": 1787,
+      "positive_count": 569,
+      "f1": 0.8337200309358082,
+      "roc_auc": 0.9561527295604018,
+      "average_precision": 0.8910026964178478,
+      "confusion_matrix": [
+        [
+          1033,
+          185
+        ],
+        [
+          30,
+          539
+        ]
+      ]
+    },
+    "dravidian_codemix_tamil": {
+      "n": 6587,
+      "positive_count": 1826,
+      "f1": 0.6198595787362087,
+      "roc_auc": 0.826798055485964,
+      "average_precision": 0.6446639477047067,
+      "confusion_matrix": [
+        [
+          3835,
+          926
+        ],
+        [
+          590,
+          1236
+        ]
+      ]
+    }
+  },
+  "contextual_test": {
+    "n": 2291,
+    "positive_count": 196,
+    "f1": 0.6086956521739131,
+    "roc_auc": 0.9398032243923823,
+    "average_precision": 0.6983093998050537,
+    "confusion_matrix": [
+      [
+        2003,
+        92
+      ],
+      [
+        70,
+        126
+      ]
+    ]
+  },
+  "contextual_test_without_parents": {
+    "n": 2291,
+    "positive_count": 196,
+    "f1": 0.6274509803921569,
+    "roc_auc": 0.9420461740782232,
+    "average_precision": 0.7020446017539798,
+    "confusion_matrix": [
+      [
+        2046,
+        49
+      ],
+      [
+        84,
+        112
+      ]
+    ]
+  },
+  "validation_average_precision": 0.741628792946321,
+  "notes": "Ablation removes context from the same model; it is not an independently trained baseline. Scores are not calibrated probabilities. Attention is not a causal explanation."
+}

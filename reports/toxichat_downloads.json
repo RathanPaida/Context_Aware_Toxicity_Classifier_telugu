@@ -1,0 +1,17 @@
+[
+  {
+    "source": "toxichat_human",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\toxichat_human\\train.jsonl",
+    "sha256": "806da95ba491888626a18c0324e9d6ec906450ba9fef92b54343ebf44e48682a"
+  },
+  {
+    "source": "toxichat_human",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\toxichat_human\\dev.jsonl",
+    "sha256": "591742cdf73b9fcae4f555cbccb5d49237b470172dd0fd07a4829cebc0060ace"
+  },
+  {
+    "source": "toxichat_human",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\toxichat_human\\test.jsonl",
+    "sha256": "13e67afb0806b1865d446ea3d730578d750d9be4127fdd872ef7cc903b52f9bb"
+  }
+]

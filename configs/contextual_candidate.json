@@ -64,7 +64,8 @@
     ],
     "custom_threads": "data/raw/custom_threads.jsonl",
     "download_attempts": 3,
-    "download_retry_seconds": 2
+    "download_retry_seconds": 2,
+    "include_custom_threads": false
   },
   "server": {
     "host": "127.0.0.1",

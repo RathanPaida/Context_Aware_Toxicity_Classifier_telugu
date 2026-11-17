@@ -1,0 +1,110 @@
+{
+  "model_type": "contextual_lora_adapted_benchmark",
+  "threshold": 0.6170012950897217,
+  "validation_average_precision": 0.7347200870797378,
+  "validation": {
+    "n": 11893,
+    "positive_count": 2579,
+    "f1": 0.6786018755328218,
+    "roc_auc": 0.9063711059487346,
+    "average_precision": 0.7347200870797378,
+    "confusion_matrix": [
+      [
+        8018,
+        1296
+      ],
+      [
+        589,
+        1990
+      ]
+    ]
+  },
+  "test": {
+    "n": 11986,
+    "positive_count": 2669,
+    "f1": 0.6721038615179761,
+    "roc_auc": 0.9038295540452226,
+    "average_precision": 0.7301699692695244,
+    "confusion_matrix": [
+      [
+        7997,
+        1320
+      ],
+      [
+        650,
+        2019
+      ]
+    ]
+  },
+  "by_source": {
+    "cga_wiki": {
+      "n": 3612,
+      "positive_count": 274,
+      "f1": 0.6736401673640168,
+      "roc_auc": 0.9628793411851145,
+      "average_precision": 0.7775046027699719,
+      "confusion_matrix": [
+        [
+          3295,
+          43
+        ],
+        [
+          113,
+          161
+        ]
+      ]
+    },
+    "cultural_safety_telugu": {
+      "n": 1787,
+      "positive_count": 569,
+      "f1": 0.8140780413159908,
+      "roc_auc": 0.9514603732529919,
+      "average_precision": 0.8865665806540297,
+      "confusion_matrix": [
+        [
+          1012,
+          206
+        ],
+        [
+          37,
+          532
+        ]
+      ]
+    },
+    "dravidian_codemix_tamil": {
+      "n": 6587,
+      "positive_count": 1826,
+      "f1": 0.6279895808666824,
+      "roc_auc": 0.8314614360518203,
+      "average_precision": 0.6515273234815329,
+      "confusion_matrix": [
+        [
+          3690,
+          1071
+        ],
+        [
+          500,
+          1326
+        ]
+      ]
+    }
+  },
+  "notes": "Experimental benchmark with LoRA fine-tuning of IndicBERT attention projections and end-to-end conversation head training. Not promoted to production candidate.",
+  "contextual_test": {
+    "n": 2291,
+    "positive_count": 196,
+    "f1": 0.695906432748538,
+    "roc_auc": 0.9629657590960011,
+    "average_precision": 0.7845696535961122,
+    "confusion_matrix": [
+      [
+        2068,
+        27
+      ],
+      [
+        77,
+        119
+      ]
+    ]
+  }
+}

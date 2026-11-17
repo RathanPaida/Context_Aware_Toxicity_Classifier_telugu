@@ -1,0 +1,16 @@
+{
+  "method": "real uvicorn localhost HTTP",
+  "health": {
+    "ready": true,
+    "detail": null,
+    "model": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+    "topic_input": false,
+    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_no_cdropout",
+    "device": "cpu",
+    "threshold": 0.635425865650177
+  },
+  "index_status": 200,
+  "docs_status": 200,
+  "prediction_status": 200,
+  "toxicity_score": 0.009613415226340294
+}

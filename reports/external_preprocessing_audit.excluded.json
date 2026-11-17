@@ -1,0 +1,1278 @@
+[
+  {
+    "id": "toxichat_human:train:52:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:80:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:87:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:89:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:102:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:130:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:139:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:144:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:165:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:182:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:193:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:201:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:206:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:208:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:242:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:256:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:264:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:277:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:279:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:293:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:303:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:305:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:306:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:312:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:323:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:325:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:330:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:340:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:351:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:356:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:359:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:361:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:364:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:367:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:370:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:379:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:385:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:393:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:407:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:409:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:425:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:435:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:436:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:439:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:454:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:458:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:460:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:484:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:491:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:504:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:512:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:515:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:523:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:533:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:558:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:560:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:573:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:586:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:589:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:601:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:603:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:611:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:616:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:621:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:625:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:628:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:629:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:631:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:637:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:641:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:645:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:653:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:659:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:659:2",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:676:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:678:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:680:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:684:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:688:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:689:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:691:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:707:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:712:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:714:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:721:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:722:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:731:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:742:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:743:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:763:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:767:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:783:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:787:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:794:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:810:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:811:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:812:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:824:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:824:2",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:826:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:841:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:852:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:857:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:861:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:867:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:872:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:877:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:883:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:885:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:902:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:918:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:919:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:921:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:924:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:926:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:929:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:930:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:942:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:950:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:952:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:955:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:956:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:965:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:968:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:971:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:982:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:990:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:991:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:992:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:997:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1006:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1011:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1014:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1015:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1017:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1018:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1020:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1020:2",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1021:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1022:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1028:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1032:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1035:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1036:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1038:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1046:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1052:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1057:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1074:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1082:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1083:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1093:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1096:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1097:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1098:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1116:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1123:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1128:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1131:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1161:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1165:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1182:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1194:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1207:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1208:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1217:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1219:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1221:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1222:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1235:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1243:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1245:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1249:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1250:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1251:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1255:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1259:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1261:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1263:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1267:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1270:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1272:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1275:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1279:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1282:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1286:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1289:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1291:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1292:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1307:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1315:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1320:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1330:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1331:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1337:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1343:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1352:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1355:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1358:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1371:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1375:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1377:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1379:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1384:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1387:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1396:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:train:1399:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:19:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:75:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:80:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:84:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:90:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:96:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:100:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:128:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:130:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:131:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:133:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:137:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:157:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:164:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:167:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:177:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:183:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:185:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:194:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:199:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:200:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:218:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:218:2",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:225:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:232:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:237:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:239:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:241:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:248:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:250:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:256:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:272:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:277:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:283:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:285:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:287:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:292:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:val:297:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:11:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:18:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:32:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:49:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:51:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:54:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:66:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:71:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:72:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:73:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:76:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:78:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:102:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:108:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:117:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:122:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:149:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:156:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:170:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:193:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:203:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:206:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:210:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:230:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:245:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:250:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:253:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:256:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:264:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:269:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:274:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:282:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "toxichat_human:test:286:1",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:1076",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:3165",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:5187",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:7135",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:8166",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:8377",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:10928",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:12548",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:12652",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:13155",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:13209",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:14494",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:15764",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:train:16518",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:716",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:1042",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:1499",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:1660",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:1945",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:2366",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:2632",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:2989",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:3240",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:3779",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:4769",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:val:4788",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:660",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:1320",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:2215",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:2312",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:2404",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:2757",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:2901",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:3021",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:3944",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:4121",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:4416",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:4457",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:5350",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:5624",
+    "reason": "duplicate_same_chain_label"
+  },
+  {
+    "id": "macd_telugu:test:5727",
+    "reason": "duplicate_same_chain_label"
+  }
+]

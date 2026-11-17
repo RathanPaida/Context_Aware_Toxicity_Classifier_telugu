@@ -1,0 +1,88 @@
+{
+  "method": "ASGI TestClient with actual saved checkpoint; no browser/HTTP socket test",
+  "health": {
+    "ready": true,
+    "detail": null,
+    "model": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+    "topic_input": false,
+    "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_no_cdropout",
+    "device": "cpu",
+    "threshold": 0.635425865650177
+  },
+  "single_score": 0.009613442234694958,
+  "thread_turns": 2,
+  "invalid_input_status": 422,
+  "notebook_execution": "sequential in-process",
+  "cell_timings": {
+    "Context_Aware_Toxicity.ipynb": [
+      {
+        "cell": 2,
+        "seconds": 0.005
+      },
+      {
+        "cell": 4,
+        "seconds": 0.262
+      },
+      {
+        "cell": 5,
+        "seconds": 1.339
+      },
+      {
+        "cell": 7,
+        "seconds": 0.0
+      },
+      {
+        "cell": 9,
+        "seconds": 0.869
+      },
+      {
+        "cell": 11,
+        "seconds": 21.27
+      },
+      {
+        "cell": 12,
+        "seconds": 0.159
+      }
+    ],
+    "LoRA_Fine_Tuning.ipynb": [
+      {
+        "cell": 2,
+        "seconds": 0.004
+      },
+      {
+        "cell": 3,
+        "seconds": 0.001
+      },
+      {
+        "cell": 4,
+        "seconds": 0.0
+      },
+      {
+        "cell": 5,
+        "seconds": 0.001
+      }
+    ],
+    "Data_Downloads.ipynb": [
+      {
+        "cell": 2,
+        "seconds": 0.003
+      },
+      {
+        "cell": 4,
+        "seconds": 1.953
+      },
+      {
+        "cell": 6,
+        "seconds": 0.122
+      },
+      {
+        "cell": 8,
+        "seconds": 0.109
+      },
+      {
+        "cell": 10,
+        "seconds": 1.739
+      }
+    ]
+  }
+}

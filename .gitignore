@@ -38,13 +38,18 @@ models/checkpoints/
 *.bin
 *.safetensors
 *.onnx
+*.joblib
 
 # Datasets and Archives (>100MB files)
-data/
+data/cache/
+data/processed/
+data/raw/*
+!data/raw/custom_threads.jsonl
 *.zip
 *.parquet
 *.csv
 *.jsonl
+!data/raw/custom_threads.jsonl
 jigsaw-unintended-bias-in-toxicity-classification/
 subtask2_test/
 test_english/

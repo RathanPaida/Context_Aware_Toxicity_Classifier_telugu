@@ -1,0 +1,10 @@
+{
+  "status": "interrupted_by_user_request",
+  "epoch": 1,
+  "step": 250,
+  "steps": 1718,
+  "elapsed_seconds": 139.88098300000001,
+  "training_eta_seconds": 821.381132176,
+  "completed_epochs": 0,
+  "detail": "Training was stopped when the user asked for code and instructions only. No completed v2 checkpoint or evaluation was produced."
+}

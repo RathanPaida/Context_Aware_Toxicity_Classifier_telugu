@@ -1,0 +1,92 @@
+{
+  "input": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\contextual.jsonl",
+  "prepared_sha256": "de69b37150ecae47c1d74ef7017c289f6d6d22018b86041cc141792f9a58007f",
+  "examples": 78839,
+  "unique_messages": 78320,
+  "split_counts": {
+    "train": 54960,
+    "val": 11893,
+    "test": 11986
+  },
+  "text_audit": {
+    "texts_changed_by_conservative_normalization": 37772,
+    "texts_with_control_characters": 2,
+    "texts_not_NFC": 46,
+    "texts_over_2000_characters": 996,
+    "empty_after_normalization": 0
+  },
+  "duplicate_same_source_chain_label_rows": 577,
+  "conflicting_isolated_text_groups_within_source": 15,
+  "normalized_shared_text_groups_crossing_splits": 0,
+  "by_source_split_label": {
+    "cga_wiki/train/0": 14618,
+    "cga_wiki/train/1": 1223,
+    "cga_wiki/val/0": 3220,
+    "cga_wiki/val/1": 286,
+    "cga_wiki/test/0": 3338,
+    "cga_wiki/test/1": 274,
+    "cultural_safety_telugu/val/0": 1266,
+    "cultural_safety_telugu/test/1": 569,
+    "cultural_safety_telugu/train/1": 2516,
+    "cultural_safety_telugu/train/0": 5858,
+    "cultural_safety_telugu/val/1": 534,
+    "cultural_safety_telugu/test/0": 1218,
+    "dravidian_codemix_tamil/val/0": 4828,
+    "dravidian_codemix_tamil/val/1": 1759,
+    "dravidian_codemix_tamil/train/0": 22219,
+    "dravidian_codemix_tamil/train/1": 8526,
+    "dravidian_codemix_tamil/test/1": 1826,
+    "dravidian_codemix_tamil/test/0": 4761
+  },
+  "policy": "Audit only; original benchmark and labels unchanged. Exact same-chain duplicates may overweight training. Differing labels for a target in different contexts are not automatically errors. Near-duplicate semantics require manual adjudication.",
+  "cleaned": {
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\contextual_clean_v1.jsonl",
+    "examples": 78232,
+    "sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+    "excluded_by_reason": {
+      "duplicate_same_chain_label": 566,
+      "contradictory_isolated_labels": 41
+    },
+    "audit": {
+      "examples": 78232,
+      "unique_messages": 78184,
+      "split_counts": {
+        "train": 54578,
+        "val": 11776,
+        "test": 11878
+      },
+      "text_audit": {
+        "texts_changed_by_conservative_normalization": 0,
+        "texts_with_control_characters": 0,
+        "texts_not_NFC": 0,
+        "texts_over_2000_characters": 991,
+        "empty_after_normalization": 0
+      },
+      "duplicate_same_source_chain_label_rows": 0,
+      "conflicting_isolated_text_groups_within_source": 0,
+      "normalized_shared_text_groups_crossing_splits": 0,
+      "by_source_split_label": {
+        "cga_wiki/train/0": 14554,
+        "cga_wiki/train/1": 1221,
+        "cga_wiki/val/0": 3195,
+        "cga_wiki/val/1": 285,
+        "cga_wiki/test/0": 3303,
+        "cga_wiki/test/1": 274,
+        "cultural_safety_telugu/val/0": 1266,
+        "cultural_safety_telugu/test/1": 569,
+        "cultural_safety_telugu/train/1": 2516,
+        "cultural_safety_telugu/train/0": 5854,
+        "cultural_safety_telugu/val/1": 534,
+        "cultural_safety_telugu/test/0": 1218,
+        "dravidian_codemix_tamil/val/0": 4756,
+        "dravidian_codemix_tamil/val/1": 1740,
+        "dravidian_codemix_tamil/train/0": 21961,
+        "dravidian_codemix_tamil/train/1": 8472,
+        "dravidian_codemix_tamil/test/1": 1816,
+        "dravidian_codemix_tamil/test/0": 4698
+      },
+      "policy": "Audit only; original benchmark and labels unchanged. Exact same-chain duplicates may overweight training. Differing labels for a target in different contexts are not automatically errors. Near-duplicate semantics require manual adjudication."
+    },
+    "comparison": "New population: retrain all compared models on this same version."
+  }
+}

@@ -1,0 +1,312 @@
+{
+  "config": {
+    "paths": {
+      "raw": "data/raw/contextual",
+      "prepared": "data/processed/contextual_clean_v1.jsonl",
+      "embeddings": "data/cache/contextual_clean_lora.pt",
+      "checkpoint": "models/checkpoints/contextual_clean_lora",
+      "report": "reports/contextual_clean_lora_evaluation.json",
+      "manifest": "reports/preprocessing_audit.json"
+    },
+    "encoder": {
+      "name": "ai4bharat/IndicBERTv2-MLM-Sam-TLM",
+      "revision": "bb783337859e3d7957de5ba82766ddea51e8fc3e",
+      "local_files_only": true,
+      "max_tokens": 128,
+      "batch_size": 8,
+      "progress_batches": 100
+    },
+    "adapter": {
+      "enabled": true,
+      "type": "lora",
+      "r": 8,
+      "lora_alpha": 16,
+      "lora_dropout": 0.1,
+      "target_modules": [
+        "query",
+        "value"
+      ]
+    },
+    "model": {
+      "hidden_size": 192,
+      "heads": 4,
+      "layers": 2,
+      "feedforward_size": 384,
+      "dropout": 0.1,
+      "max_turns": 12
+    },
+    "training": {
+      "seed": 42,
+      "epochs": 5,
+      "batch_size": 8,
+      "encoder_lr": 3e-05,
+      "learning_rate": 0.0003,
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "patience": 3,
+      "device": "auto",
+      "cpu_threads": 4,
+      "fp16": true,
+      "gradient_accumulation_steps": 4,
+      "context_dropout": 0.0,
+      "require_cuda": true,
+      "gradient_checkpointing": true,
+      "progress_steps": 100
+    },
+    "data": {
+      "download_timeout_seconds": 60,
+      "download_chunk_bytes": 1048576,
+      "max_archive_bytes": 1073741824,
+      "validation_fraction": 0.15,
+      "test_fraction": 0.15,
+      "require_real_context": true,
+      "cga": {
+        "url": "https://zissou.infosci.cornell.edu/convokit/datasets/conversations-gone-awry-corpus/conversations-gone-awry-corpus.zip",
+        "archive": "cga-wiki.zip",
+        "directory": "cga-wiki",
+        "label_field": "comment_has_personal_attack"
+      },
+      "local_sources": [
+        {
+          "path": "data/processed/cultural_safety_telugu.parquet",
+          "label": "toxic",
+          "source": "cultural_safety_telugu",
+          "optional": true
+        },
+        {
+          "path": "data/processed/dravidian_codemix.parquet",
+          "label": "toxic",
+          "source": "dravidian_codemix_tamil",
+          "optional": true
+        }
+      ],
+      "custom_threads": "data/raw/custom_threads.jsonl",
+      "download_attempts": 3,
+      "download_retry_seconds": 2,
+      "include_custom_threads": false,
+      "expected_prepared_sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+      "prepared_only": true,
+      "text_normalization": "nfc_controls_whitespace_v1"
+    },
+    "server": {
+      "host": "127.0.0.1",
+      "port": 7860,
+      "cors_origins": [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+      ]
+    },
+    "baseline": {
+      "max_features": 100000,
+      "ngram_range": [
+        3,
+        5
+      ],
+      "C": 1.0,
+      "max_iter": 1000,
+      "report": "reports/clean_tfidf.json"
+    }
+  },
+  "input_size": 768,
+  "threshold": 0.59521484375,
+  "prepared_sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+  "has_context_training": true,
+  "labels": [
+    "toxic"
+  ],
+  "model_type": "contextual_lora_v2",
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 0.7425432591542774,
+      "validation_ap": 0.6848182613974043,
+      "seconds": 1482.4126904000002
+    },
+    {
+      "epoch": 2,
+      "loss": 0.6596089974124922,
+      "validation_ap": 0.7277115761136457,
+      "seconds": 1270.2613714
+    },
+    {
+      "epoch": 3,
+      "loss": 0.6249384128486006,
+      "validation_ap": 0.736382436539695,
+      "seconds": 1263.8017435000002
+    },
+    {
+      "epoch": 4,
+      "loss": 0.6036145627765069,
+      "validation_ap": 0.7541752633732337,
+      "seconds": 1257.0922502000003
+    },
+    {
+      "epoch": 5,
+      "loss": 0.5823597665581316,
+      "validation_ap": 0.7654973535563485,
+      "seconds": 1256.2438159000003
+    }
+  ],
+  "selection_metric": "full_validation_average_precision",
+  "validation_average_precision": 0.7654973535563485,
+  "training_examples": 54578,
+  "positive_weight": 3.4703087885985746,
+  "test": {
+    "precision": 0.6367052928280614,
+    "recall": 0.7645731477999248,
+    "n": 11878,
+    "positive_count": 2659,
+    "f1": 0.6948051948051948,
+    "roc_auc": 0.9144286488150668,
+    "average_precision": 0.7584137361556336,
+    "confusion_matrix": [
+      [
+        8059,
+        1160
+      ],
+      [
+        626,
+        2033
+      ]
+    ]
+  },
+  "by_source": {
+    "cga_wiki": {
+      "precision": 0.7490636704119851,
+      "recall": 0.7299270072992701,
+      "n": 3577,
+      "positive_count": 274,
+      "f1": 0.7393715341959335,
+      "roc_auc": 0.965669895317462,
+      "average_precision": 0.8059415019068421,
+      "confusion_matrix": [
+        [
+          3236,
+          67
+        ],
+        [
+          74,
+          200
+        ]
+      ]
+    },
+    "cultural_safety_telugu": {
+      "precision": 0.759018759018759,
+      "recall": 0.9244288224956063,
+      "n": 1787,
+      "positive_count": 569,
+      "f1": 0.8335974643423137,
+      "roc_auc": 0.9580155315262279,
+      "average_precision": 0.9031495576525025,
+      "confusion_matrix": [
+        [
+          1051,
+          167
+        ],
+        [
+          43,
+          526
+        ]
+      ]
+    },
+    "dravidian_codemix_tamil": {
+      "precision": 0.5853112404836542,
+      "recall": 0.7197136563876652,
+      "n": 6514,
+      "positive_count": 1816,
+      "f1": 0.6455915040750803,
+      "roc_auc": 0.8466762498991978,
+      "average_precision": 0.6798996869269116,
+      "confusion_matrix": [
+        [
+          3772,
+          926
+        ],
+        [
+          509,
+          1307
+        ]
+      ]
+    }
+  },
+  "test_ids_sha256": "fa34611c223aaa4610edb5f35e93aade2cc8486ec4c35f3ae899a513ebf2b55c",
+  "contextual_test": {
+    "precision": 0.7427184466019418,
+    "recall": 0.7806122448979592,
+    "n": 2282,
+    "positive_count": 196,
+    "f1": 0.7611940298507462,
+    "roc_auc": 0.9669076643121295,
+    "average_precision": 0.8212520730277887,
+    "confusion_matrix": [
+      [
+        2033,
+        53
+      ],
+      [
+        43,
+        153
+      ]
+    ]
+  },
+  "context_removed_ablation": {
+    "precision": 0.6378430121250798,
+    "recall": 0.7517863858593457,
+    "n": 11878,
+    "positive_count": 2659,
+    "f1": 0.6901432763680304,
+    "roc_auc": 0.9125011458055806,
+    "average_precision": 0.7540968352893265,
+    "confusion_matrix": [
+      [
+        8084,
+        1135
+      ],
+      [
+        660,
+        1999
+      ]
+    ]
+  },
+  "contextual_test_without_parents": {
+    "precision": 0.8095238095238095,
+    "recall": 0.6071428571428571,
+    "n": 2282,
+    "positive_count": 196,
+    "f1": 0.6938775510204082,
+    "roc_auc": 0.9623021308235663,
+    "average_precision": 0.7906048873524228,
+    "confusion_matrix": [
+      [
+        2058,
+        28
+      ],
+      [
+        77,
+        119
+      ]
+    ]
+  },
+  "mean_absolute_score_change": 0.00669224258423815,
+  "contextual_mean_absolute_score_change": 0.034828485181517606,
+  "validation": {
+    "precision": 0.6365094642284248,
+    "recall": 0.7753028526768269,
+    "n": 11776,
+    "positive_count": 2559,
+    "f1": 0.6990838618745595,
+    "roc_auc": 0.9184267877844188,
+    "average_precision": 0.7654973535563485,
+    "confusion_matrix": [
+      [
+        8084,
+        1133
+      ],
+      [
+        575,
+        1984
+      ]
+    ]
+  },
+  "checkpoint_reload_verified": true
+}

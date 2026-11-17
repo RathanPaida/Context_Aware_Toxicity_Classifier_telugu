@@ -1,0 +1,26 @@
+{
+  "comparison": "ensemble minus contextual_transformer",
+  "overall": {
+    "f1_difference": 0.033865883713853684,
+    "percentile_95_interval": [
+      0.025435096880356126,
+      0.0426198724977216
+    ],
+    "groups": 8882,
+    "examples": 11878,
+    "resamples": 1000,
+    "seed": 2026
+  },
+  "notes": "Percentile intervals resample connected conversation/shared-text groups. Exploratory test reuse and validation-selection uncertainty are not removed by bootstrapping. An interval crossing zero does not establish improvement.",
+  "contextual": {
+    "f1_difference": 0.010155832408206944,
+    "percentile_95_interval": [
+      -0.025129712085199898,
+      0.043639538719608906
+    ],
+    "groups": 540,
+    "examples": 2282,
+    "resamples": 1000,
+    "seed": 2026
+  }
+}

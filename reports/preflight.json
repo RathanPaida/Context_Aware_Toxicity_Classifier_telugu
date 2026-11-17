@@ -1,0 +1,18 @@
+{
+  "python": "3.10.20 | packaged by Anaconda, Inc. | (main, Mar 11 2026, 17:42:35) [MSC v.1942 64 bit (AMD64)]",
+  "interpreter": "C:\\Users\\paida\\anaconda3\\python.exe",
+  "torch": "2.12.0+cu130",
+  "transformers": "5.17.0",
+  "cuda_available": true,
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "prepared_sha256": "368817cc6203e762d0a5b5a9f777761759fbf8769d0f3ec0b2d5dadb039b6bd6",
+  "splits": {
+    "train": 54578,
+    "val": 11776,
+    "test": 11878
+  },
+  "cached_encoder": "C:\\Users\\paida\\.cache\\huggingface\\hub\\models--ai4bharat--IndicBERTv2-MLM-Sam-TLM\\snapshots\\bb783337859e3d7957de5ba82766ddea51e8fc3e",
+  "free_disk_gib": 313.15,
+  "checkpoint": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\models\\checkpoints\\contextual_clean_lora",
+  "full_training_started": false
+}

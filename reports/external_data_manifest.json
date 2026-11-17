@@ -1,0 +1,16 @@
+{
+  "examples": 34556,
+  "contextual_examples": 2623,
+  "sources": {
+    "toxichat_human": 4560,
+    "macd_telugu": 29996
+  },
+  "splits": {
+    "test": 5168,
+    "train": 24275,
+    "val": 5113
+  },
+  "quarantined_conflicting_isolated_rows": 67,
+  "prepared_sha256": "bec6f7cd2b16e2ceb9b8b83a7ebc099367bd4a3a65c5b1b7f58f18f7a04dc131",
+  "policy": "New shared-text/conversation grouped splits; not official benchmark splits. Original split is retained as provenance. External experiment only; frozen main benchmark unchanged."
+}

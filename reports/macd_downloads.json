@@ -1,0 +1,17 @@
+[
+  {
+    "source": "macd_telugu",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\macd_telugu\\telugu_train.csv",
+    "sha256": "cb6bb4e4574cdad1477aa8c2c030c133ecc8ec1b5411c73b98370cb599aa2a69"
+  },
+  {
+    "source": "macd_telugu",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\macd_telugu\\telugu_val.csv",
+    "sha256": "1553fbe42b32b66f2c535f14d2f763464cf54e1e06dfafc637612fe616429a18"
+  },
+  {
+    "source": "macd_telugu",
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\raw\\external\\macd_telugu\\telugu_test.csv",
+    "sha256": "626d4907c0282ec9ead25b5d0e1ea664dffaeeab9744d55c34f107e8cd931e5c"
+  }
+]

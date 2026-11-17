@@ -1,0 +1,79 @@
+{
+  "input": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\external_contextual.jsonl",
+  "prepared_sha256": "bec6f7cd2b16e2ceb9b8b83a7ebc099367bd4a3a65c5b1b7f58f18f7a04dc131",
+  "examples": 34556,
+  "unique_messages": 34266,
+  "split_counts": {
+    "train": 24275,
+    "val": 5113,
+    "test": 5168
+  },
+  "text_audit": {
+    "texts_changed_by_conservative_normalization": 9558,
+    "texts_with_control_characters": 0,
+    "texts_not_NFC": 14,
+    "texts_over_2000_characters": 0,
+    "empty_after_normalization": 0
+  },
+  "duplicate_same_source_chain_label_rows": 319,
+  "conflicting_isolated_text_groups_within_source": 0,
+  "normalized_shared_text_groups_crossing_splits": 0,
+  "by_source_split_label": {
+    "toxichat_human/test/0": 440,
+    "toxichat_human/train/0": 2391,
+    "toxichat_human/train/1": 933,
+    "toxichat_human/test/1": 208,
+    "toxichat_human/val/0": 418,
+    "toxichat_human/val/1": 170,
+    "macd_telugu/val/0": 2183,
+    "macd_telugu/train/1": 10900,
+    "macd_telugu/val/1": 2342,
+    "macd_telugu/train/0": 10051,
+    "macd_telugu/test/1": 2358,
+    "macd_telugu/test/0": 2162
+  },
+  "policy": "Audit only; original benchmark and labels unchanged. Exact same-chain duplicates may overweight training. Differing labels for a target in different contexts are not automatically errors. Near-duplicate semantics require manual adjudication.",
+  "cleaned": {
+    "path": "D:\\NLP_projects\\Context_Aware_Toxicity_classifier\\data\\processed\\external_clean_v1.jsonl",
+    "examples": 34237,
+    "sha256": "60267f816ce6801e10fbaea5700b4bea600e8f73b28763073bbdcfb77a303138",
+    "excluded_by_reason": {
+      "duplicate_same_chain_label": 319
+    },
+    "audit": {
+      "examples": 34237,
+      "unique_messages": 34248,
+      "split_counts": {
+        "train": 24036,
+        "val": 5080,
+        "test": 5121
+      },
+      "text_audit": {
+        "texts_changed_by_conservative_normalization": 0,
+        "texts_with_control_characters": 0,
+        "texts_not_NFC": 0,
+        "texts_over_2000_characters": 0,
+        "empty_after_normalization": 0
+      },
+      "duplicate_same_source_chain_label_rows": 0,
+      "conflicting_isolated_text_groups_within_source": 0,
+      "normalized_shared_text_groups_crossing_splits": 0,
+      "by_source_split_label": {
+        "toxichat_human/test/0": 411,
+        "toxichat_human/train/0": 2199,
+        "toxichat_human/train/1": 905,
+        "toxichat_human/test/1": 203,
+        "toxichat_human/val/0": 400,
+        "toxichat_human/val/1": 164,
+        "macd_telugu/val/0": 2182,
+        "macd_telugu/train/1": 10885,
+        "macd_telugu/val/1": 2334,
+        "macd_telugu/train/0": 10047,
+        "macd_telugu/test/1": 2345,
+        "macd_telugu/test/0": 2162
+      },
+      "policy": "Audit only; original benchmark and labels unchanged. Exact same-chain duplicates may overweight training. Differing labels for a target in different contexts are not automatically errors. Near-duplicate semantics require manual adjudication."
+    },
+    "comparison": "New population: retrain all compared models on this same version."
+  }
+}

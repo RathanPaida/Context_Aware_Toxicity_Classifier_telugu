@@ -9,12 +9,17 @@ from sklearn.pipeline import make_pipeline
 from .config import location, project_path, write_json
 from .data import read_jsonl
 from .training import fit_threshold, metrics
+from .evaluation import validate_splits, summarize, prediction_rows
+import joblib
 
 
 def train_baseline(cfg):
+    from .evaluation import file_hash
+    if cfg['data'].get('expected_prepared_sha256') and file_hash(location(cfg, 'prepared')) != cfg['data']['expected_prepared_sha256']:
+        raise ValueError('Prepared data does not match the frozen experiment SHA-256')
     settings = cfg['baseline']
     rows = read_jsonl(location(cfg, 'prepared'))
-    splits = {s: [r for r in rows if r['split'] == s] for s in ('train', 'val', 'test')}
+    splits = validate_splits(rows)
     model = make_pipeline(
         TfidfVectorizer(analyzer='char_wb', ngram_range=tuple(settings['ngram_range']),
                         max_features=settings['max_features'], sublinear_tf=True),
@@ -28,11 +33,14 @@ def train_baseline(cfg):
     report['validation'] = metrics([r['label'] for r in splits['val']], val, threshold)
     test = splits['test']
     pred = model.predict_proba([r['texts'][-1] for r in test])[:, 1]
-    report['test'] = metrics([r['label'] for r in test], pred, threshold)
-    report['by_source'] = {}
-    for source in sorted({r['source'] for r in test}):
-        ids = [i for i, r in enumerate(test) if r['source'] == source]
-        report['by_source'][source] = metrics([test[i]['label'] for i in ids], pred[ids], threshold)
+    report.update(summarize(test, pred, threshold))
+    report_path = project_path(settings['report'])
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    model_path = report_path.with_suffix('.joblib')
+    temporary = model_path.with_suffix('.tmp')
+    joblib.dump({'pipeline': model, 'threshold': threshold, 'prepared_sha256': report['prepared_sha256']}, temporary)
+    temporary.replace(model_path)
+    write_json(report_path.with_suffix('.predictions.json'), prediction_rows(test, pred))
     write_json(project_path(settings['report']), report)
     return report
 
@@ -49,3 +57,12 @@ def compare_reports(cfg):
                      r.get('validation', {}).get('average_precision')),
                      'test_F1': r['test']['f1'], 'test_AP': r['test']['average_precision']})
     return pd.DataFrame(rows)
+
+
+if __name__ == '__main__':
+    import argparse
+    from .config import load_config
+    parser = argparse.ArgumentParser(description='Train a target-only TF-IDF baseline on the configured splits')
+    parser.add_argument('--config', default='configs/contextual_submission.json')
+    args = parser.parse_args()
+    print(json.dumps(train_baseline(load_config(args.config)), indent=2))
