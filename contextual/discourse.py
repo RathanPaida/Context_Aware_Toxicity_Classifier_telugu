@@ -46,6 +46,38 @@ PARENT_REPORT_PROMPTS = [
     r'\b(?:enduku\s+report\s+chesav|em\s+jarigindi|complaint\s+chesav)\b'
 ]
 
+# Tinglish lexical markers (pronouns, verbs, conjunctions, vernacular slang)
+TINGLISH_MARKERS = [
+    r'\b(?:nenu|nuvvu|manam|vaadu|aame|vaallu|nannu|ninnu|neeku|naaku)\b',
+    r'\b(?:unnadu|unnav|unnara|vachadu|vastha|chesanu|chesam|cheyaku|cheddam|thittadu|thittaru|matladu)\b',
+    r'\b(?:kabatti|kani|kooda|anduke|kada|mama|macha|bava|poramboku|daddamma|lucha|kukkala)\b',
+    r'\b(?:cheppav|chusava|chusa|thelusthondi|avvanu|undemo|ippudu|e\s+roju)\b'
+]
+
+# Insult endorsement patterns (affirming/validating an attack)
+ENDORSEMENT_PATTERNS = [
+    r'\b(?:and\s+he\s+was\s+(?:right|correct)|everyone\s+agrees|you\s+proved\s+him\s+right|could\s+not\s+be\s+more\s+correct)\b',
+    r'\b(?:adi\s+(?:100\s*percent\s*)?correct|adi\s+nijame|thappu\s+emi\s+ledu|vaadu\s+cheppindi\s+correct|alage\s+anali)\b',
+    r'(?:అతను\s+చెప్పింది\s+నిజమే|అది\s+కరెక్టే|అందులో\s+తప్పులేదు|నువ్వు\s+దానికి\s+అర్హుడివే)'
+]
+
+
+def is_tinglish(text: str) -> bool:
+    """Return True if Latin text contains distinctive Romanized Telugu markers."""
+    if not text or not isinstance(text, str):
+        return False
+    t_lower = text.lower()
+    matches = sum(bool(re.search(p, t_lower)) for p in TINGLISH_MARKERS)
+    return matches >= 1
+
+
+def is_endorsing_insult(text: str) -> bool:
+    """Return True if the text endorses or validates the reported insult against the peer."""
+    if not text or not isinstance(text, str):
+        return False
+    t_lower = text.lower()
+    return any(re.search(p, t_lower) for p in ENDORSEMENT_PATTERNS)
+
 
 def is_reporting_discourse(target_text: str, history: Optional[List[str]] = None) -> bool:
     """Return True if target_text exhibits meta-linguistic reporting, quoting of abuse, or counterspeech."""
