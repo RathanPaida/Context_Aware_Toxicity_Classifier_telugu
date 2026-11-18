@@ -4,7 +4,7 @@ This project predicts toxicity of a target reply using its actual parent chain. 
 
 The English-only experiment is complete. Read **[ENGLISH_POST_RUN_REVIEW.md](ENGLISH_POST_RUN_REVIEW.md)** for verified results and remaining submission checks. [ENGLISH_EXPERIMENT_PLAN.md](ENGLISH_EXPERIMENT_PLAN.md) contains the reproduction commands, downloads and data-expansion plan. Further production runs are left to the user.
 
-The completed mixed-language run is reviewed in [POST_RUN_REVIEW.md](POST_RUN_REVIEW.md). [RUN_AND_REPORT.md](RUN_AND_REPORT.md) retains the earlier mixed-language reproduction steps.
+The completed mixed-language run is reviewed in [POST_RUN_REVIEW.md](POST_RUN_REVIEW.md). [RUN_AND_REPORT.md](RUN_AND_REPORT.md) retains the earlier mixed-language reproduction steps
 
 Read [SUBMISSION_REPORT.md](SUBMISSION_REPORT.md) for measured results and [SUBMISSION_HANDOFF.md](SUBMISSION_HANDOFF.md) for detailed setup, blocked steps, data downloads and submission instructions.
 
